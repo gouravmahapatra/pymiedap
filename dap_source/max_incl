@@ -1,0 +1,34 @@
+*************************************************************************
+* max_incl is an include file in which the maximum array sizes are set
+*
+* Put the file max_incl in the directory with the makefile. 
+* In the directories DAP and GAP, make a link to this max_incl file,
+* such that the same file is used in the DAP and the GAP directories.
+*
+* nlev : number of levels in the atmosphere (= number of layers + 1)
+* nspecies : number of aerosol species
+* nwavels : number of wavelengths
+* ncoefs : number of expansion coefficients
+* nmu : number of Gaussian division points (integration over theta)
+* nfou : number of Fouries terms (integration over phi-phi_0)
+* nsup : size of the supermatrices
+*
+* eps : accuracy of doubling/adding
+*
+*************************************************************************
+      INTEGER nlaysMAX,
+     .        ncoefsMAX,nmuMAX,nfouMAX,nsupMAX,
+     .        nmatMAX
+
+      PARAMETER (nlaysMAX=50,
+     .           ncoefsMAX=4000,
+     .           nfouMAX=ncoefsMAX,
+     .           nmuMAX=201,
+     .           nmatMAX=4,
+     .           nsupMAX=nmuMAX*nmatMAX)
+
+*------------------------------------------------------------------------
+*     Accuracy of the adding-doubling algorithm:
+*------------------------------------------------------------------------
+      DOUBLE PRECISION eps
+      PARAMETER (eps=1.D-6)

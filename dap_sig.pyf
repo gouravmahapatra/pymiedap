@@ -1,0 +1,323 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module module_dap ! in 
+    interface  ! in :module_dap
+        subroutine adding(outputname,a,b,coefs,ncoefs,nlays,nmug,nmat,surfmat) ! in :module_dap:dap_source/adding.f
+            character*16 intent(in) :: outputname
+            double precision dimension(50),intent(in) :: a
+            double precision dimension(50),intent(in) :: b
+            double precision dimension(4,4,2001,50),intent(in) :: coefs
+            integer dimension(50),intent(in) :: ncoefs
+            integer intent(in) :: nlays
+            integer intent(in) :: nmug
+            integer intent(in) :: nmat
+            double precision dimension(804,804),intent(in,out) :: surfmat
+        end subroutine adding
+        subroutine addlay(nmat,nmu,ebtop,ebbot,iad,rmtop,tmtop,rmbot,tmbot,rmsbot) ! in :module_dap:dap_source/addlay.f
+            integer :: nmat
+            integer :: nmu
+            double precision dimension(201) :: ebtop
+            double precision dimension(201) :: ebbot
+            integer :: iad
+            double precision dimension(804,804) :: rmtop
+            double precision dimension(804,804) :: tmtop
+            double precision dimension(804,804),intent(out) :: rmbot
+            double precision dimension(804,804),intent(out) :: tmbot
+            double precision dimension(804,804),intent(out) :: rmsbot
+        end subroutine addlay
+        subroutine addsm(c,a,b,nmat,nmu) ! in :module_dap:dap_source/addsm.f
+            double precision dimension(804,804),intent(out) :: c
+            double precision dimension(804,804) :: a
+            double precision dimension(804,804) :: b
+            integer :: nmat
+            integer :: nmu
+        end subroutine addsm
+        subroutine assign(a,b,nmat,nmu) ! in :module_dap:dap_source/assign.f
+            double precision dimension(804,804),intent(in,out) :: a
+            double precision dimension(804,804),intent(in,out) :: b
+            integer intent(in) :: nmat
+            integer intent(in) :: nmu
+        end subroutine assign
+        subroutine baerosols(nlays,nmat,baer,coefin,ncoefin,basca,baabs,coefs,coefsa,ncoefsa) ! in :module_dap:dap_source/baerosols.f
+            integer intent(in) :: nlays
+            integer intent(in) :: nmat
+            double precision dimension(50),intent(in) :: baer
+            double precision dimension(4,4,2001,50),intent(in) :: coefin
+            integer dimension(50),intent(in) :: ncoefin
+            double precision dimension(50),intent(out) :: basca
+            double precision dimension(50),intent(out) :: baabs
+            double precision dimension(4,4,2001,50),intent(out) :: coefs
+            double precision dimension(4,4,2001,50),intent(out) :: coefsa
+            integer dimension(50),intent(out) :: ncoefsa
+        end subroutine baerosols
+        subroutine bmolecules(wav,nlays,pres,depol,mma,grav,bmsca,bmabs,coefsm) ! in :module_dap:dap_source/bmolecules.f
+            double precision intent(in) :: wav
+            integer intent(in) :: nlays
+            double precision dimension(50),intent(in) :: pres
+            double precision intent(in) :: depol
+            double precision intent(in) :: mma
+            double precision intent(in) :: grav
+            double precision dimension(50),intent(out) :: bmsca
+            double precision dimension(50),intent(out) :: bmabs
+            double precision dimension(4,4,2001),intent(out) :: coefsm
+        end subroutine bmolecules
+        subroutine brack(el,array,n,nd,i1,i2) ! in :module_dap:dap_source/brack.f
+            double precision :: el
+            double precision dimension(nd) :: array
+            integer :: n
+            integer, optional,check(len(array)>=nd),depend(array) :: nd=len(array)
+            integer intent(out) :: i1
+            integer intent(out) :: i2
+        end subroutine brack
+        subroutine bstart(m,layer,coefs,ncoef,m0,xmumin,a,b,b0,ndoubl) ! in :module_dap:dap_source/bstart.f
+            integer :: m
+            integer :: layer
+            double precision dimension(4,4,2001,50) :: coefs
+            integer dimension(50) :: ncoef
+            integer dimension(50) :: m0
+            double precision :: xmumin
+            double precision :: a
+            double precision :: b
+            double precision intent(out) :: b0
+            integer intent(out) :: ndoubl
+        end subroutine bstart
+        subroutine double(rm,tm,ebmu,nmu,nmat) ! in :module_dap:dap_source/double.f
+            double precision dimension(804,804),intent(in,out) :: rm
+            double precision dimension(804,804),intent(in,out) :: tm
+            double precision dimension(201),intent(in,out) :: ebmu
+            integer :: nmu
+            integer :: nmat
+        end subroutine double
+        subroutine endfou(m,m1,m0,nlays,nextm) ! in :module_dap:dap_source/endfou.f
+            integer :: m
+            integer dimension(50) :: m1
+            integer dimension(50) :: m0
+            integer :: nlays
+            logical intent(out) :: nextm
+        end subroutine endfou
+        subroutine expbmu(b,xmu,nmu,ebmu) ! in :module_dap:dap_source/expbmu.f
+            double precision intent(in) :: b
+            double precision dimension(201),intent(in) :: xmu
+            integer intent(in) :: nmu
+            double precision dimension(201),intent(out) :: ebmu
+        end subroutine expbmu
+        subroutine fillup(rm,tm,nmat,nmu) ! in :module_dap:dap_source/fillup.f
+            double precision dimension(804,804),intent(in,out) :: rm
+            double precision dimension(804,804),intent(in,out) :: tm
+            integer :: nmat
+            integer :: nmu
+        end subroutine fillup
+        subroutine gauleg(ndim,ngauss,a,b,x,w) ! in :module_dap:dap_source/gauleg.f
+            integer intent(in) :: ndim
+            integer intent(in) :: ngauss
+            double precision intent(in) :: a
+            double precision intent(in) :: b
+            double precision dimension(ndim),intent(out),depend(ndim) :: x
+            double precision dimension(ndim),intent(out),depend(ndim) :: w
+        end subroutine gauleg
+        subroutine init(coefs,coefsm,coefsa) ! in :module_dap:dap_source/init.f
+            double precision dimension(4,4,2001,50),intent(in,out) :: coefs
+            double precision dimension(4,4,2001),intent(in,out) :: coefsm
+            double precision dimension(4,4,2001,50),intent(in,out) :: coefsa
+        end subroutine init
+        subroutine layer0(surfmat,smf,nmu,nmat,ebbot,rmbot,tmbot,rmsbot) ! in :module_dap:dap_source/layer0.f
+            double precision dimension(804,804),intent(in,out) :: surfmat
+            double precision dimension(201),intent(in) :: smf
+            integer intent(in) :: nmu
+            integer intent(in) :: nmat
+            double precision dimension(201),intent(out) :: ebbot
+            double precision dimension(804,804),intent(in,out) :: rmbot
+            double precision dimension(804,804),intent(in,out) :: tmbot
+            double precision dimension(804,804),intent(in,out) :: rmsbot
+        end subroutine layer0
+        subroutine layerm(m,m0,m1,m2,l,xmu,smf,nmu,nmat,coefs,ncoefs,zmplus,zmmin,a,b,ebtop,rmtop,tmtop) ! in :module_dap:dap_source/layerm.f
+            integer intent(in) :: m
+            integer dimension(50),intent(in) :: m0
+            integer dimension(50),intent(in) :: m1
+            integer dimension(50),intent(in) :: m2
+            integer intent(in) :: l
+            double precision dimension(201),intent(in) :: xmu
+            double precision dimension(201),intent(in) :: smf
+            integer intent(in) :: nmu
+            integer intent(in) :: nmat
+            double precision dimension(4,4,2001,50),intent(in) :: coefs
+            integer dimension(50),intent(in) :: ncoefs
+            double precision dimension(804,804),intent(in,out) :: zmplus
+            double precision dimension(804,804),intent(in,out) :: zmmin
+            double precision intent(in,out) :: a
+            double precision intent(in,out) :: b
+            double precision dimension(201),intent(in,out) :: ebtop
+            double precision dimension(804,804),intent(in,out) :: rmtop
+            double precision dimension(804,804),intent(in,out) :: tmtop
+        end subroutine layerm
+        subroutine ldiapr(a,e,b,nmat,nmu) ! in :module_dap:dap_source/ldiapr.f
+            double precision dimension(804,804),intent(out) :: a
+            double precision dimension(804) :: e
+            double precision dimension(804,804) :: b
+            integer :: nmat
+            integer :: nmu
+        end subroutine ldiapr
+        subroutine newfou(m,rmbot,smf,iunfou,nmat,nmu,m0,nlays,nextm) ! in :module_dap:dap_source/newfou.f
+            integer intent(in) :: m
+            double precision dimension(804,804),intent(in) :: rmbot
+            double precision dimension(201),intent(in) :: smf
+            integer intent(in) :: iunfou
+            integer intent(in) :: nmat
+            integer intent(in) :: nmu
+            integer dimension(50),intent(in) :: m0
+            integer intent(in) :: nlays
+            logical intent(out) :: nextm
+        end subroutine newfou
+        subroutine nobot(rmtop,tmtop,rmbot,tmbot,rmsbot,ebtop,ebbot,nmu,nmat) ! in :module_dap:dap_source/nobot.f
+            double precision dimension(804,804),intent(in,out) :: rmtop
+            double precision dimension(804,804),intent(in,out) :: tmtop
+            double precision dimension(804,804),intent(in,out) :: rmbot
+            double precision dimension(804,804),intent(in,out) :: tmbot
+            double precision dimension(804,804),intent(in,out) :: rmsbot
+            double precision dimension(201),intent(in,out) :: ebtop
+            double precision dimension(201),intent(in,out) :: ebbot
+            integer :: nmu
+            integer :: nmat
+        end subroutine nobot
+        subroutine notop(rmbot,tmbot,ebtop,ebbot,nmu,nmat) ! in :module_dap:dap_source/notop.f
+            double precision dimension(804,804),intent(in,out) :: rmbot
+            double precision dimension(804,804),intent(in,out) :: tmbot
+            double precision dimension(201),intent(in,out) :: ebtop
+            double precision dimension(201),intent(in,out) :: ebbot
+            integer :: nmu
+            integer :: nmat
+        end subroutine notop
+        subroutine ord1m(xmu,smf,nmu,nmat,zmplus,zmmin,a,b,ebmu,rm1,tm1) ! in :module_dap:dap_source/ord1m.f
+            double precision dimension(201) :: xmu
+            double precision dimension(201) :: smf
+            integer :: nmu
+            integer :: nmat
+            double precision dimension(804,804) :: zmplus
+            double precision dimension(804,804) :: zmmin
+            double precision :: a
+            double precision :: b
+            double precision dimension(201) :: ebmu
+            double precision dimension(804,804),intent(out) :: rm1
+            double precision dimension(804,804),intent(out) :: tm1
+        end subroutine ord1m
+        subroutine ord2m(xmu,smf,nmu,nmat,zmplus,zmmin,a,b,ebmu,rm,tm) ! in :module_dap:dap_source/ord2m.f
+            double precision dimension(201) :: xmu
+            double precision dimension(201) :: smf
+            integer :: nmu
+            integer :: nmat
+            double precision dimension(804,804) :: zmplus
+            double precision dimension(804,804) :: zmmin
+            double precision :: a
+            double precision :: b
+            double precision dimension(201) :: ebmu
+            double precision dimension(804,804),intent(out) :: rm
+            double precision dimension(804,804),intent(out) :: tm
+        end subroutine ord2m
+        subroutine prod(a,b,c,nmat,nmu,nmum) ! in :module_dap:dap_source/prod.f
+            double precision dimension(804,804),intent(in,out) :: a
+            double precision dimension(804,804),intent(in,out) :: b
+            double precision dimension(804,804) :: c
+            integer intent(in) :: nmat
+            integer intent(in) :: nmu
+            integer intent(in) :: nmum
+        end subroutine prod
+        subroutine rdiapr(a,b,e,nmat,nmu) ! in :module_dap:dap_source/rdiapr.f
+            double precision dimension(804,804),intent(out) :: a
+            double precision dimension(804,804) :: b
+            double precision dimension(804) :: e
+            integer :: nmat
+            integer :: nmu
+        end subroutine rdiapr
+        subroutine renorm(zmmin,zmplus,nmu,nmat,xmu,smf) ! in :module_dap:dap_source/renorm.f
+            double precision dimension(804,804),intent(in,out) :: zmmin
+            double precision dimension(804,804),intent(in,out) :: zmplus
+            integer intent(in) :: nmu
+            integer intent(in) :: nmat
+            double precision dimension(201),intent(in) :: xmu
+            double precision dimension(201),intent(in) :: smf
+        end subroutine renorm
+        subroutine scalzm(m,layer,coefs,ncoefs,xmu,binfac,nmu,zmmin,zmplus) ! in :module_dap:dap_source/scalzm.f
+            integer intent(in) :: m
+            integer intent(in) :: layer
+            double precision dimension(4,4,2001,50),intent(in) :: coefs
+            integer dimension(50),intent(in) :: ncoefs
+            double precision dimension(201),intent(in) :: xmu
+            double precision intent(in) :: binfac
+            integer intent(in) :: nmu
+            double precision dimension(804,804),intent(out) :: zmmin
+            double precision dimension(804,804),intent(out) :: zmplus
+        end subroutine scalzm
+        subroutine setfou(coefs,ncoefs,nlays,a,b,xmu,nmug,m0,m1,m2,iadd) ! in :module_dap:dap_source/setfou.f
+            double precision dimension(4,4,2001,50),intent(in) :: coefs
+            integer dimension(50),intent(in) :: ncoefs
+            integer intent(in) :: nlays
+            double precision dimension(50),intent(in) :: a
+            double precision dimension(50),intent(in) :: b
+            double precision dimension(201),intent(in) :: xmu
+            integer intent(in) :: nmug
+            integer dimension(50),intent(out) :: m0
+            integer dimension(50),intent(out) :: m1
+            integer dimension(50),intent(out) :: m2
+            integer dimension(50,2001),intent(out) :: iadd
+        end subroutine setfou
+        subroutine setmu(nmat,nmug,iunfou,nmu,xmu,smf) ! in :module_dap:dap_source/setmu.f
+            integer intent(in) :: nmat
+            integer intent(in) :: nmug
+            integer intent(in) :: iunfou
+            integer intent(out) :: nmu
+            double precision dimension(201),intent(out) :: xmu
+            double precision dimension(201),intent(out) :: smf
+        end subroutine setmu
+        subroutine setzm(m,layer,coefs,ncoefs,xmu,binfac,binfad,nmu,nmat,zmmin,zmplus) ! in :module_dap:dap_source/setzm.f
+            integer intent(in) :: m
+            integer intent(in) :: layer
+            double precision dimension(4,4,2001,50),intent(in) :: coefs
+            integer dimension(50),intent(in) :: ncoefs
+            double precision dimension(201),intent(in) :: xmu
+            double precision intent(in) :: binfac
+            double precision intent(in) :: binfad
+            integer intent(in) :: nmu
+            integer intent(in) :: nmat
+            double precision dimension(804,804),intent(out) :: zmmin
+            double precision dimension(804,804),intent(out) :: zmplus
+        end subroutine setzm
+        subroutine star(a,b,nmat,nmu) ! in :module_dap:dap_source/star.f
+            double precision dimension(804,804),intent(in,out) :: a
+            double precision dimension(804,804),intent(in,out) :: b
+            integer intent(in) :: nmat
+            integer intent(in) :: nmu
+        end subroutine star
+        subroutine top2bot(nmat,nmu,ebtop,ebbot,rmtop,tmtop,rmbot,tmbot,rmsbot) ! in :module_dap:dap_source/top2bot.f
+            integer :: nmat
+            integer :: nmu
+            double precision dimension(201),intent(in) :: ebtop
+            double precision dimension(201),intent(in) :: ebbot
+            double precision dimension(804,804),intent(in) :: rmtop
+            double precision dimension(804,804),intent(in) :: tmtop
+            double precision dimension(804,804),intent(out) :: rmbot
+            double precision dimension(804,804),intent(out) :: tmbot
+            double precision dimension(804,804),intent(out) :: rmsbot
+        end subroutine top2bot
+        subroutine trace(a,tra,nmat,nmum) ! in :module_dap:dap_source/trace.f
+            double precision dimension(804,804) :: a
+            double precision intent(out) :: tra
+            integer :: nmat
+            integer :: nmum
+        end subroutine trace
+        subroutine transf(s,nsup,nmat) ! in :module_dap:dap_source/transf.f
+            double precision dimension(804,804),intent(in,out) :: s
+            integer intent(in) :: nsup
+            integer intent(in) :: nmat
+        end subroutine transf
+        subroutine tstar(ts,t,nmat,nmu) ! in :module_dap:dap_source/tstar.f
+            double precision dimension(804,804),intent(out) :: ts
+            double precision dimension(804,804) :: t
+            integer :: nmat
+            integer :: nmu
+        end subroutine tstar
+    end interface 
+end python module module_dap
+
+! This file was auto-generated with f2py (version:2).
+! See http://cens.ioc.ee/projects/f2py2e/

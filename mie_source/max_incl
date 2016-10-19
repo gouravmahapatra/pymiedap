@@ -1,0 +1,5 @@
+
+      INTEGER nsubrMAX,ngaurMAX,nwavelsMAX,nmatMAX,nangMAX,
+     .        ncoefsMAX
+      PARAMETER (nsubrMAX=100,ngaurMAX=100,nwavelsMAX=500,
+     .           nmatMAX=4,nangMAX=10000,ncoefsMAX=4000)

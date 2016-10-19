@@ -1,0 +1,30 @@
+      SUBROUTINE ldiapr(A,E,B,nmat,nmu)
+
+*----------------------------------------------------------------------*
+*  Calculate the full EXTENDED supermatrix product A = E B where       *
+*  E is diagonal. (ldiapr = 'left diagonal product')                   *
+*  The reason why the product is not limited to the integration        *
+*  points is explained below Eq. (95) of de Haan et al. (1987).        *
+*----------------------------------------------------------------------*
+      IMPLICIT DOUBLE PRECISION (a-h,o-z)
+
+      INCLUDE 'max_incl'
+
+C      INTEGER nmu, nmat
+C      DOUBLE PRECISION A(nsupMAX,nsupMAX),B(nsupMAX,nsupMAX),E(nsupMAX)
+      DIMENSION A(nsupMAX,nsupMAX),B(nsupMAX,nsupMAX),E(nsupMAX)
+
+Cf2py intent(out) A
+
+*----------------------------------------------------------------------*
+      nsup= nmu*nmat
+
+      DO j=1,nsup
+         DO i=1,nsup
+            A(i,j) = E(i)*B(i,j)
+         ENDDO
+      ENDDO
+
+*----------------------------------------------------------------------*
+      RETURN 
+      END
