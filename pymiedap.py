@@ -652,7 +652,7 @@ def mie_code(aerosols, wavelengths, output=False, delta=1e-8, cutoff=1e-8, thmin
     for the different aerosols types.
     Requires the module_mie module.
     INPUT:
-        model : an input model containing all the modeling parameters
+        aerosols : an input aerosol type model containing all the modeling parameters
     OPTIONAL INPUT:
         delta: truncation of the Mie sum
         cutoff: cutoff value for the particle size distribution
@@ -669,7 +669,7 @@ def mie_code(aerosols, wavelengths, output=False, delta=1e-8, cutoff=1e-8, thmin
     OUTPUT:
         coefin : mie expansion coefficients for all layers in the model
         ncoefin : number of non-zero elements in coefin for each layer
-        Also generates output file for the different aerosols types if output==1.
+        Also generates output file for the different aerosols types if output==True.
 
     NOTES:
     """
@@ -1157,7 +1157,7 @@ def read_dap_output(phase, sza, emission, filename, beta=None, phi=None, ngeosMA
 
     if phi is None:
         # Getting needed geometry
-        azimuth = calc_azimuth(phase, sza, emission, deg=0)  # azimuth angle in rads
+        azimuth = calc_azimuth(phase, sza, emission, deg=False)  # azimuth angle in rads
         azimuth = np.pi - azimuth  # corr. due to diff definitions
         #azimuth = azimuth  # corr. due to diff definitions
         azimuthF[:ngeos] = np.degrees(azimuth)
