@@ -557,7 +557,7 @@ class Aerosols():
             strD = ("   R core/mantle = {:1.3f} \n".format(self.rcoremant))
             strE = (" Type: " + str(self.typ) + "\n")
             return (str0 + strA + strB + strC + strD + strE)
-        if self.layered == False:
+        if self.layered  is False:
             str0 = "Spherical particles\n"
             strA = ("nr =" + str(self.nr) + "))\n")
             strB = ("ni =" + str(self.ni) + "))\n")
@@ -1253,7 +1253,7 @@ def read_model(atm_model,data,step=20, force=0,
                 del(layer.mixed_aerosols)
             for aero_name, aero in vars(layer).items():
                 if isinstance(aero, Aerosols):
-                    if aero.layered==False:
+                    if aero.layered is False:
                         mie_code(aero, atm_model.wvl_list, ngaur=nmug_mie, nsubr=nsubr)
                     else:
                         mie_shell(aero, atm_model.wvl_list, ngaur=nmug_mie, nsubr=nsubr)
@@ -1402,7 +1402,7 @@ def planet_pixels(models, alpha=[10], npix=15, force=0, set_taus=0, rename=1,
             for lay, layer in vars(model.layers).items():
                 for aero_name, aero in vars(layer).items():
                     if isinstance(aero, Aerosols):
-                        if aero.layered==False:
+                        if aero.layered is False:
                             mie_code(aero, model.wvl_list, ngaur=nmug_mie, nsubr=nsubr)
                         else:
                             mie_shell(aero, model.wvl_list, ngaur=nmug_mie, nsubr=nsubr)
@@ -1437,7 +1437,7 @@ def planet_pixels(models, alpha=[10], npix=15, force=0, set_taus=0, rename=1,
 
         for A,alph in enumerate(alpha):
 
-            if fixed_pattern==False:
+            if fixed_pattern is False:
                 picture_full=None
 
             if input_pattern!=None:
@@ -1715,7 +1715,7 @@ def planet_integrated(models, alpha=[10], npix=15, force=0, set_taus=0,
             for lay, layer in vars(model.layers).items():
                 for aero_name, aero in vars(layer).items():
                     if isinstance(aero, Aerosols):
-                        if aero.layered==False:
+                        if aero.layered is False:
                             mie_code(aero, model.wvl_list, ngaur=nmug_mie, nsubr=nsubr)
                         else:
                             mie_shell(aero, model.wvl_list, ngaur=nmug_mie, nsubr=nsubr)
@@ -1746,7 +1746,7 @@ def planet_integrated(models, alpha=[10], npix=15, force=0, set_taus=0,
 
     for a,alph in enumerate(alpha):
 
-        if fixed_pattern==False:
+        if fixed_pattern is False:
             picture_full=None
 
         if input_pattern!=None:
