@@ -769,8 +769,8 @@ def mie_code(aerosols, wavelengths, output=False, delta=1e-8, cutoff=1e-8, thmin
 
 
 def mie_shell(aerosols, wavelengths, output=False, delta=1e-8, cutoff=1e-8, thmin=0, thmax=180,
-              step=1, nsubr=20, ngaur=20, nlaysMAX=50, ncoefsMAX=2001,
-              nfouMAX=2001, nmuMAX=201, nmatMAX=4):
+              step=1, nsubr=20, ngaur=20, nlaysMAX=50, ncoefsMAX=4001,
+              nfouMAX=4001, nmuMAX=201, nmatMAX=4):
     """ Takes an input Model object and computes the Mie expansion coefficients
     for layered spheres.
     Requires the module_mie module.
@@ -863,8 +863,8 @@ def mie_shell(aerosols, wavelengths, output=False, delta=1e-8, cutoff=1e-8, thmi
 
         qexts[i] = miec[3] # get Qext somewhere
         sexts[i] = miec[1] # get Sext somewhere
-        qscas[i] = miec[2] # get Qext somewhere
-        sscas[i] = miec[0] # get Sext somewhere
+        qscas[i] = miec[2] # get Qsca somewhere
+        sscas[i] = miec[0] # get Ssca somewhere
 
         #-----------------------------------------------------------------------
         #        Calculate the asymmetry parameter:
