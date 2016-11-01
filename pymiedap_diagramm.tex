@@ -1,0 +1,180 @@
+% TU Delft beamer template
+% Author: Erwin Walraven (initial version was created by Maarten Abbink)
+% Delft Universiy of Technology
+
+\documentclass{beamer}
+\usepackage[english]{babel}
+\usepackage{calc}
+\usepackage[absolute,overlay]{textpos}
+\usepackage{graphicx}
+\usepackage{subfig}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{mathtools}
+\usepackage{comment}
+\usepackage{MnSymbol,wasysym}
+\usepackage{tikz}
+\usepackage{xcolor}
+
+\setbeamertemplate{navigation symbols}{}
+
+\usetikzlibrary{fit}
+
+
+\begin{document}
+
+\begin{frame}{PyMieDAP: Python Mie Doubling-Adding Program}
+    \tikzstyle{fortran} = [draw, fill=blue!10, rectangle, minimum width=3.5cm]
+    \tikzstyle{python} = [draw, fill=red!10, rectangle, minimum width=3.5cm]
+    \centering
+    \begin{tikzpicture}[font=\small,scale=0.6,transform shape]
+
+        \coordinate (Out) at (0,0);
+        \coordinate (Dat) at (6,0);
+        \coordinate (Pla) at (-6,0);
+
+        \coordinate (Ms) at (0,5);
+        \coordinate (Mod) at (-6,5);
+        \coordinate (Sur) at (6,5);
+
+        \coordinate (Aer) at (-6,10);
+        \coordinate (Ss) at (0,10);
+
+        \coordinate (leg) at (6,9);
+
+        \node[fortran] (output) at (Out) {
+            \begin{minipage}[]{0.35\linewidth}
+                \footnotesize
+                \textbf{Output}
+
+                Stokes I, Q, U and V
+                \begin{itemize}
+                    \item Resolved on the disk
+                    \item Disk integrated
+                \end{itemize}
+            \end{minipage}
+        };
+        %\node[right=10pt] at (output.north west) {Output}
+        \node[python] (data) at (Dat) {
+            \begin{minipage}[]{0.4\linewidth}
+                \footnotesize
+                \textbf{Data}
+
+                Geometry of observation
+                \begin{itemize}
+                    \item SZA, emission, phase, azimuth,\dots
+                    \item Latitude, longitude, local time,\dots
+                    \item \textit{orbital parameters}
+                    \item \textit{spheroidal planets}
+                    \item \textit{moons, mutual events}
+                \end{itemize}
+            \end{minipage}
+        };
+        \node[python] (planet) at (Pla) {
+            \begin{minipage}[]{0.4\linewidth}
+                \footnotesize
+                \textbf{Cloud coverage}
+                \begin{itemize}
+                    \item Homogeneous
+                    \item Inhomogeneous
+                    \item Polar caps
+                    \item Subsolar cloud
+                    \item Patchy clouds
+                \end{itemize}
+            \end{minipage}
+        };
+
+        \node[python] (aerosols) at (Aer) {
+            \begin{minipage}[]{0.4\linewidth}
+                \footnotesize
+                \textbf{Aerosol properties}
+                \begin{itemize}
+                    \item $n_r$, $n_i$ (inner, outer)
+                    \item $r_{\rm eff}$ (inner, outer), $\nu_{\rm eff}$
+                    \item mixing
+                \end{itemize}
+            \end{minipage}
+        };
+
+        \node[fortran] (singsca) at (Ss) {
+            \begin{minipage}[]{0.35\linewidth}
+                \footnotesize
+                \textbf{Single scattering}
+                \begin{itemize}
+                    \item Mie scattering
+                    \item Layered spheres
+                    \item \textit{Non-spherical}
+                \end{itemize}
+            \end{minipage}
+        };
+
+        \node[fortran] (multsca) at (Ms) {
+            \begin{minipage}[]{0.35\linewidth}
+                \footnotesize
+                \textbf{Multiple scattering}
+        
+                with doubling-adding method
+            \end{minipage}
+        };
+
+        \node[fortran] (surface) at (Sur) {
+            \begin{minipage}[]{0.4\linewidth}
+                \footnotesize
+                \textbf{Surface}
+                \begin{itemize}
+                    \item Lambertian (non polarizing)
+                    \item \textit{Polarizing}
+                \end{itemize}
+            \end{minipage}
+        };
+
+
+        \node[python] (model) at (Mod) {
+            \begin{minipage}[]{0.4\linewidth}
+                \footnotesize
+                \textbf{Model atmosphere}
+                \begin{itemize}
+                    \item Planet properties
+                        \begin{itemize}
+                            \item $T_{\odot}$, $R_{\odot}$, $D_{p-\odot}$, $g$
+                        \end{itemize}
+                    \item Gas properties
+                        \begin{itemize}
+                            \item Molecular mass, depolarization
+                        \end{itemize}
+                    \item Layers definition
+                        \begin{itemize}
+                            \item $\tau$, $P$, $T$
+                            \item aerosols
+                        \end{itemize}
+                \end{itemize}
+            \end{minipage}
+    };
+
+        \node[draw, minimum width=3cm] (legend) at (leg) {
+            \begin{minipage}[]{0.35\linewidth}
+                \footnotesize
+                \textbf{Legend}
+                \begin{itemize}
+                    \item \colorbox{red!10}{Python code}
+                    \item \colorbox{blue!10}{Fortran code}
+                    \item Existing element
+                    \item \textit{In development}
+                \end{itemize}
+            \end{minipage}
+        };
+
+
+    \draw[->, thick] (model) -- (multsca);
+    \draw[<-, thick] (output) -- (data);
+    \draw[->, thick] (planet) -- (output);
+    \draw[->, thick] (surface) -- (multsca);
+    \draw[->, thick] (aerosols) -- (singsca);
+    \draw[->, thick] (singsca) -- (multsca) node[midway, fill=white] {Expansion
+    coefficients};
+    \draw[->, thick] (multsca) -- (output) node[midway, fill=white] {Fourier coefficients};
+    \end{tikzpicture}
+\end{frame}
+
+\end{document}
