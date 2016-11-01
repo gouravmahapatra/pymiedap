@@ -572,7 +572,7 @@ class Aerosols():
 #--------------
 
 # Small utilities
-def calc_azimuth(phase, sza, emission, deg=1):
+def calc_azimuth(phase, sza, emission, deg=True):
     """This method computes the azimuth angle from the geometric
     data. To be used once all geo data have been read and treated.
     INPUTS:
@@ -595,7 +595,7 @@ def calc_azimuth(phase, sza, emission, deg=1):
     c_delta_phi[c_delta_phi>1.] = 1.
     c_delta_phi[c_delta_phi<-1.] = -1.
 
-    if deg==1:
+    if deg is True:
         delta_phi = np.degrees(np.arccos(c_delta_phi))
     else:
         delta_phi = np.arccos(c_delta_phi)
@@ -645,7 +645,7 @@ def sunblackbody(L, Ts=5750):
 
 
 # Main functions
-def mie_code(aerosols, wavelengths, output=0, delta=1e-8, cutoff=1e-8, thmin=0, thmax=180,
+def mie_code(aerosols, wavelengths, output=False, delta=1e-8, cutoff=1e-8, thmin=0, thmax=180,
              step=1, nsubr=50, ngaur=60, nlaysMAX=50, ncoefsMAX=4001,
              nfouMAX=4001, nmuMAX=201, nmatMAX=4):
     """ Takes an input Model object and computes the Mie expansion coefficients
@@ -751,7 +751,7 @@ def mie_code(aerosols, wavelengths, output=0, delta=1e-8, cutoff=1e-8, thmin=0, 
         #------------------------------------------------------------------
         #        Write the coefficients to the output file:
         #------------------------------------------------------------------
-        if output==1:
+        if output is True:
             mie.writsc(scfile_name, idis, nsubr, ngaur, coefs, ncoefs, cosbar,
                         miec, wav, nr, ni, rmin, rmax, r_eff, v_eff, par3)
 
@@ -770,7 +770,7 @@ def mie_code(aerosols, wavelengths, output=0, delta=1e-8, cutoff=1e-8, thmin=0, 
     print('End of Mie program')
 
 
-def mie_shell(aerosols, wavelengths, output=0, delta=1e-8, cutoff=1e-8, thmin=0, thmax=180,
+def mie_shell(aerosols, wavelengths, output=False, delta=1e-8, cutoff=1e-8, thmin=0, thmax=180,
               step=1, nsubr=20, ngaur=20, nlaysMAX=50, ncoefsMAX=2001,
               nfouMAX=2001, nmuMAX=201, nmatMAX=4):
     """ Takes an input Model object and computes the Mie expansion coefficients
@@ -883,7 +883,7 @@ def mie_shell(aerosols, wavelengths, output=0, delta=1e-8, cutoff=1e-8, thmin=0,
         #------------------------------------------------------------------
         #        Write the coefficients to the output file:
         #------------------------------------------------------------------
-        if output==1:
+        if output is True:
             mie.writsc(scfile_name, idis, nsubr, ngaur, coefs, ncoefs, cosbar,
                         miec, wav, nr_mantle, ni_mantle, rmin, rmax, r_eff, v_eff, par3)
 
@@ -938,7 +938,7 @@ def read_mie_output(filename, full_output=False, nameout='stuff.dat'):
 
     Pl = - F[4,:] / F[0,:]
 
-    if full_output==True:
+    if full_output is True:
         return theta, F
     else:
         return theta, Pl
@@ -1126,7 +1126,7 @@ def dap_code(model, rename=False, output_name='modelA',
 
         # Naming the model with check for Windows paths
         print('fou_{:4.3f}.dat'.format(wav))
-        if rename==True:
+        if rename is True:
             output_file = path_output + output_name + '_{:4.3f}.dat'.format(wav)
             output_file = os.path.normpath(output_file)
             model.name[z] = output_file
@@ -1205,8 +1205,8 @@ def read_dap_output(phase, sza, emission, filename, beta=None, phi=None, ngeosMA
     return I,Q,U,V
 
 
-def read_model(atm_model,data,step=20, force=0,
-               path_input='./dap_database/', set_taus=0, rename=False,
+def read_model(atm_model,data,step=20, force=False,
+               path_input='./dap_database/', set_taus=False, rename=False,
                output_name='modelA', nmug_mie=20, nmug=20, nsubr=50, nmat=4):
     """ to read the files associated with a model.
     INPUTS:
@@ -1245,11 +1245,11 @@ def read_model(atm_model,data,step=20, force=0,
     Vt = np.zeros((len(wvl),n_pts))
 
     # If the model is not yet computed or is forced to
-    if atm_model.name[0] == '' or force==1:
+    if atm_model.name[0] == '' or force is True:
         # Execute Mie on all aerosols types on all layers
         for lay, layer in vars(atm_model.layers).items():
             #If there is already an aerosol mix, we overwrite it
-            if hasattr(layer,'mixed_aerosols')==True:
+            if hasattr(layer,'mixed_aerosols') is True:
                 del(layer.mixed_aerosols)
             for aero_name, aero in vars(layer).items():
                 if isinstance(aero, Aerosols):
@@ -1261,7 +1261,7 @@ def read_model(atm_model,data,step=20, force=0,
             layer.mix_aerosols() #mix aerosols
 
         # Set the opacities
-        if set_taus==1:
+        if set_taus is True:
             for lay, layer in vars(atm_model.layers).items():
                 layer.tau = layer.col_dens * layer.mixed_aerosols.sext
 
@@ -1330,7 +1330,7 @@ def binned_average(x,y,xbins, errmean=True, weighted=True, sigmas=1.):
     # Inverse of sigmas squared
     sigm2 = 1/sigmas**2
 
-    if weighted==True:
+    if weighted is True:
         # this is \sum 1/sigma_i^2
         n = np.histogram(x,bins=xbins,weights=sigm2)[0]
         # this is \sum x_i / sigma_i^2
@@ -1347,13 +1347,13 @@ def binned_average(x,y,xbins, errmean=True, weighted=True, sigmas=1.):
         sy2 = np.histogram(x,bins=xbins,weights=y*y)[0]
         moy = sy/n
         sigma = np.sqrt(sy2/n - moy**2)
-        if errmean==True:
+        if errmean is True:
             sigma = sigma/np.sqrt(n)
 
     return xmid,moy,sigma
 
 
-def planet_pixels(models, alpha=[10], npix=15, force=0, set_taus=0, rename=1,
+def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rename=True,
                    output_names=['modelA','modelB'], fixed_pattern=True,
                    input_pattern=None, cusp=False, thresh_lat=50., patchy=True,
                    fclouds=[0.5,0.5], constant_fcloud=False, sscloud=False,
@@ -1397,7 +1397,7 @@ def planet_pixels(models, alpha=[10], npix=15, force=0, set_taus=0, rename=1,
 
     for M, model in enumerate(models):
         # compute the models if not done yet
-        if model.name[0] == '' or force==1:
+        if model.name[0] == '' or force is True:
             # Execute Mie on all aerosols types
             for lay, layer in vars(model.layers).items():
                 for aero_name, aero in vars(layer).items():
@@ -1410,7 +1410,7 @@ def planet_pixels(models, alpha=[10], npix=15, force=0, set_taus=0, rename=1,
                 layer.mix_aerosols() #mix aerosols
 
             # Set the opacities
-            if set_taus==1:
+            if set_taus is True:
                 for lay, layer in vars(model.layers).items():
                     layer.tau = layer.col_dens * layer.mixed_aerosols.sext
 
@@ -1626,8 +1626,8 @@ def planet_pixels(models, alpha=[10], npix=15, force=0, set_taus=0, rename=1,
     mpl.ion()
 
 
-def planet_integrated(models, alpha=[10], npix=15, force=0, set_taus=0,
-                      rename=1, output_names=['modelA','modelB'], fixed_pattern=True,
+def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
+                      rename=True, output_names=['modelA','modelB'], fixed_pattern=True,
                       input_pattern=None, cusp=False, thresh_lat=50., full_disk=False,
                       patchy=True, fclouds=[0.5,0.5], constant_fcloud=False,
                       sscloud=False, sigma_c=10., delta_c=[0.], nmug_mie=20,
@@ -1710,7 +1710,7 @@ def planet_integrated(models, alpha=[10], npix=15, force=0, set_taus=0,
     # loop on models to compute
     for M, model in enumerate(models):
         # if not done yet or if forced
-        if model.name[0] == '' or force==1:
+        if model.name[0] == '' or force is True:
             # Execute Mie on all aerosols types
             for lay, layer in vars(model.layers).items():
                 for aero_name, aero in vars(layer).items():
@@ -1723,7 +1723,7 @@ def planet_integrated(models, alpha=[10], npix=15, force=0, set_taus=0,
                 layer.mix_aerosols() #mix aerosols
 
             # Set the opacities
-            if set_taus==1:
+            if set_taus is True:
                 for lay, layer in vars(model.layers).items():
                     layer.tau = layer.col_dens * layer.mixed_aerosols.sext
 
@@ -2005,7 +2005,7 @@ def mask_planet(alpha=15, npix=20, cusp=False, thresh_lat=50., patchy=True,
     zv = np.sqrt(1. - xv*xv - yv*yv)
     th = np.degrees(np.arccos(xv*xstar + zv*zstar))
 
-    if sscloud==True:
+    if sscloud is True:
         # coordinates of subsolar point + offset
         xss = np.sin(np.radians(alpha+delta_c))
         zss = np.cos(np.radians(alpha+delta_c))
@@ -2022,7 +2022,7 @@ def mask_planet(alpha=15, npix=20, cusp=False, thresh_lat=50., patchy=True,
 
 
     # If polar cusps
-    if cusp==True:
+    if cusp is True:
         cusp_idx = np.where(abs(lat)>thresh_lat)
         grid[:] = 1.
         grid_full[:] = 1.
@@ -2034,7 +2034,7 @@ def mask_planet(alpha=15, npix=20, cusp=False, thresh_lat=50., patchy=True,
         grid_full[xv*xv+yv*yv>1]=np.nan
 
 
-    if patchy==True:
+    if patchy is True:
         #if no fixed cover is wanted
         # n types
         ntypes = len(fclouds)
@@ -2075,7 +2075,7 @@ def mask_planet(alpha=15, npix=20, cusp=False, thresh_lat=50., patchy=True,
                     grid_lit[th>90]=np.nan
 
                     # get current cloud coverage at given phase angle
-                    if constant_fcloud==True:
+                    if constant_fcloud is True:
                         cl = np.where(grid_lit>=0)[0].size
                         lit = np.where(~np.isnan(grid_lit))[0].size
                         nb_cloud = float(cl)/(lit)
@@ -2092,7 +2092,7 @@ def mask_planet(alpha=15, npix=20, cusp=False, thresh_lat=50., patchy=True,
             grid_full[xv*xv+yv*yv>1]=np.nan
             grid_lit[th>90]=np.nan
 
-    if full_disk==True:
+    if full_disk is True:
         grid[:] = 0
         grid_lit[:] = 0
         grid_lit[xv*xv+yv*yv>1]=np.nan
