@@ -679,8 +679,6 @@ def mie_code(aerosols, wavelengths, output=False, delta=1e-8, cutoff=1e-8, thmin
     # ---------------------------
     nsupMAX = nmuMAX * nmatMAX
 
-    # par1 = 1.05
-    # par2 = 0.07
     par3 = 0.25  # this last parameter is only used for some PSD
     weight2 = 0.3
 
@@ -777,7 +775,7 @@ def mie_shell(aerosols, wavelengths, output=False, delta=1e-8, cutoff=1e-8, thmi
     for layered spheres.
     Requires the module_mie module.
     INPUT:
-        model : an input model containing all the modeling parameters
+        aerosols : an input aerosol type model containing all the modeling parameters
     OPTIONAL INPUT:
         delta: truncation of the Mie sum
         cutoff: cutoff value for the particle size distribution
@@ -804,8 +802,6 @@ def mie_shell(aerosols, wavelengths, output=False, delta=1e-8, cutoff=1e-8, thmi
     # ---------------------------
     nsupMAX = nmuMAX * nmatMAX
 
-    # par1 = 1.05
-    # par2 = 0.07
     par3 = 0.25  # this last parameter is only used for some PSD
     weight2 = 0.0
 
