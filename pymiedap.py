@@ -1155,7 +1155,7 @@ def read_dap_output(phase, sza, emission, filename, beta=None, phi=None, ngeosMA
     betaF = np.zeros(ngeosMAX)
     azimuthF = np.zeros(ngeosMAX)
 
-    if phi==None:
+    if phi is None:
         # Getting needed geometry
         azimuth = calc_azimuth(phase, sza, emission, deg=0)  # azimuth angle in rads
         azimuth = np.pi - azimuth  # corr. due to diff definitions
@@ -1166,7 +1166,7 @@ def read_dap_output(phase, sza, emission, filename, beta=None, phi=None, ngeosMA
         azimuthF[:ngeos] = phi[:ngeos]
 
 
-    if beta==None:
+    if beta is None:
         azimuth = azimuth[:ngeos]
         beta = get_cosbeta(phase, sza, emission, azimuth)  # rotation angle beta
         beta = np.arccos(beta) #warning: still in radians here
@@ -2040,7 +2040,7 @@ def mask_planet(alpha=15, npix=20, cusp=False, thresh_lat=50., patchy=True,
         ntypes = len(fclouds)
         fclouds = np.array(fclouds)/sum(fclouds) #renormalization
 
-        if fixed_cover==None:
+        if fixed_cover is None:
             #compute a new one
             #starting from a no-type cover (repr. with -1)
             grid[:] = -1.
