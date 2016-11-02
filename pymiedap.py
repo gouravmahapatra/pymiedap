@@ -226,6 +226,8 @@ class Model(object):
 
         strfin = ''
         print('Model:')
+        wvl_str = ('**Operating wavelengths:\n'+
+                    str(self.wvl_list) + ' microns\n\n')
         planet_str = ("**Planet data:**\n "+
                       "g={:2.2f} m/s^2; ".format(self.gravity) +
                       "surf.alb.={:2.2f}\n \n".format(self.asurf))
@@ -248,7 +250,7 @@ class Model(object):
                           ', tau=' + str(layer.tau) +
                           ', tau_gas=' + str(layer.tau_g) + '\n')
             strfin = strfin + strout
-        return planet_str+gas_str+lays_str+strfin
+        return wvl_str+planet_str+gas_str+lays_str+strfin
 
 
     def model_atm(self,  H=5., z_top=74., k_max=2., r_c = 1.0, v_c = 0.07,
@@ -383,6 +385,53 @@ class Model(object):
         nrs = k + slope*wvl
         for layername, layer in vars(self.layers).items():
             layer.nr = nrs
+
+    def summary(self):
+        """Writes a summary of model parameters in a .info file with name of
+        current model"""
+
+        if self.name==['']:
+            print('Model not titled yet!')
+        else:
+            for w,wvl in enumerate(self.wvl_list):
+                filename = self.name[w].split('/')[-1]
+                filename = filename.split('_')[0]
+                filename = '_'.join(filename)
+                filename += '.info'
+                fich = open(filename,'w')
+
+                strfin = ''
+                wvl_str = ('{}:\n'+
+                           '**Operating wavelengths:\n'+
+                        str(self.wvl_list) + ' microns\n\n')
+                planet_str = ("**Planet data:**\n "+
+                            "g={:2.2f} m/s^2; ".format(self.gravity) +
+                            "surf.alb.={:2.2f}\n \n".format(self.asurf))
+                gas_str = ("**Gas data**\n mma={:2.2f} ".format(self.mma) +
+                        "dpol={:2.2f}\n".format(self.dpol))
+                lays_str = '\n **Layers** \n'
+                fich.write(wvl_str)
+                fich.write(planet_str)
+                fich.write(gas_str)
+                fich.write(lays_str)
+
+                for layer_name, layer in vars(self.layers).items():
+                    if hasattr(layer,'mixed_aerosols')==True:
+                        strout = (str(layer_name) +
+                                ' Type:' + layer.mixed_aerosols.typ +
+                                ', level=' + str(layer.level) +
+                                ', P=' + str(layer.press) +
+                                ', tau=' + str(layer.tau) +
+                                ', tau_gas=' + str(layer.tau_g) + '\n')
+                    else:
+                        strout = (str(layer_name) +
+                                ' Type:' + layer.aerosols.typ +
+                                ', level=' + str(layer.level) +
+                                ', P=' + str(layer.press) +
+                                ', tau=' + str(layer.tau) +
+                                ', tau_gas=' + str(layer.tau_g) + '\n')
+                    strfin = strfin + strout
+                fich.write(strfin)
 
 
 class Geom():
