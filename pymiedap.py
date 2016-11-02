@@ -1386,6 +1386,10 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
     OUTPUT:
         produces two pdf files for intensity and degree of linear polarization
     """
+    # If onyl one model is given, assumes a full cover.
+    if len(models)==1:
+        full_disk=True
+        patchy=False
 
     atm_model = models[0]
     wvl = atm_model.wvl_list
@@ -1474,6 +1478,7 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
                                                                     patchy=patchy,
                                                                     fclouds=fclouds,
                                                                     constant_fcloud=constant_fcloud,
+                                                                    full_disk=full_disk,
                                                                     sscloud=sscloud,
                                                                     sigma_c=sigma_c,
                                                                     delta_c=delta_c[A])
