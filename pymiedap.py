@@ -1770,6 +1770,12 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
     Plmin = np.ones((len(wvl),nalpha))
     Ptmin = np.ones((len(wvl),nalpha))
 
+    # Create tables to store raw variations
+    Iall = np.ones((len(wvl),nalpha, niter))
+    Qall = np.ones((len(wvl),nalpha,niter))
+    Uall = np.ones((len(wvl),nalpha,niter))
+    Vall = np.ones((len(wvl),nalpha,niter))
+
     Imax = -np.ones((len(wvl),nalpha))
     Pqmax = -np.ones((len(wvl),nalpha))
     Pumax = -np.ones((len(wvl),nalpha))
@@ -1961,6 +1967,12 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
             Ut[:,a] += 4*np.nansum(Ux,axis=1)*apix/np.pi
             Vt[:,a] += 4*np.nansum(Vx,axis=1)*apix/np.pi
 
+            # Integrating over planet
+            Iall[:,a,citer] = 4*np.nansum(Ix,axis=1)*apix/np.pi
+            Qall[:,a,citer] = 4*np.nansum(Qx,axis=1)*apix/np.pi
+            Uall[:,a,citer] = 4*np.nansum(Ux,axis=1)*apix/np.pi
+            Vall[:,a,citer] = 4*np.nansum(Vx,axis=1)*apix/np.pi
+
             # ==================
             # end of loop on iterations
             # ==================
@@ -2001,6 +2013,17 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
     atm_model.Pl = np.sqrt( (Qt**2+Ut**2)/It**2 )
     atm_model.Pt = np.sqrt( (Qt**2+Ut**2+Vt**2)/It**2 )
     atm_model.Pu = Ut/It
+
+    # store global results in first input model
+    atm_model.Iall = Iall
+    atm_model.Qall = Qall
+    atm_model.Uall = Uall
+    atm_model.Vall = Vall
+    atm_model.Pall = (-Qall/Iall)
+    atm_model.Plall = np.sqrt( (Qall**2+Uall**2)/Iall**2 )
+    atm_model.Ptall = np.sqrt( (Qall**2+Uall**2+Vall**2)/Iall**2 )
+    atm_model.Puall = Uall/Iall
+
 
     # saving dispersion
     atm_model.Pqmax = Pqmax
