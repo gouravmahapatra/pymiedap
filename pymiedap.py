@@ -1681,7 +1681,7 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
                       input_pattern=None, cusp=False, thresh_lat=50., full_disk=False,
                       patchy=True, fclouds=[0.5,0.5], constant_fcloud=False,
                       sscloud=False, sigma_c=10., delta_c=[0.], nmug_mie=20,
-                      niter=1, nmug=20., nsubr=50, nmat=4):
+                      niter=1, nmug=20., nsubr=50, nmat=4, pixscaler=1, adaptive_pixels=False):
 
     """ Function to generate disk-integrated images of a planet according to model
     INPUT:
@@ -1713,6 +1713,10 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
         nmat: number of Stokes elements to compute
         nsubr: number of divisions for size dist in Mie calculations
         niter: number of iterations for the coverage
+        adaptive_pixels: if True, npix increases with increasing phase angle
+            (in log2 of alpha)
+        pixscaler: factor used in combination with adaptive_pixels to set the
+            rate of increase in pix number
     OUTPUT:
         I,Q,U,V: Stokes elements. I(alpha=0) being the geometric albedo
         P: -Q/I
@@ -1803,7 +1807,12 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
             picture_full=input_pattern
 
         #Get geom of pixels
-        ngeos, apix, theta0, theta, phi, beta, lats, longs, xs, ys = geos.getgeos(alph, npix)
+        if adaptive_pixels is True:
+            npix2 = np.int(np.ceil(npix + pixscaler*np.log2(alph)))
+        else:
+            npix2 = npix
+
+        ngeos, apix, theta0, theta, phi, beta, lats, longs, xs, ys = geos.getgeos(alph, npix2)
         phases[a] = alph
 
         theta0 = theta0[:ngeos]
@@ -1858,10 +1867,10 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
         for citer in np.arange(niter):
             #print(citer)
 
-            if citer>0:
+            if citer>0 or npix!=npix2:
                 picture_full = None
             # Generate a pixel mask
-            picture, mask, picture_full, ncloud, asym = mask_planet(alpha=alph, npix=npix,
+            picture, mask, picture_full, ncloud, asym = mask_planet(alpha=alph, npix=npix2,
                                                                     fixed_cover=picture_full,
                                                                     cusp=cusp,
                                                                     thresh_lat=thresh_lat,
