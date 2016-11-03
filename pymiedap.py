@@ -1403,7 +1403,7 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
                    input_pattern=None, cusp=False, thresh_lat=50., patchy=True,
                    fclouds=[0.5,0.5], constant_fcloud=False, sscloud=False,
                    sigma_c=10., delta_c=[0.], nmug_mie=20, nmug=20., nsubr=50,
-                   nmat=4):
+                   nmat=4, pixscaler=1, adaptive_pixels=False):
     """ Function to generate disk-resolved images of a planet according to model
     INPUT:
         atm_model: model to compute
@@ -1432,6 +1432,10 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
         nmug, nmug_mie: number of Gauss point for Mie and DAP codes
         nmat: number of Stokes elements to compute
         nsubr: number of divisions for size dist in Mie calculations
+        adaptive_pixels: if True, npix increases with increasing phase angle
+            (in log2 of alpha)
+        pixscaler: factor used in combination with adaptive_pixels to set the
+            rate of increase in pix number
     OUTPUT:
         produces two pdf files for intensity and degree of linear polarization
     """
@@ -1439,6 +1443,8 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
     if len(models)==1:
         full_disk=True
         patchy=False
+    else:
+        full_disk=False
 
     atm_model = models[0]
     wvl = atm_model.wvl_list
@@ -1492,8 +1498,13 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
             if input_pattern!=None:
                 picture_full=input_pattern
 
+            if adaptive_pixels is True:
+                npix2 = np.int(np.ceil(npix + pixscaler*np.log2(alph)))
+            else:
+                npix2 = npix
+
             #Get geom
-            ngeos, apix, theta0, theta, phi, beta, lats, longs, xs, ys = geos.getgeos(alph, npix)
+            ngeos, apix, theta0, theta, phi, beta, lats, longs, xs, ys = geos.getgeos(alph, npix2)
 
             theta0 = theta0[:ngeos]
             theta = theta[:ngeos]
@@ -1520,7 +1531,10 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
             Vt = np.zeros((len(wvl),ngeos))
 
             # call maskd_planet
-            picture, mask, picture_full, ncloud, asym = mask_planet(alpha=alph, npix=npix,
+            if npix!=npix2:
+                picture_full = None
+
+            picture, mask, picture_full, ncloud, asym = mask_planet(alpha=alph, npix=npix2,
                                                                     fixed_cover=picture_full,
                                                                     cusp=cusp,
                                                                     thresh_lat=thresh_lat,
@@ -1577,7 +1591,7 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
             ax.set_title('Polarization at phase angle: {:3.2f}'.format(alph))
             circ = mpl.Circle((0,0),1,color='gray')
             sc = ax.scatter(x, y, c=100*atm_model.P[j,:],lw=0,
-                            marker='s',s=(0.6*figsize/npix)**2,
+                            marker='s',s=(0.6*figsize/npix2)**2,
                             cmap=mpl.cm.seismic, zorder=10,
                             vmin=-5, vmax=5)
             fig.tight_layout(pad=1.2)
@@ -1596,7 +1610,7 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
             ax.set_title('Polarization at phase angle: {:3.2f}'.format(alph))
             circ = mpl.Circle((0,0),1,color='gray')
             sc = ax.scatter(x, y, c=100*(atm_model.U[j,:]/atm_model.I[j,:]),lw=0,
-                            marker='s',s=(0.6*figsize/npix)**2,
+                            marker='s',s=(0.6*figsize/npix2)**2,
                             cmap=mpl.cm.seismic, zorder=10,
                             vmin=-5, vmax=5)
             fig.tight_layout(pad=1.2)
@@ -1616,7 +1630,7 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
             circ = mpl.Circle((0,0),1,color='gray')
             ax.add_patch(circ)
             sc = ax.scatter(x, y, c=atm_model.I[j,:],lw=0,marker='s',
-                            s=(0.6*figsize/npix)**2,
+                            s=(0.6*figsize/npix2)**2,
                             cmap=mpl.cm.YlOrRd, zorder=10,
                             vmin=0, vmax=1)
             fig.tight_layout(pad=1.2)
@@ -1635,7 +1649,7 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
             circ = mpl.Circle((0,0),1,color='gray')
             ax.add_patch(circ)
             sc = ax.scatter(x, y, c=100*(atm_model.V[j,:]/atm_model.I[j,:]),lw=0,marker='s',
-                            s=(0.6*figsize/npix)**2,
+                            s=(0.6*figsize/npix2)**2,
                             cmap=mpl.cm.seismic, zorder=10,
                             vmin=-0.1, vmax=0.1)
             fig.tight_layout(pad=1.2)
@@ -1654,7 +1668,7 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
             ax.set_title('Polarization at phase angle: {:3.2f}'.format(alph))
             circ = mpl.Circle((0,0),1,color='gray')
             sc = ax.scatter(x, y, c=100*Ptot[j,:],lw=0,
-                            marker='s',s=(0.6*figsize/npix)**2,
+                            marker='s',s=(0.6*figsize/npix2)**2,
                             cmap=mpl.cm.YlOrRd, zorder=10,
                             vmin=0, vmax=5)
             fig.tight_layout(pad=1.2)
@@ -1681,7 +1695,8 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
                       input_pattern=None, cusp=False, thresh_lat=50., full_disk=False,
                       patchy=True, fclouds=[0.5,0.5], constant_fcloud=False,
                       sscloud=False, sigma_c=10., delta_c=[0.], nmug_mie=20,
-                      niter=1, nmug=20., nsubr=50, nmat=4, pixscaler=1, adaptive_pixels=False):
+                      niter=1, nmug=20., nsubr=50, nmat=4, pixscaler=1,
+                      adaptive_pixels=False):
 
     """ Function to generate disk-integrated images of a planet according to model
     INPUT:
