@@ -1590,6 +1590,7 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
             ax = fig.add_subplot(111, aspect=1)
             ax.set_title('Polarization at phase angle: {:3.2f}'.format(alph))
             circ = mpl.Circle((0,0),1,color='gray')
+            ax.add_patch(circ)
             sc = ax.scatter(x, y, c=100*atm_model.P[j,:],lw=0,
                             marker='s',s=(0.6*figsize/npix2)**2,
                             cmap=mpl.cm.seismic, zorder=10,
@@ -1599,7 +1600,6 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
             cb.set_label('Degree of linear polarization (%)',size=font_size)
             ax.set_ylim(-1,1)
             ax.set_xlim(-1,1)
-            ax.add_patch(circ)
             #fig.savefig('Pl_phase_{:01.3f}_{:3.2f}.png'.format(w,alph))
             ppPl.savefig(fig)
             mpl.close(fig)
@@ -1609,6 +1609,7 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
             ax = fig.add_subplot(111, aspect=1)
             ax.set_title('Polarization at phase angle: {:3.2f}'.format(alph))
             circ = mpl.Circle((0,0),1,color='gray')
+            ax.add_patch(circ)
             sc = ax.scatter(x, y, c=100*(atm_model.U[j,:]/atm_model.I[j,:]),lw=0,
                             marker='s',s=(0.6*figsize/npix2)**2,
                             cmap=mpl.cm.seismic, zorder=10,
@@ -1618,7 +1619,6 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
             cb.set_label('U/I (%)',size=font_size)
             ax.set_ylim(-1,1)
             ax.set_xlim(-1,1)
-            ax.add_patch(circ)
             #fig.savefig('U_phase_{:01.3f}_{:3.2f}.png'.format(w,alph))
             ppU.savefig(fig)
             mpl.close(fig)
@@ -1666,6 +1666,7 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
             fig = mpl.figure(figsize=(figsize/dpi,figsize/dpi), dpi=dpi)
             ax = fig.add_subplot(111, aspect=1)
             ax.set_title('Polarization at phase angle: {:3.2f}'.format(alph))
+            ax.add_patch(circ)
             circ = mpl.Circle((0,0),1,color='gray')
             sc = ax.scatter(x, y, c=100*Ptot[j,:],lw=0,
                             marker='s',s=(0.6*figsize/npix2)**2,
@@ -1676,7 +1677,6 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
             cb.set_label('Degree of linear polarization (%)',size=font_size)
             ax.set_ylim(-1,1)
             ax.set_xlim(-1,1)
-            ax.add_patch(circ)
             #fig.savefig('Pt_phase_{:01.3f}_{:3.2f}.png'.format(w,alph))
             ppPt.savefig(fig)
             mpl.close(fig)
