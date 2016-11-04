@@ -21,8 +21,8 @@ Cf2py intent(out) nfou,nmat,nmugs,xmu,rfou
 *----------------------------------------------------------------------------
 *     Get the input file with the Fourier coefficients:
 *----------------------------------------------------------------------------
-      WRITE(*,*) 'Give the name of the Fourier coefficients file',
-     .           ' (max. 20):'
+C      WRITE(*,*) 'Give the name of the Fourier coefficients file',
+C     .           ' (max. 20):'
 
 *----------------------------------------------------------------------------
 *     Open the Fourier coefficients file:
