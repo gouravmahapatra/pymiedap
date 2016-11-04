@@ -2213,8 +2213,8 @@ def mask_planet(alpha=15, npix=20, cusp=False, thresh_lat=50., patchy=True,
                     x = x.astype('int')
                     y = y.astype('int')
                     # if they go beyond the grid, wrap them around
-                    x[x>=npix] = -1
-                    y[y>=npix] = -1
+                    x[abs(x)>=npix] = -1
+                    y[abs(y)>=npix] = -1
                     # if a pixel is not already taken, give the value of the current type
                     #grid[x,y] = np.where(grid[x,y]==-1, T, grid[x,y])
                     grid_full[x,y] = np.where(grid_full[x,y]==-1, T, grid_full[x,y])
