@@ -1915,7 +1915,6 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
             # ==================
 
         for citer in np.arange(niter):
-            #print(citer)
 
             if citer>0 or npix!=npix2:
                 picture_full = None
@@ -1979,7 +1978,7 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
         # ====================
 
         progress = (a+1)*(citer+1)*(pixtype+1) #for the progress bar
-        sys.stdout.write('\r{:2f}% done'.format(100.*progress/Nsteps))
+        sys.stdout.write('\r{:2f}% done\n'.format(100.*progress/Nsteps))
         sys.stdout.flush()
 
     # ===================
