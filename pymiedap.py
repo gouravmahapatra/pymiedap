@@ -1691,7 +1691,7 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
 
 
 def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
-                      rename=True, output_names=['modelA','modelB'], fixed_pattern=True,
+                      rename=True, output_names=['modelA','modelB'], fixed_pattern=False,
                       input_pattern=None, cusp=False, thresh_lat=50., full_disk=False,
                       patchy=True, fclouds=[0.5,0.5], constant_fcloud=False,
                       sscloud=False, sigma_c=10., delta_c=[0.], nmug_mie=20,
