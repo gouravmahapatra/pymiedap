@@ -1500,6 +1500,7 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
 
             if adaptive_pixels is True:
                 npix2 = np.int(np.ceil(npix + pixscaler*np.log2(alph)))
+                print('npix=',npix)
             else:
                 npix2 = npix
 
@@ -1666,8 +1667,8 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
             fig = mpl.figure(figsize=(figsize/dpi,figsize/dpi), dpi=dpi)
             ax = fig.add_subplot(111, aspect=1)
             ax.set_title('Polarization at phase angle: {:3.2f}'.format(alph))
-            ax.add_patch(circ)
             circ = mpl.Circle((0,0),1,color='gray')
+            ax.add_patch(circ)
             sc = ax.scatter(x, y, c=100*Ptot[j,:],lw=0,
                             marker='s',s=(0.6*figsize/npix2)**2,
                             cmap=mpl.cm.YlOrRd, zorder=10,
@@ -1859,6 +1860,7 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
         #Get geom of pixels
         if adaptive_pixels is True:
             npix2 = np.int(np.ceil(npix + pixscaler*np.log2(alph)))
+            print('npix=',npix)
         else:
             npix2 = npix
 
