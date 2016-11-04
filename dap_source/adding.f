@@ -66,7 +66,7 @@ Cf2py intent(in) outputname,a,b,coefs,ncoefs,nlays,nmug,nmat,surfmat
 *---------------------------------------------------------------------
       m= -1
 1000  m= m+1
-      WRITE(*,*) m
+C      WRITE(*,*) m
 
 *---------------------------------------------------------------------
 *     Calculate two binomial factors:
