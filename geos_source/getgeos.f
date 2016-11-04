@@ -150,9 +150,9 @@ Cf2py intent(out) xs, ys
 *     Calculate the size of a pixel: 
 *----------------------------------------------------------------------------
       apix= pi/nn
-      WRITE(*,*)
-      WRITE(*,*) 'apix:',apix,npix,ngeos
-      WRITE(*,*)
+C      WRITE(*,*)
+C      WRITE(*,*) 'apix:',apix,npix,ngeos
+C      WRITE(*,*)
 
 *----------------------------------------------------------------------------
       RETURN
