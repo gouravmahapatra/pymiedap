@@ -1763,24 +1763,53 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
     Ut = np.zeros((len(wvl),nalpha))
     Vt = np.zeros((len(wvl),nalpha))
 
-    # Create table to store extrema
-    Imin = np.ones((len(wvl),nalpha))
-    Pqmin = np.ones((len(wvl),nalpha))
-    Pumin = np.ones((len(wvl),nalpha))
-    Plmin = np.ones((len(wvl),nalpha))
-    Ptmin = np.ones((len(wvl),nalpha))
+    # Create table to store 1sigma minima
+    Imin1s = np.ones((len(wvl),nalpha))
+    Pqmin1s = np.ones((len(wvl),nalpha))
+    Pumin1s = np.ones((len(wvl),nalpha))
+    Plmin1s = np.ones((len(wvl),nalpha))
+    Ptmin1s = np.ones((len(wvl),nalpha))
+
+    # Create table to store 2sigma minima
+    Imin2s = np.ones((len(wvl),nalpha))
+    Pqmin2s = np.ones((len(wvl),nalpha))
+    Pumin2s = np.ones((len(wvl),nalpha))
+    Plmin2s = np.ones((len(wvl),nalpha))
+    Ptmin2s = np.ones((len(wvl),nalpha))
+    # Create table to store 3sigma maxima
+    Imax3s = np.ones((len(wvl),nalpha))
+    Pqmax3s = np.ones((len(wvl),nalpha))
+    Pumax3s = np.ones((len(wvl),nalpha))
+    Plmax3s = np.ones((len(wvl),nalpha))
+    Ptmax3s = np.ones((len(wvl),nalpha))
+
+
+    # Create table to store 1sigma maxima
+    Imax1s = np.ones((len(wvl),nalpha))
+    Pqmax1s = np.ones((len(wvl),nalpha))
+    Pumax1s = np.ones((len(wvl),nalpha))
+    Plmax1s = np.ones((len(wvl),nalpha))
+    Ptmax1s = np.ones((len(wvl),nalpha))
+
+    # Create table to store 2sigma maxima
+    Imax2s = np.ones((len(wvl),nalpha))
+    Pqmax2s = np.ones((len(wvl),nalpha))
+    Pumax2s = np.ones((len(wvl),nalpha))
+    Plmax2s = np.ones((len(wvl),nalpha))
+    Ptmax2s = np.ones((len(wvl),nalpha))
+    # Create table to store 3sigma maxima
+    Imax3s = np.ones((len(wvl),nalpha))
+    Pqmax3s = np.ones((len(wvl),nalpha))
+    Pumax3s = np.ones((len(wvl),nalpha))
+    Plmax3s = np.ones((len(wvl),nalpha))
+    Ptmax3s = np.ones((len(wvl),nalpha))
+
 
     # Create tables to store raw variations
     Iall = np.ones((len(wvl),nalpha, niter))
     Qall = np.ones((len(wvl),nalpha,niter))
     Uall = np.ones((len(wvl),nalpha,niter))
     Vall = np.ones((len(wvl),nalpha,niter))
-
-    Imax = -np.ones((len(wvl),nalpha))
-    Pqmax = -np.ones((len(wvl),nalpha))
-    Pumax = -np.ones((len(wvl),nalpha))
-    Plmax = -np.ones((len(wvl),nalpha))
-    Ptmax = -np.ones((len(wvl),nalpha))
 
     # loop on models to compute
     for M, model in enumerate(models):
@@ -1929,45 +1958,12 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
             # end of loop on pixels types
             #===============
 
-            # compute new value of important observables for this iter
-            newI = 4*np.nansum(Ix,axis=1)*apix/np.pi
-            newQ = 4*np.nansum(Qx,axis=1)*apix/np.pi
-            newPq = -newQ/newI
-            newU = 4*np.nansum(Ux,axis=1)*apix/np.pi
-            newPu = newU/newI
-            newPl = np.sqrt((newQ**2 + newU**2) / newI**2)
-            newV = 4*np.nansum(Vx,axis=1)*apix/np.pi
-            newPt = np.sqrt((newQ**2 + newU**2 + newV**2) / newI**2)
-
-            # if it is an extremum, save it
-            upmin = Imin[:,a]>newI
-            upmax = Imax[:,a]<newI
-            Imin[:,a] = newI*upmin + Imin[:,a]*~upmin
-            Imax[:,a] = newI*upmax + Imax[:,a]*~upmax
-            upmin = Pqmin[:,a]>newPq
-            upmax = Pqmax[:,a]<newPq
-            Pqmin[:,a] = newPq*upmin + Pqmin[:,a]*~upmin
-            Pqmax[:,a] = newPq*upmax + Pqmax[:,a]*~upmax
-            upmin = Pumin[:,a]>newPu
-            upmax = Pumax[:,a]<newPu
-            Pumin[:,a] = newPu*upmin + Pumin[:,a]*~upmin
-            Pumax[:,a] = newPu*upmax + Pumax[:,a]*~upmax
-            upmin = Plmin[:,a]>newPl
-            upmax = Plmax[:,a]<newPl
-            Plmin[:,a] = newPl*upmin + Plmin[:,a]*~upmin
-            Plmax[:,a] = newPl*upmax + Plmax[:,a]*~upmax
-            upmin = Ptmin[:,a]>newPt
-            upmax = Ptmax[:,a]<newPt
-            Ptmin[:,a] = newPt*upmin + Ptmin[:,a]*~upmin
-            Ptmax[:,a] = newPt*upmax + Ptmax[:,a]*~upmax
-
             # Integrating over planet
             It[:,a] += 4*np.nansum(Ix,axis=1)*apix/np.pi
             Qt[:,a] += 4*np.nansum(Qx,axis=1)*apix/np.pi
             Ut[:,a] += 4*np.nansum(Ux,axis=1)*apix/np.pi
             Vt[:,a] += 4*np.nansum(Vx,axis=1)*apix/np.pi
 
-            # Integrating over planet
             Iall[:,a,citer] = 4*np.nansum(Ix,axis=1)*apix/np.pi
             Qall[:,a,citer] = 4*np.nansum(Qx,axis=1)*apix/np.pi
             Uall[:,a,citer] = 4*np.nansum(Ux,axis=1)*apix/np.pi
@@ -2019,23 +2015,54 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
     atm_model.Qall = Qall
     atm_model.Uall = Uall
     atm_model.Vall = Vall
-    atm_model.Pall = (-Qall/Iall)
+    atm_model.Pqall = (-Qall/Iall)
     atm_model.Plall = np.sqrt( (Qall**2+Uall**2)/Iall**2 )
     atm_model.Ptall = np.sqrt( (Qall**2+Uall**2+Vall**2)/Iall**2 )
     atm_model.Puall = Uall/Iall
 
-
     # saving dispersion
-    atm_model.Pqmax = Pqmax
-    atm_model.Pqmin = Pqmin
-    atm_model.Pumax = Pumax
-    atm_model.Pumin = Pumin
-    atm_model.Plmin = Plmin
-    atm_model.Plmax = Plmax
-    atm_model.Ptmin = Ptmin
-    atm_model.Ptmax = Ptmax
-    atm_model.Imin = Imin
-    atm_model.Imax = Imax
+    atm_model.Pqmin1s = np.percentile(atm_model.Pqall,15.87, axis=2)
+    atm_model.Pqmin2s = np.percentile(atm_model.Pqall,2.28, axis=2)
+    atm_model.Pqmin3s = np.percentile(atm_model.Pqall,0.13, axis=2)
+    atm_model.Pumin1s = np.percentile(atm_model.Puall,15.87, axis=2)
+    atm_model.Pumin2s = np.percentile(atm_model.Puall,2.28, axis=2)
+    atm_model.Pumin3s = np.percentile(atm_model.Puall,0.13, axis=2)
+    atm_model.Plmin1s = np.percentile(atm_model.Plall,15.87, axis=2)
+    atm_model.Plmin2s = np.percentile(atm_model.Plall,2.28, axis=2)
+    atm_model.Plmin3s = np.percentile(atm_model.Plall,0.13, axis=2)
+    atm_model.Ptmin1s = np.percentile(atm_model.Ptall,15.87, axis=2)
+    atm_model.Ptmin2s = np.percentile(atm_model.Ptall,2.28, axis=2)
+    atm_model.Ptmin3s = np.percentile(atm_model.Ptall,0.13, axis=2)
+    atm_model.Imin1s = np.percentile(atm_model.Iall,15.87, axis=2)
+    atm_model.Imin2s = np.percentile(atm_model.Iall,2.28, axis=2)
+    atm_model.Imin3s = np.percentile(atm_model.Iall,0.13, axis=2)
+
+    atm_model.Pqmax1s = np.percentile(atm_model.Pqall,84.13, axis=2)
+    atm_model.Pqmax2s = np.percentile(atm_model.Pqall,97.72, axis=2)
+    atm_model.Pqmax3s = np.percentile(atm_model.Pqall,99.87, axis=2)
+    atm_model.Pumax1s = np.percentile(atm_model.Puall,84.13, axis=2)
+    atm_model.Pumax2s = np.percentile(atm_model.Puall,97.72, axis=2)
+    atm_model.Pumax3s = np.percentile(atm_model.Puall,99.87, axis=2)
+    atm_model.Plmax1s = np.percentile(atm_model.Plall,84.13, axis=2)
+    atm_model.Plmax2s = np.percentile(atm_model.Plall,97.72, axis=2)
+    atm_model.Plmax3s = np.percentile(atm_model.Plall,99.87, axis=2)
+    atm_model.Ptmax1s = np.percentile(atm_model.Ptall,84.13, axis=2)
+    atm_model.Ptmax2s = np.percentile(atm_model.Ptall,97.72, axis=2)
+    atm_model.Ptmax3s = np.percentile(atm_model.Ptall,99.87, axis=2)
+    atm_model.Imax1s = np.percentile(atm_model.Iall,84.13, axis=2)
+    atm_model.Imax2s = np.percentile(atm_model.Iall,97.72, axis=2)
+    atm_model.Imax3s = np.percentile(atm_model.Iall,99.87, axis=2)
+
+    atm_model.Pqmin = atm_model.Pqall.min(axis=2)
+    atm_model.Pqmax = atm_model.Pqall.max(axis=2)
+    atm_model.Pumax = atm_model.Puall.max(axis=2)
+    atm_model.Pumin = atm_model.Puall.min(axis=2)
+    atm_model.Plmin = atm_model.Plall.min(axis=2)
+    atm_model.Plmax = atm_model.Plall.max(axis=2)
+    atm_model.Ptmin = atm_model.Ptall.min(axis=2)
+    atm_model.Ptmax = atm_model.Ptall.max(axis=2)
+    atm_model.Imin = atm_model.Iall.min(axis=2)
+    atm_model.Imax = atm_model.Iall.max(axis=2)
 
     # Compute adjusted radiance
     B = sunblackbody(np.array(atm_model.wvl_list)*1e-6,Ts=atm_model.Ts)
