@@ -2080,68 +2080,96 @@ def mask_planet(alpha=15, npix=20, cusp=False, thresh_lat=50., patchy=True,
         asym: asymetry parameter
 
     """
+    # read the pixel geometries
+    ngeos, apix, theta0, theta, phi, beta, lats, longs, xs, ys = geos.getgeos(alpha, npix)
 
-    # Calculate some values
-    step = 2./npix
-    xs = -1 + 0.5*step + np.arange(0,npix)*step
-    ys = -1 + 0.5*step + np.arange(0,npix)*step
-    lat = np.degrees(np.arcsin(ys))
-    z = np.sqrt(1-xs**2-ys**2)
-    lon = np.arctan(xs/z)
-    xv, yv = np.meshgrid(xs,ys)
-    grid = np.zeros((npix,npix))
+    # prepare grids
+    #grid = np.zeros((npix,npix))
     grid_lit = np.zeros((npix,npix))
     grid_full = np.zeros((npix,npix))
+    grid_lit[:] = np.nan
 
-    grid[:] = np.nan
-    grid_full[:] = np.nan
+    # get angles
+    theta0 = theta0[:ngeos]
+    theta = theta[:ngeos]
+    phi = phi[:ngeos]
+    beta = beta[:ngeos]
+    lats = lats[:ngeos]
+    longs = longs[:ngeos]
+    phase = np.ones(ngeos)*alpha
+    xs = xs[:ngeos]
+    ys = ys[:ngeos]
+    xs = xs.round(2)
+    ys = ys.round(2)
 
-    # Calculate the lit part of the grid
-    xstar = np.sin(np.radians(alpha))
-    zstar = np.cos(np.radians(alpha))
-    zv = np.sqrt(1. - xv*xv - yv*yv)
-    th = np.degrees(np.arccos(xv*xstar + zv*zstar))
+    # X and Y axis
+    step = 2./npix
+    X = -1 + 0.5*step + np.arange(0,npix)*step
+    Y = -1 + 0.5*step + np.arange(0,npix)*step
+    X = X.round(2)
+    Y = Y.round(2)
+    xv, yv = np.meshgrid(X,Y)
+    # remove outside of disk
+    grid_full[xv*xv+yv*yv>1]=np.nan
+    #grid_lit[xv*xv+yv*yv>1]=np.nan
 
-    if sscloud is True:
-        # coordinates of subsolar point + offset
-        xss = np.sin(np.radians(alpha+delta_c))
-        zss = np.cos(np.radians(alpha+delta_c))
-        zv = np.sqrt(1. - xv*xv - yv*yv)
-        thss = np.degrees(np.arccos(xv*xss + zv*zss))
-        grid[:] = 1.
-        grid_full[:] = 1.
-        grid[thss<sigma_c] = 0.
-        grid_full[thss<sigma_c] = 0.
-        grid_lit = grid[:]
-        grid_lit[xv*xv+yv*yv>1]=np.nan
-        grid_lit[th>90]=np.nan
+    # find where correct pixels are on a square grid
+    xidx = [np.where(X==item)[0][0] for i, item in enumerate(xs) if item in X]
+    yidx = [np.where(Y==item)[0][0] for i, item in enumerate(ys) if item in Y]
+
+    if full_disk==True:
+        # remove outside of disk
         grid_full[xv*xv+yv*yv>1]=np.nan
+        # validate pixels lit
+        grid_lit[xidx,yidx] = 0. # validate those
+        grid_full[xidx,yidx] = 0. # validate those
 
+
+    if sscloud==True:
+        grid_full[:] = 1.
+        # validate pixels lit
+        grid_lit[xidx,yidx] = 1. # validate those
+
+        # coordinates of subsolar point + offset
+        ssidx = np.where((theta0+delta_c)<sigma_c)[0]
+        newxs = xs[ssidx]
+        newys = ys[ssidx]
+
+        ssxidx = [np.where(X==item)[0][0] for i, item in enumerate(newxs) if item in X]
+        ssyidx = [np.where(Y==item)[0][0] for i, item in enumerate(newys) if item in Y]
+        grid_full[ssxidx,ssyidx] = 0. # validate those
+        grid_lit[ssxidx,ssyidx] = 0. # validate those
 
     # If polar cusps
-    if cusp is True:
-        cusp_idx = np.where(abs(lat)>thresh_lat)
-        grid[:] = 1.
+    if cusp==True:
         grid_full[:] = 1.
-        grid[cusp_idx,:] = 0.
-        grid_full[cusp_idx,:] = 0.
-        grid_lit = grid[:]
-        grid_lit[xv*xv+yv*yv>1]=np.nan
-        grid_lit[th>90]=np.nan
-        grid_full[xv*xv+yv*yv>1]=np.nan
+        # validate pixels lit
+        grid_lit[xidx,yidx] = 1. # validate those
 
+        # coordinates of subsolar point + offset
+        cuspidx = np.where(abs(lats)>thresh_lat)[0]
+        newxs = xs[cuspidx]
+        newys = ys[cuspidx]
 
-    if patchy is True:
+        cuspxidx = [np.where(X==item)[0][0] for i, item in enumerate(newxs) if item in X]
+        cuspyidx = [np.where(Y==item)[0][0] for i, item in enumerate(newys) if item in Y]
+        #grid[cuspxidx,cuspyidx] = 0. # validate those
+        grid_lit[cuspxidx,cuspyidx] = 0. # validate those
+        grid_full[cuspxidx,cuspyidx] = 0. # validate those
+
+    if patchy==True:
         #if no fixed cover is wanted
         # n types
         ntypes = len(fclouds)
         fclouds = np.array(fclouds)/sum(fclouds) #renormalization
 
-        if fixed_cover is None:
+        if fixed_cover==None:
             #compute a new one
             #starting from a no-type cover (repr. with -1)
-            grid[:] = -1.
+
             grid_full[:] = -1.
+            # validate pixels lit
+            grid_lit[xidx,yidx] = -1. # validate those
 
             #loop on types
             total_fcloud = 0. #total cloud coverage
@@ -2162,17 +2190,15 @@ def mask_planet(alpha=15, npix=20, cusp=False, thresh_lat=50., patchy=True,
                     x[x>=npix] = -1
                     y[y>=npix] = -1
                     # if a pixel is not already taken, give the value of the current type
-                    grid[x,y] = np.where(grid[x,y]==-1, T, grid[x,y])
+                    #grid[x,y] = np.where(grid[x,y]==-1, T, grid[x,y])
                     grid_full[x,y] = np.where(grid_full[x,y]==-1, T, grid_full[x,y])
+                    grid_lit[x,y] = np.where(grid_lit[x,y]==-1, T, grid_lit[x,y])
 
                     # lit part of the planet and remove out-of-planet pixels
-                    grid_lit = grid[:]
-                    grid_lit[xv*xv+yv*yv>1]=np.nan
                     grid_full[xv*xv+yv*yv>1]=np.nan
-                    grid_lit[th>90]=np.nan
 
                     # get current cloud coverage at given phase angle
-                    if constant_fcloud is True:
+                    if constant_fcloud==True:
                         cl = np.where(grid_lit>=0)[0].size
                         lit = np.where(~np.isnan(grid_lit))[0].size
                         nb_cloud = float(cl)/(lit)
@@ -2185,16 +2211,8 @@ def mask_planet(alpha=15, npix=20, cusp=False, thresh_lat=50., patchy=True,
             # else take existing one
             grid_lit = np.copy(fixed_cover)
             grid_full = np.copy(fixed_cover)
-            grid_lit[xv*xv+yv*yv>1]=np.nan
+            #grid_lit[xv*xv+yv*yv>1]=np.nan
             grid_full[xv*xv+yv*yv>1]=np.nan
-            grid_lit[th>90]=np.nan
-
-    if full_disk is True:
-        grid[:] = 0
-        grid_lit[:] = 0
-        grid_lit[xv*xv+yv*yv>1]=np.nan
-        grid_full[xv*xv+yv*yv>1]=np.nan
-        grid_lit[th>90]=np.nan
 
     # get current cloud coverage at given phase angle
     cl = np.where(grid_lit>=0)[0].size
