@@ -1939,10 +1939,18 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
             #===============
 
             for pixtype,model in enumerate(models):
-                IB = Is[pixtype][:,mask==pixtype]
-                QB = Qs[pixtype][:,mask==pixtype]
-                UB = Us[pixtype][:,mask==pixtype]
-                VB = Vs[pixtype][:,mask==pixtype]
+                IB = Is[pixtype,:,:]
+                IB = IB[:,mask==pixtype]
+                #IB = Is[pixtype][:,mask==pixtype]
+                QB = Qs[pixtype,:,:]
+                QB = QB[:,mask==pixtype]
+                #QB = Qs[pixtype][:,mask==pixtype]
+                UB = Us[pixtype,:,:]
+                UB = UB[:,mask==pixtype]
+                VB = Vs[pixtype,:,:]
+                VB = VB[:,mask==pixtype]
+                #UB = Us[pixtype][:,mask==pixtype]
+                #VB = Vs[pixtype][:,mask==pixtype]
                 theta0B = theta0[mask==pixtype]
 
                 # save some information in the model
