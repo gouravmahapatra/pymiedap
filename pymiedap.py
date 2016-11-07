@@ -1764,48 +1764,6 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
     Ut = np.zeros((len(wvl),nalpha))
     Vt = np.zeros((len(wvl),nalpha))
 
-    # Create table to store 1sigma minima
-    Imin1s = np.ones((len(wvl),nalpha))
-    Pqmin1s = np.ones((len(wvl),nalpha))
-    Pumin1s = np.ones((len(wvl),nalpha))
-    Plmin1s = np.ones((len(wvl),nalpha))
-    Ptmin1s = np.ones((len(wvl),nalpha))
-
-    # Create table to store 2sigma minima
-    Imin2s = np.ones((len(wvl),nalpha))
-    Pqmin2s = np.ones((len(wvl),nalpha))
-    Pumin2s = np.ones((len(wvl),nalpha))
-    Plmin2s = np.ones((len(wvl),nalpha))
-    Ptmin2s = np.ones((len(wvl),nalpha))
-    # Create table to store 3sigma maxima
-    Imax3s = np.ones((len(wvl),nalpha))
-    Pqmax3s = np.ones((len(wvl),nalpha))
-    Pumax3s = np.ones((len(wvl),nalpha))
-    Plmax3s = np.ones((len(wvl),nalpha))
-    Ptmax3s = np.ones((len(wvl),nalpha))
-
-
-    # Create table to store 1sigma maxima
-    Imax1s = np.ones((len(wvl),nalpha))
-    Pqmax1s = np.ones((len(wvl),nalpha))
-    Pumax1s = np.ones((len(wvl),nalpha))
-    Plmax1s = np.ones((len(wvl),nalpha))
-    Ptmax1s = np.ones((len(wvl),nalpha))
-
-    # Create table to store 2sigma maxima
-    Imax2s = np.ones((len(wvl),nalpha))
-    Pqmax2s = np.ones((len(wvl),nalpha))
-    Pumax2s = np.ones((len(wvl),nalpha))
-    Plmax2s = np.ones((len(wvl),nalpha))
-    Ptmax2s = np.ones((len(wvl),nalpha))
-    # Create table to store 3sigma maxima
-    Imax3s = np.ones((len(wvl),nalpha))
-    Pqmax3s = np.ones((len(wvl),nalpha))
-    Pumax3s = np.ones((len(wvl),nalpha))
-    Plmax3s = np.ones((len(wvl),nalpha))
-    Ptmax3s = np.ones((len(wvl),nalpha))
-
-
     # Create tables to store raw variations
     Iall = np.ones((len(wvl),nalpha, niter))
     Qall = np.ones((len(wvl),nalpha,niter))
@@ -1968,11 +1926,6 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
             #===============
 
             # Integrating over planet
-            It[:,a] += 4*np.nansum(Ix,axis=1)*apix/np.pi
-            Qt[:,a] += 4*np.nansum(Qx,axis=1)*apix/np.pi
-            Ut[:,a] += 4*np.nansum(Ux,axis=1)*apix/np.pi
-            Vt[:,a] += 4*np.nansum(Vx,axis=1)*apix/np.pi
-
             Iall[:,a,citer] = 4*np.nansum(Ix,axis=1)*apix/np.pi
             Qall[:,a,citer] = 4*np.nansum(Qx,axis=1)*apix/np.pi
             Uall[:,a,citer] = 4*np.nansum(Ux,axis=1)*apix/np.pi
@@ -1995,19 +1948,11 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
     # end of loop on phase angle
     # ===================
 
-    # divide by number of iteration to get average
-    # need niter+1 as initial values for tables is 0
-    niter=niter+1
-    It = It/niter
-    Qt = Qt/niter
-    Ut = Ut/niter
-    Vt = Vt/niter
-
-    # Scaling to geometrical albedo
-    #It = It/4.
-    #Qt = Qt/4.
-    #Ut = Ut/4.
-    #Vt = Vt/4.
+    # Compute mean value
+    It = Iall.mean(axis=2)
+    Qt = Qall.mean(axis=2)
+    Ut = Uall.mean(axis=2)
+    Vt = Vall.mean(axis=2)
 
     # store result in first input model
     atm_model.I = It
