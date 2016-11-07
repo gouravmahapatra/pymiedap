@@ -1696,7 +1696,7 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
                       input_pattern=None, cusp=False, thresh_lat=50., full_disk=False,
                       patchy=True, fclouds=[0.5,0.5], constant_fcloud=False,
                       sscloud=False, sigma_c=10., delta_c=[0.], nmug_mie=20,
-                      niter=1, nmug=20., nsubr=50, nmat=4, pixscaler=1,
+                      niter=1, nmug=20., nsubr=50, nmat=4,
                       adaptive_pixels=False):
 
     """ Function to generate disk-integrated images of a planet according to model
@@ -1731,8 +1731,6 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
         niter: number of iterations for the coverage
         adaptive_pixels: if True, npix increases with increasing phase angle
             (in sin**2 of alpha/2)
-        pixscaler: factor used in combination with adaptive_pixels to set the
-            rate of increase in pix number
     OUTPUT:
         I,Q,U,V: Stokes elements. I(alpha=0) being the geometric albedo
         P: -Q/I
@@ -1765,7 +1763,7 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
     Vt = np.zeros((len(wvl),nalpha))
 
     # Create tables to store raw variations
-    Iall = np.ones((len(wvl),nalpha, niter))
+    Iall = np.ones((len(wvl),nalpha,niter))
     Qall = np.ones((len(wvl),nalpha,niter))
     Uall = np.ones((len(wvl),nalpha,niter))
     Vall = np.ones((len(wvl),nalpha,niter))
@@ -1899,16 +1897,12 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
             for pixtype,model in enumerate(models):
                 IB = Is[pixtype,:,:]
                 IB = IB[:,mask==pixtype]
-                #IB = Is[pixtype][:,mask==pixtype]
                 QB = Qs[pixtype,:,:]
                 QB = QB[:,mask==pixtype]
-                #QB = Qs[pixtype][:,mask==pixtype]
                 UB = Us[pixtype,:,:]
                 UB = UB[:,mask==pixtype]
                 VB = Vs[pixtype,:,:]
                 VB = VB[:,mask==pixtype]
-                #UB = Us[pixtype][:,mask==pixtype]
-                #VB = Vs[pixtype][:,mask==pixtype]
                 theta0B = theta0[mask==pixtype]
 
                 # save some information in the model
@@ -1916,10 +1910,10 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
                 vecasym[a] = asym
                 model.picture = np.copy(picture_full)
 
-                Ix[:,mask==pixtype] = IB#*np.cos(np.radians(theta0B))
-                Qx[:,mask==pixtype] = QB#*np.cos(np.radians(theta0B))
-                Ux[:,mask==pixtype] = UB#*np.cos(np.radians(theta0B))
-                Vx[:,mask==pixtype] = VB#*np.cos(np.radians(theta0B))
+                Ix[:,mask==pixtype] = IB
+                Qx[:,mask==pixtype] = QB
+                Ux[:,mask==pixtype] = UB
+                Vx[:,mask==pixtype] = VB
 
             #===============
             # end of loop on pixels types
