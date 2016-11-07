@@ -1399,11 +1399,11 @@ def binned_average(x,y,xbins, errmean=True, weighted=True, sigmas=1.):
 
 
 def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rename=True,
-                   output_names=['modelA','modelB'], fixed_pattern=True,
-                   input_pattern=None, cusp=False, thresh_lat=50., patchy=True,
-                   fclouds=[0.5,0.5], constant_fcloud=False, sscloud=False,
-                   sigma_c=10., delta_c=[0.], nmug_mie=20, nmug=20., nsubr=50,
-                   nmat=4, pixscaler=1, adaptive_pixels=False):
+                  output_names=['modelA','modelB'], fixed_pattern=True,
+                  input_pattern=None, cusp=False, thresh_lat=50., patchy=True,
+                  fclouds=[0.5,0.5], constant_fcloud=False, sscloud=False,
+                  sigma_c=10., delta_c=[0.], nmug_mie=20, nmug=20., nsubr=50,
+                  nmat=4, pixscaler=1, adaptive_pixels=False):
     """ Function to generate disk-resolved images of a planet according to model
     INPUT:
         atm_model: model to compute
@@ -1433,7 +1433,7 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
         nmat: number of Stokes elements to compute
         nsubr: number of divisions for size dist in Mie calculations
         adaptive_pixels: if True, npix increases with increasing phase angle
-            (in log2 of alpha)
+            (in sin**2 of alpha/2)
         pixscaler: factor used in combination with adaptive_pixels to set the
             rate of increase in pix number
     OUTPUT:
@@ -1499,8 +1499,8 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
                 picture_full=input_pattern
 
             if adaptive_pixels is True:
-                npix2 = np.int(np.ceil(npix + pixscaler*np.log2(alph)))
-                print('npix=',npix)
+                npix2 = np.ceil(npix * (1 + np.sin(np.radians(alph)/2.)**2))
+                print('npix=',npix2)
             else:
                 npix2 = npix
 
@@ -1730,7 +1730,7 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
         nsubr: number of divisions for size dist in Mie calculations
         niter: number of iterations for the coverage
         adaptive_pixels: if True, npix increases with increasing phase angle
-            (in log2 of alpha)
+            (in sin**2 of alpha/2)
         pixscaler: factor used in combination with adaptive_pixels to set the
             rate of increase in pix number
     OUTPUT:
@@ -1859,8 +1859,8 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
 
         #Get geom of pixels
         if adaptive_pixels is True:
-            npix2 = np.int(np.ceil(npix + pixscaler*np.log2(alph)))
-            print('npix=',npix)
+            npix2 = np.ceil(npix * (1 + np.sin(np.radians(alph)/2.)**2))
+            print('npix=',npix2)
         else:
             npix2 = npix
 
