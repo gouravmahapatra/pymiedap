@@ -2136,7 +2136,8 @@ def mask_planet(alpha=15, npix=20, cusp=False, thresh_lat=50., patchy=True,
         #if no fixed cover is wanted
         # n types
         ntypes = len(fclouds)
-        fclouds = np.array(fclouds)/sum(fclouds) #renormalization
+        fclouds = np.array(fclouds).astype(float) #avoids issues if integers are given
+        fclouds = fclouds/sum(fclouds) #renormalization
 
         if fixed_cover==None:
             #compute a new one
