@@ -39,6 +39,7 @@ import matplotlib
 import matplotlib.pyplot as mpl
 #from lmfit import minimize, Parameters
 from matplotlib.backends.backend_pdf import PdfPages
+from PIL import Image
 
 # ---------
 # CLASSES DEFINITION
@@ -2274,12 +2275,24 @@ def surface_check(model,nmug):
     return Lfin
 
 
-def orthographic_projection(latitudes,longitudes,center=[0,0]):
+def orthographic_projection(center=np.array([0,0]), npix=20):
     """ function to compute the orthographic proj given coordinates"""
 
+    img = Image.open('./earth_contour.png')
+    img.thumbnail((4*npix,2*npix))
+    maps = np.array(img)
+    maps = maps/np.max(maps)
+    maps[maps>0.5] = 1.0
+    maps[maps<0.5] = 0.0
+    maps = maps.astype('float')
+    nlat, nlon = np.shape(maps)
+    latitudes = np.linspace(-90,90,nlat)
+    longitudes = np.linspace(-180,180,nlon)
+    maps2 = np.copy(maps)
     lats = np.radians(latitudes)
     lons = np.radians(longitudes)
     center = np.radians(center)
+    center[0] = -center[0]
     x = np.cos(lats[:,np.newaxis])*np.sin(lons[np.newaxis,:]-center[1])
     y = (np.cos(center[0])*np.sin(lats[:,np.newaxis]) -
          np.sin(center[0])*np.cos(lats[:,np.newaxis])*np.cos(lons[np.newaxis,:]-center[1]))
@@ -2287,8 +2300,33 @@ def orthographic_projection(latitudes,longitudes,center=[0,0]):
             np.cos(center[0])*np.cos(lats[:,np.newaxis])*np.cos(lons[np.newaxis,:]-center[1]))
     x[cosc<0.] = np.nan
     y[cosc<0.] = np.nan
+    maps[cosc<0.] = np.nan
 
-    return x,y
+    # X and Y axis
+    step = 2./npix
+    X = -1 + 0.5*step + np.arange(0,npix)*step
+    Y = -1 + 0.5*step + np.arange(0,npix)*step
+    X = X.round(2)
+    Y = Y.round(2)
+
+    # prepare grids
+    grid_lit = np.zeros((npix,npix))
+    grid_full = np.zeros((npix,npix))
+    grid_lit[:] = np.nan
+    grid_full[:] = np.nan
+
+    # find where correct pixels are on a square grid
+    xidx = [np.argmin(abs(X-item)) for i, item in enumerate(x.flatten()) if ~np.isnan(item)]
+    yidx = [np.argmin(abs(Y-item)) for i, item in enumerate(y.flatten()) if ~np.isnan(item)]
+
+    for i,ii in enumerate(x.flatten()):
+        if ~np.isnan(ii):
+            xtmp = np.argmin(abs(X-ii))
+            jj = y.flatten()[i]
+            ytmp = np.argmin(abs(Y-jj))
+            grid_full[xtmp,ytmp] = maps.flatten()[i]
+
+    return x,y,maps2, xidx, yidx, grid_full
 
 
 # -----------
