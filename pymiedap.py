@@ -2274,6 +2274,23 @@ def surface_check(model,nmug):
     return Lfin
 
 
+def orthographic_projection(latitudes,longitudes,center=[0,0]):
+    """ function to compute the orthographic proj given coordinates"""
+
+    lats = np.radians(latitudes)
+    lons = np.radians(longitudes)
+    center = np.radians(center)
+    x = np.cos(lats[:,np.newaxis])*np.sin(lons[np.newaxis,:]-center[1])
+    y = (np.cos(center[0])*np.sin(lats[:,np.newaxis]) -
+         np.sin(center[0])*np.cos(lats[:,np.newaxis])*np.cos(lons[np.newaxis,:]-center[1]))
+    cosc = (np.sin(center[0])*np.sin(lats[:,np.newaxis]) +
+            np.cos(center[0])*np.cos(lats[:,np.newaxis])*np.cos(lons[np.newaxis,:]-center[1]))
+    x[cosc<0.] = np.nan
+    y[cosc<0.] = np.nan
+
+    return x,y
+
+
 # -----------
 # MAIN
 # -----------
