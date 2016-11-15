@@ -2056,7 +2056,6 @@ def mask_planet(alpha=15, npix=20, cusp=False, thresh_lat=50., patchy=True,
         asym: asymetry parameter
 
     """
-    # wARNING! arrays have shape (nlines, ncols), hence the grid[y,x]!
 
     # read the pixel geometries
     ngeos, apix, theta0, theta, phi, beta, lats, longs, xs, ys = geos.getgeos(alpha, npix)
@@ -2101,6 +2100,7 @@ def mask_planet(alpha=15, npix=20, cusp=False, thresh_lat=50., patchy=True,
         # validate pixels lit
         grid_lit[yidx,xidx] = 0. # validate those
         grid_full[yidx,xidx] = 0. # validate those
+        # wARNING! arrays have shape (nlines, ncols), hence the grid[y,x]!
 
 
     if sscloud==True:
@@ -2117,6 +2117,7 @@ def mask_planet(alpha=15, npix=20, cusp=False, thresh_lat=50., patchy=True,
         ssyidx = [np.where(Y==item)[0][0] for i, item in enumerate(newys) if item in Y]
         grid_full[ssyidx,ssxidx] = 0. # validate those
         grid_lit[ssyidx,ssxidx] = 0. # validate those
+        # wARNING! arrays have shape (nlines, ncols), hence the grid[y,x]!
 
     # If polar cusps
     if cusp==True:
@@ -2134,6 +2135,7 @@ def mask_planet(alpha=15, npix=20, cusp=False, thresh_lat=50., patchy=True,
         #grid[cuspxidx,cuspyidx] = 0. # validate those
         grid_lit[cuspyidx,cuspxidx] = 0. # validate those
         grid_full[cuspyidx,cuspxidx] = 0. # validate those
+        # wARNING! arrays have shape (nlines, ncols), hence the grid[y,x]!
 
     if patchy==True:
         #if no fixed cover is wanted
@@ -2163,6 +2165,7 @@ def mask_planet(alpha=15, npix=20, cusp=False, thresh_lat=50., patchy=True,
                     moy = (npr.randint(1,npix),npr.randint(1,npix))
                     cov = np.diag([npr.randint(1,4),10])
                     x,y = npr.multivariate_normal(moy,cov,50).T
+                    # Warning: here x is N/S axis and y E/W axis
                     x = x.astype('int')
                     y = y.astype('int')
                     # if they go beyond the grid, wrap them around
@@ -2170,8 +2173,10 @@ def mask_planet(alpha=15, npix=20, cusp=False, thresh_lat=50., patchy=True,
                     y[abs(y)>=npix] = -1
                     # if a pixel is not already taken, give the value of the current type
                     #grid[x,y] = np.where(grid[x,y]==-1, T, grid[x,y])
-                    grid_full[y,x] = np.where(grid_full[y,x]==-1, T, grid_full[y,x])
-                    grid_lit[y,x] = np.where(grid_lit[y,x]==-1, T, grid_lit[y,x])
+                    grid_full[x,y] = np.where(grid_full[x,y]==-1, T, grid_full[x,y])
+                    grid_lit[x,y] = np.where(grid_lit[x,y]==-1, T, grid_lit[x,y])
+                    # wARNING! arrays have shape (nlines, ncols), hence the
+                    # grid[x,y]!
 
                     # lit part of the planet and remove out-of-planet pixels
                     grid_full[xv*xv+yv*yv>1]=np.nan
