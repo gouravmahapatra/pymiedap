@@ -1402,6 +1402,7 @@ def binned_average(x,y,xbins, errmean=True, weighted=True, sigmas=1.):
 def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rename=True,
                   output_names=['modelA','modelB'], fixed_pattern=True,
                   input_pattern=None, cusp=False, thresh_lat=50., patchy=True,
+                  xscale=0.1, yscale=0.01,
                   fclouds=[0.5,0.5], constant_fcloud=False, sscloud=False,
                   sigma_c=10., delta_c=[0.], nmug_mie=20, nmug=20., nsubr=50,
                   nmat=4, pixscaler=1, adaptive_pixels=False):
@@ -1437,6 +1438,8 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
             (in sin**2 of alpha/2)
         pixscaler: factor used in combination with adaptive_pixels to set the
             rate of increase in pix number
+        xscale: for patchy clouds gives the typical size on x-axis, as a function of npix
+        yscale: for patchy clouds gives the typical size on y-axis, as a function of npix
     OUTPUT:
         produces two pdf files for intensity and degree of linear polarization
     """
@@ -1541,6 +1544,8 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
                                                                     cusp=cusp,
                                                                     thresh_lat=thresh_lat,
                                                                     patchy=patchy,
+                                                                    xscale=xscale,
+                                                                    yscale=yscale,
                                                                     fclouds=fclouds,
                                                                     constant_fcloud=constant_fcloud,
                                                                     full_disk=full_disk,
@@ -1696,6 +1701,7 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
                       rename=True, output_names=['modelA','modelB'], fixed_pattern=False,
                       input_pattern=None, cusp=False, thresh_lat=50., full_disk=False,
                       patchy=True, fclouds=[0.5,0.5], constant_fcloud=False,
+                      xscale=0.1, yscale=0.01,
                       sscloud=False, sigma_c=10., delta_c=[0.], nmug_mie=20,
                       niter=1, nmug=20., nsubr=50, nmat=4,
                       adaptive_pixels=False):
@@ -1732,6 +1738,8 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
         niter: number of iterations for the coverage
         adaptive_pixels: if True, npix increases with increasing phase angle
             (in sin**2 of alpha/2)
+        xscale: for patchy clouds gives the typical size on x-axis, as a function of npix
+        yscale: for patchy clouds gives the typical size on y-axis, as a function of npix
     OUTPUT:
         I,Q,U,V: Stokes elements. I(alpha=0) being the geometric albedo
         P: -Q/I
@@ -1883,6 +1891,8 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
                                                                     cusp=cusp,
                                                                     thresh_lat=thresh_lat,
                                                                     patchy=patchy,
+                                                                    xscale=xscale,
+                                                                    yscale=yscale,
                                                                     fclouds=fclouds,
                                                                     constant_fcloud=constant_fcloud,
                                                                     full_disk=full_disk,
