@@ -2029,7 +2029,7 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
 def mask_planet(alpha=15, npix=20, cusp=False, thresh_lat=50., patchy=True,
                  ntypes=2, full_disk=False, fclouds=[0.5,0.5], fixed_cover=None,
                  constant_fcloud=False, sscloud=False, sigma_c=10.,
-                 delta_c=0.):
+                 delta_c=0., xscale=0.1, yscale=0.01):
     """ Generates a mask that can be used for inhomogeneous planetsi
     INPUTS:
         alpha: phase angle at which the calculation is made
@@ -2047,6 +2047,9 @@ def mask_planet(alpha=15, npix=20, cusp=False, thresh_lat=50., patchy=True,
         sigma_c: extend in degrees of the subsolar cloud. Points between the
             subsolar point and the points with SZA=alpha+sigma are cloudy.
         delta_c: longitudinal offset for the cloud, in degrees
+        xscale: for patchy clouds gives the typical size on x-axis, as a function of npix
+        yscale: for patchy clouds gives the typical size on y-axis, as a function of npix
+
     OUTPUT:
         grid_lit: array corresponding to the points of the generated cloud
             cover that are lit
@@ -2163,7 +2166,7 @@ def mask_planet(alpha=15, npix=20, cusp=False, thresh_lat=50., patchy=True,
                 while nb_cloud<total_fcloud:
                     # generate several multivariate gaussians on the grid
                     moy = (npr.randint(1,npix),npr.randint(1,npix))
-                    cov = np.diag([npr.randint(1,4),10])
+                    cov = np.diag([npix*yscale,npix*xscale])
                     x,y = npr.multivariate_normal(moy,cov,50).T
                     # Warning: here x is N/S axis and y E/W axis
                     x = x.astype('int')
