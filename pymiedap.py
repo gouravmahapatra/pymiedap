@@ -1905,36 +1905,51 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
             # loop on pixels types
             #===============
 
-            for pixtype,model in enumerate(models):
-                IB = Is[pixtype,:,:]
-                IB = IB[:,mask==pixtype]
-                QB = Qs[pixtype,:,:]
-                QB = QB[:,mask==pixtype]
-                UB = Us[pixtype,:,:]
-                UB = UB[:,mask==pixtype]
-                VB = Vs[pixtype,:,:]
-                VB = VB[:,mask==pixtype]
-                theta0B = theta0[mask==pixtype]
+            if len(mask) !=0: # if there is some visible pixels
+                for pixtype,model in enumerate(models):
+                    IB = Is[pixtype,:,:]
+                    IB = IB[:,mask==pixtype]
+                    QB = Qs[pixtype,:,:]
+                    QB = QB[:,mask==pixtype]
+                    UB = Us[pixtype,:,:]
+                    UB = UB[:,mask==pixtype]
+                    VB = Vs[pixtype,:,:]
+                    VB = VB[:,mask==pixtype]
+                    theta0B = theta0[mask==pixtype]
 
+                    # save some information in the model
+                    vecfcloud[a,:] = fclouds
+                    vecasym[a] = asym
+                    model.picture = np.copy(picture_full)
+
+                    Ix[:,mask==pixtype] = IB
+                    Qx[:,mask==pixtype] = QB
+                    Ux[:,mask==pixtype] = UB
+                    Vx[:,mask==pixtype] = VB
+
+                #===============
+                # end of loop on pixels types
+                #===============
+
+                # Integrating over planet
+                Iall[:,a,citer] = 4*np.nansum(Ix,axis=1)*apix/np.pi
+                Qall[:,a,citer] = 4*np.nansum(Qx,axis=1)*apix/np.pi
+                Uall[:,a,citer] = 4*np.nansum(Ux,axis=1)*apix/np.pi
+                Vall[:,a,citer] = 4*np.nansum(Vx,axis=1)*apix/np.pi
+
+            else:
                 # save some information in the model
                 vecfcloud[a,:] = fclouds
                 vecasym[a] = asym
                 model.picture = np.copy(picture_full)
 
-                Ix[:,mask==pixtype] = IB
-                Qx[:,mask==pixtype] = QB
-                Ux[:,mask==pixtype] = UB
-                Vx[:,mask==pixtype] = VB
+                # Integrating over planet
+                Iall[:,a,citer] = np.nan
+                Qall[:,a,citer] = np.nan
+                Uall[:,a,citer] = np.nan
+                Vall[:,a,citer] = np.nan
 
-            #===============
-            # end of loop on pixels types
-            #===============
 
-            # Integrating over planet
-            Iall[:,a,citer] = 4*np.nansum(Ix,axis=1)*apix/np.pi
-            Qall[:,a,citer] = 4*np.nansum(Qx,axis=1)*apix/np.pi
-            Uall[:,a,citer] = 4*np.nansum(Ux,axis=1)*apix/np.pi
-            Vall[:,a,citer] = 4*np.nansum(Vx,axis=1)*apix/np.pi
 
             # ==================
             # end of loop on iterations
