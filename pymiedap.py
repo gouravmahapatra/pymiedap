@@ -1995,37 +1995,42 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
     atm_model.Puall = Uall/Iall
 
     # saving dispersion
-    atm_model.Pqmin1s = np.percentile(atm_model.Pqall,15.87, axis=2)
-    atm_model.Pqmin2s = np.percentile(atm_model.Pqall,2.28, axis=2)
-    atm_model.Pqmin3s = np.percentile(atm_model.Pqall,0.13, axis=2)
-    atm_model.Pumin1s = np.percentile(atm_model.Puall,15.87, axis=2)
-    atm_model.Pumin2s = np.percentile(atm_model.Puall,2.28, axis=2)
-    atm_model.Pumin3s = np.percentile(atm_model.Puall,0.13, axis=2)
-    atm_model.Plmin1s = np.percentile(atm_model.Plall,15.87, axis=2)
-    atm_model.Plmin2s = np.percentile(atm_model.Plall,2.28, axis=2)
-    atm_model.Plmin3s = np.percentile(atm_model.Plall,0.13, axis=2)
-    atm_model.Ptmin1s = np.percentile(atm_model.Ptall,15.87, axis=2)
-    atm_model.Ptmin2s = np.percentile(atm_model.Ptall,2.28, axis=2)
-    atm_model.Ptmin3s = np.percentile(atm_model.Ptall,0.13, axis=2)
-    atm_model.Imin1s = np.percentile(atm_model.Iall,15.87, axis=2)
-    atm_model.Imin2s = np.percentile(atm_model.Iall,2.28, axis=2)
-    atm_model.Imin3s = np.percentile(atm_model.Iall,0.13, axis=2)
+    atm_model.Pqstd = np.std(atm_model.Pqall, axis=2)
+    atm_model.Pustd = np.std(atm_model.Puall, axis=2)
+    atm_model.Plstd = np.std(atm_model.Plall, axis=2)
+    atm_model.Ptstd = np.std(atm_model.Ptall, axis=2)
+    atm_model.Istd = np.std(atm_model.Iall, axis=2)
+    atm_model.Pqmin1s = atm_model.P-1*atm_model.Pqstd
+    atm_model.Pqmin2s = atm_model.P-2*atm_model.Pqstd
+    atm_model.Pqmin3s = atm_model.P-3*atm_model.Pqstd
+    atm_model.Pumin1s = atm_model.Pu-1*atm_model.Pustd
+    atm_model.Pumin2s = atm_model.Pu-2*atm_model.Pustd
+    atm_model.Pumin3s = atm_model.Pu-3*atm_model.Pustd
+    atm_model.Plmin1s = atm_model.Pl-1*atm_model.Plstd
+    atm_model.Plmin2s = atm_model.Pl-2*atm_model.Plstd
+    atm_model.Plmin3s = atm_model.Pl-3*atm_model.Plstd
+    atm_model.Ptmin1s = atm_model.Pt-1*atm_model.Ptstd
+    atm_model.Ptmin2s = atm_model.Pt-2*atm_model.Ptstd
+    atm_model.Ptmin3s = atm_model.Pt-3*atm_model.Ptstd
+    atm_model.Imin1s = atm_model.I-1*atm_model.Istd
+    atm_model.Imin2s = atm_model.I-2*atm_model.Istd
+    atm_model.Imin3s = atm_model.I-3*atm_model.Istd
 
-    atm_model.Pqmax1s = np.percentile(atm_model.Pqall,84.13, axis=2)
-    atm_model.Pqmax2s = np.percentile(atm_model.Pqall,97.72, axis=2)
-    atm_model.Pqmax3s = np.percentile(atm_model.Pqall,99.87, axis=2)
-    atm_model.Pumax1s = np.percentile(atm_model.Puall,84.13, axis=2)
-    atm_model.Pumax2s = np.percentile(atm_model.Puall,97.72, axis=2)
-    atm_model.Pumax3s = np.percentile(atm_model.Puall,99.87, axis=2)
-    atm_model.Plmax1s = np.percentile(atm_model.Plall,84.13, axis=2)
-    atm_model.Plmax2s = np.percentile(atm_model.Plall,97.72, axis=2)
-    atm_model.Plmax3s = np.percentile(atm_model.Plall,99.87, axis=2)
-    atm_model.Ptmax1s = np.percentile(atm_model.Ptall,84.13, axis=2)
-    atm_model.Ptmax2s = np.percentile(atm_model.Ptall,97.72, axis=2)
-    atm_model.Ptmax3s = np.percentile(atm_model.Ptall,99.87, axis=2)
-    atm_model.Imax1s = np.percentile(atm_model.Iall,84.13, axis=2)
-    atm_model.Imax2s = np.percentile(atm_model.Iall,97.72, axis=2)
-    atm_model.Imax3s = np.percentile(atm_model.Iall,99.87, axis=2)
+    atm_model.Pqmax1s = atm_model.P+1*atm_model.Pqstd
+    atm_model.Pqmax2s = atm_model.P+2*atm_model.Pqstd
+    atm_model.Pqmax3s = atm_model.P+3*atm_model.Pqstd
+    atm_model.Pumax1s = atm_model.Pu+1*atm_model.Pustd
+    atm_model.Pumax2s = atm_model.Pu+2*atm_model.Pustd
+    atm_model.Pumax3s = atm_model.Pu+3*atm_model.Pustd
+    atm_model.Plmax1s = atm_model.Pl+1*atm_model.Plstd
+    atm_model.Plmax2s = atm_model.Pl+2*atm_model.Plstd
+    atm_model.Plmax3s = atm_model.Pl+3*atm_model.Plstd
+    atm_model.Ptmax1s = atm_model.Pt+1*atm_model.Ptstd
+    atm_model.Ptmax2s = atm_model.Pt+2*atm_model.Ptstd
+    atm_model.Ptmax3s = atm_model.Pt+3*atm_model.Ptstd
+    atm_model.Imax1s = atm_model.I+1*atm_model.Istd
+    atm_model.Imax2s = atm_model.I+2*atm_model.Istd
+    atm_model.Imax3s = atm_model.I+3*atm_model.Istd
 
     atm_model.Pqmin = atm_model.Pqall.min(axis=2)
     atm_model.Pqmax = atm_model.Pqall.max(axis=2)
