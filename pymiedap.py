@@ -2090,6 +2090,10 @@ def mask_planet(alpha=15, npix=20, cusp=False, thresh_lat=50., patchy=True,
 
     """
 
+    # if no specific pattern, assume full_disk
+    if patchy==False and cusp==False and sscloud==False:
+        full_disk=True
+
     # read the pixel geometries
     ngeos, apix, theta0, theta, phi, beta, lats, longs, xs, ys = geos.getgeos(alpha, npix)
 
