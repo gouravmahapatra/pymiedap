@@ -1352,6 +1352,7 @@ def gen_clouds():
 
 
 def rotate_stokes(Q,U,beta):
+    """ Calculates values of Q and U after rotation with angle beta"""
 
     newQ = np.cos(2*beta)*Q + np.sin(2*beta)*U
     newU= -np.sin(2*beta)*Q + np.cos(2*beta)*U
