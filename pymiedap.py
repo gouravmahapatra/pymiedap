@@ -524,8 +524,8 @@ class Geom():
         AZI = self.azimuth
 
         sgn = np.ones(len(AZI))
-        sgn[AZI<0.] = 1
-        sgn[AZI>0.] = -1
+        #sgn[AZI<0.] = 1
+        #sgn[AZI>0.] = -1
 
         num = np.cos(np.pi*SZA/180.)-np.cos(np.pi*EMI/180.)*np.cos(np.pi*PHA/180.)
         denom = (sgn*np.sin(np.pi*EMI/180.)*np.sin(np.pi*PHA/180.))
@@ -665,8 +665,8 @@ def get_cosbeta(PHA,SZA,EMI,AZI):
     Returns: cos BETA (rad) '''
 
     sgn = np.ones(len(AZI))
-    sgn[AZI<0.] = 1
-    sgn[AZI>0.] = -1
+    #sgn[AZI<0.] = 1
+    #sgn[AZI>0.] = -1
     #sgn = (-1.* AZI>=np.pi) + (1. * AZI<np.pi)
     #sgn = 1.
     num = np.cos(np.pi*SZA/180.)-np.cos(np.pi*EMI/180.)*np.cos(np.pi*PHA/180.)
