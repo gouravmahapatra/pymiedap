@@ -117,7 +117,7 @@ C     WRITE(12,801)
                      rf(i)= rfj(i,k)
                      if (ISNAN(rf(i))) write(*,*) 'rf is NaN'
                   ENDDO
-                  CALL akima(xmu,rf,nmugs,mu0,rf3,nmuMAX,6)
+                  CALL akima(xmu,rf,nmugs,mu,rf3,nmuMAX,6)
                   if (ISNAN(rf3)) write(*,*) 'rf is NaN'
                   rfm(k)= rf3
                ENDDO
