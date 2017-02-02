@@ -93,9 +93,10 @@ C     WRITE(12,801)
                   ki= (j1-1)*nmat+k 
                   DO i=1,nmugs
                      rf(i)= rfou(ki,i,m)
+                     if (ISNAN(rf(i))) write(*,*) 'rf is NaN'
                   ENDDO
-                  CALL spline(xmu,rf,nmugs,nmuMAX,rf2)
-                  CALL splint(xmu,rf,rf2,nmugs,mu0,rf3,nmuMAX)
+                  CALL akima(xmu,rf,nmugs,mu0,rf3,nmuMAX,6) !6= no. of extra elements to be added
+                  if (ISNAN(rf3)) write(*,*) 'rf is NaN'
                   rfm(k)= rf3
                ENDDO
             ELSE
@@ -104,18 +105,20 @@ C     WRITE(12,801)
                      ki= (j-1)*nmat+k 
                      DO i=1,nmugs
                         rf(i)= rfou(ki,i,m)
+                        if (ISNAN(rf(i))) write(*,*) 'rf is NaN'
                      ENDDO
-                     CALL spline(xmu,rf,nmugs,nmuMAX,rf2)
-                     CALL splint(xmu,rf,rf2,nmugs,mu0,rf3,nmuMAX)
+                     CALL akima(xmu,rf,nmugs,mu0,rf3,nmuMAX,6)
+                     if (ISNAN(rf3)) write(*,*) 'rf is NaN'
                      rfj(j,k)= rf3
                   ENDDO
                ENDDO
                DO k=1,nmat
                   DO i=1,nmugs
                      rf(i)= rfj(i,k)
+                     if (ISNAN(rf(i))) write(*,*) 'rf is NaN'
                   ENDDO
-                  CALL spline(xmu,rf,nmugs,nmuMAX,rf2)
-                  CALL splint(xmu,rf,rf2,nmugs,mu,rf3,nmuMAX)
+                  CALL akima(xmu,rf,nmugs,mu0,rf3,nmuMAX,6)
+                  if (ISNAN(rf3)) write(*,*) 'rf is NaN'
                   rfm(k)= rf3
                ENDDO
             ENDIF

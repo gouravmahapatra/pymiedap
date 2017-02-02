@@ -16,4 +16,4 @@ f2py -c ./readmie_source/read_mie_output.f -m module_readmie
 f2py --fcompiler='gfortran' -c ./dap_source/*.f -m module_dap
 
 #make read dap
-f2py --fcompiler=gfortran -c ./geos_source/bracks.f ./geos_source/rdfous.f ./geos_source/read_dap.f ./geos_source/getgeos.f ./geos_source/spline.f ./geos_source/splint.f -m module_geos
+f2py --fcompiler=gfortran -c ./geos_source/bracks.f ./geos_source/rdfous.f ./geos_source/read_dap.f ./geos_source/getgeos.f ./geos_source/spline.f ./geos_source/splint.f ./geos_source/akima.f -m module_geos
