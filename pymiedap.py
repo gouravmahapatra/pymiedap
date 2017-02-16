@@ -50,6 +50,8 @@ class Layer():
     program. It contains the basic parameters of the model
     tau : optical thickness (for each lambda)
     tau_g : optical thickness related to absorption (for each lambda)
+    tau_ray : optical thickness related to rayleigh scattering set by user (for each lambda)
+    rayscat: if True, rayleigh scattering is computed. If false, tau_ray is used instead.
     press : pressure at the bottom of the layer
     level : level of the layer with respect to the others from bottom to top (starts at 0)
     aerosols : an object containing the properties of a type of aerosols.
@@ -60,6 +62,7 @@ class Layer():
 
     def __init__(self, tau=[30, 30], tau_g=[0.,0.], press=30e-3, psd='2',
                  level=0, mix_factor=0., bmsca=[0, 0], bmabs=[0,0],
+                 tau_ray=[0.,0.], rayscat=True,
                  basca=[0,0], baabs=[0,0]):
         """ Initializes the model object with default values
         aerosols: a subclass to describe the properties of the aerosols
@@ -67,6 +70,8 @@ class Layer():
         self.aerosols = Aerosols()
         self.tau = tau
         self.tau_g = tau_g
+        self.tau_ray = tau_ray
+        self.rayscat = rayscat
         self.press = press
         self.level = level
         self.col_dens = 3.2
@@ -524,8 +529,8 @@ class Geom():
         AZI = self.azimuth
 
         sgn = np.ones(len(AZI))
-        sgn[AZI<0.] = 1
-        sgn[AZI>0.] = -1
+        #sgn[AZI<0.] = 1
+        #sgn[AZI>0.] = -1
 
         num = np.cos(np.pi*SZA/180.)-np.cos(np.pi*EMI/180.)*np.cos(np.pi*PHA/180.)
         denom = (sgn*np.sin(np.pi*EMI/180.)*np.sin(np.pi*PHA/180.))
@@ -665,8 +670,8 @@ def get_cosbeta(PHA,SZA,EMI,AZI):
     Returns: cos BETA (rad) '''
 
     sgn = np.ones(len(AZI))
-    sgn[AZI<0.] = 1
-    sgn[AZI>0.] = -1
+    #sgn[AZI<0.] = 1
+    #sgn[AZI>0.] = -1
     #sgn = (-1.* AZI>=np.pi) + (1. * AZI<np.pi)
     #sgn = 1.
     num = np.cos(np.pi*SZA/180.)-np.cos(np.pi*EMI/180.)*np.cos(np.pi*PHA/180.)
@@ -1109,6 +1114,11 @@ def dap_code(model, rename=False, output_name='modelA',
         # Storing the effective scattering and absorption opacities
         for layer_name, layer in vars(model.layers).items():
             lev = layer.level
+
+            # force user-define rayleigh opacity
+            if layer.rayscat==False:
+                bmsca[lev-1] = layer.tau_ray[z]
+
             layer.bmsca[z] = bmsca[lev-1]
             layer.bmabs[z] = bmabs[lev-1]
             layer.basca[z] = basca[lev-1]
@@ -1198,8 +1208,8 @@ def read_dap_output(phase, sza, emission, filename, beta=None, phi=None, ngeosMA
         Assuming normal reflection (i.e. multiply by cos(theta0) if you want real observed flux)
     """
     ngeos = len(phase)
-    betaF = np.zeros(ngeosMAX)
-    azimuthF = np.zeros(ngeosMAX)
+    betaF = np.zeros(ngeosMAX, order='F')
+    azimuthF = np.zeros(ngeosMAX, order='F')
 
     if phi is None:
         # Getting needed geometry
@@ -1224,9 +1234,9 @@ def read_dap_output(phase, sza, emission, filename, beta=None, phi=None, ngeosMA
     ngeos = len(phase)
 
     #Preparing vectors for FORTRAN function
-    phaseF = np.zeros(ngeosMAX)
-    szaF = np.zeros(ngeosMAX)
-    emissionF = np.zeros(ngeosMAX)
+    phaseF = np.zeros(ngeosMAX, order='F')
+    szaF = np.zeros(ngeosMAX, order='F')
+    emissionF = np.zeros(ngeosMAX, order='F')
 
     phaseF[:ngeos] = phase
     szaF[:ngeos] = sza

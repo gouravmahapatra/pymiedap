@@ -141,6 +141,13 @@ Cf2py intent(out) xs, ys
                         ENDIF
                     ENDIF
 
+                    ! If planet is East of star
+                    ! then sin(alpha) is negative
+                    ! then need to change beta
+                    IF (DSIN(alpha).LT.0.D0) THEN
+                        beta(ngeos) = 180.D0 - beta(ngeos)
+                    ENDIF
+
                 ENDIF ! end of illumination test
             ENDIF !end of on-disk test
          ENDDO !end of x loop
