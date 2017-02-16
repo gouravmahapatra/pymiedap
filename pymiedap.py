@@ -1208,8 +1208,8 @@ def read_dap_output(phase, sza, emission, filename, beta=None, phi=None, ngeosMA
         Assuming normal reflection (i.e. multiply by cos(theta0) if you want real observed flux)
     """
     ngeos = len(phase)
-    betaF = np.zeros(ngeosMAX)
-    azimuthF = np.zeros(ngeosMAX)
+    betaF = np.zeros(ngeosMAX, order='F')
+    azimuthF = np.zeros(ngeosMAX, order='F')
 
     if phi is None:
         # Getting needed geometry
@@ -1234,9 +1234,9 @@ def read_dap_output(phase, sza, emission, filename, beta=None, phi=None, ngeosMA
     ngeos = len(phase)
 
     #Preparing vectors for FORTRAN function
-    phaseF = np.zeros(ngeosMAX)
-    szaF = np.zeros(ngeosMAX)
-    emissionF = np.zeros(ngeosMAX)
+    phaseF = np.zeros(ngeosMAX, order='F')
+    szaF = np.zeros(ngeosMAX, order='F')
+    emissionF = np.zeros(ngeosMAX, order='F')
 
     phaseF[:ngeos] = phase
     szaF[:ngeos] = sza
