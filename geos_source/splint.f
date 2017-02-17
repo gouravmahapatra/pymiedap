@@ -11,11 +11,11 @@ Cf2py intent(out) y
 *     the output from SPLINE above, and given a value of x, this     
 *     routine returns a cubic-spline interpolated value y.       
 *----------------------------------------------------------------------------
-      IMPLICIT DOUBLE PRECISION (a-h,o-z)
+      IMPLICIT NONE 
 
-      INTEGER n, nn
+      INTEGER n, nn, klo, khi
       DOUBLE PRECISION xa(nn),ya(nn),y2a(nn)
-      DOUBLE PRECISION x, y
+      DOUBLE PRECISION x, y, a, b, h, k
 
 *----------------------------------------------------------------------------
       klo=1
