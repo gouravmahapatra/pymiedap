@@ -18,10 +18,9 @@ Cf2py intent(out) Sv
 
       INCLUDE 'max_incl'
 
-      INTEGER i,j,nmat,nmugs,nfou,npix,ngeos,ni,ki,j1,j2,kj,m,k,ii,mpix,
-     .        nalpha
+      INTEGER i,j,nmat,nmugs,nfou,ngeos,ni,ki,j1,j2,m,k
 
-      DOUBLE PRECISION fac,mu,mu0,eps,be,rf3,SvQ,SvU,apix,alph,pol
+      DOUBLE PRECISION fac,mu,mu0,eps,be,rf3,SvQ,SvU
 
       DOUBLE PRECISION xmu(nmuMAX),beta(ngeosMAX), alpha(ngeosMAX),
      .                 thet0(ngeosMAX),theta(ngeosMAX),phi(ngeosMAX),
