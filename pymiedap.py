@@ -756,7 +756,7 @@ def mie_code(aerosols, wavelengths, output=False, delta=1e-8, cutoff=1e-8, thmin
     idis = aerosols.psd  # index of the particle size dist
 
     # Getting extrema for radii
-    rmin, rmax = mie.rminmax(idis, nsubr, ngaur, r_eff, v_eff, par3, weight2,
+    rmin, rmax = mie.rminmax(idis, r_eff, v_eff, par3, weight2,
                                 cutoff)
     # -----
     # LOOP ON WAVELENGTHS
@@ -879,7 +879,7 @@ def mie_shell(aerosols, wavelengths, output=False, delta=1e-8, cutoff=1e-8, thmi
     idis = aerosols.psd  # index of the particle size dist
 
     # Getting extrema for radii
-    rmin, rmax = mie.rminmax(idis, nsubr, ngaur, r_eff, v_eff, par3, weight2,
+    rmin, rmax = mie.rminmax(idis, r_eff, v_eff, par3, weight2,
                                 cutoff)
     # -----
     # LOOP ON WAVELENGTHS

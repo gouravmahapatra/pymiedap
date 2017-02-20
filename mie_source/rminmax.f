@@ -1,4 +1,4 @@
-      SUBROUTINE rminmax(idis,nsubr,ngaur,par1,par2,par3,weight2,cutoff,
+      SUBROUTINE rminmax(idis,par1,par2,par3,weight2,cutoff,
      .                   rmin,rmax)
 
 *-----------------------------------------------------------------------
@@ -12,7 +12,7 @@
 *-----------------------------------------------------------------------
       IMPLICIT NONE
 
-      INTEGER idis,nsubr,ngaur
+      INTEGER idis
 
       DOUBLE PRECISION par1,par2,par3,cutoff,rmin,rmax,
      .                 sef,ref,rref,r0,r1,weight2
@@ -22,7 +22,7 @@
       DOUBLE PRECISION eps
       PARAMETER (eps=1.D-10)
 
-Cf2py intent(in) idis, nsubr, ngaur, par1, par2, par3, weight2, cutoff
+Cf2py intent(in) idis, par1, par2, par3, weight2, cutoff
 Cf2py intent(out) rmin, rmax
 
 *-----------------------------------------------------------------------
