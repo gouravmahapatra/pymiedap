@@ -773,10 +773,9 @@ def mie_code(aerosols, wavelengths, output=False, delta=1e-8, cutoff=1e-8, thmin
         scfile_name = specie + '.sc.' + '{:06.3f}'.format(wav)
 
         # calculation of the scattering matrix
-        u, wg, F, miec, nangle = mie.scatmat(m, wav, idis, thmin, thmax,
-                                                step, nsubr, ngaur, rmin,
-                                                rmax, r_eff, v_eff, par3,
-                                                weight2, delta)
+        u, wg, F, miec, nangle = mie.scatmat(m, wav, idis, nsubr, ngaur, rmin,
+                                             rmax, r_eff, v_eff, par3, weight2,
+                                             delta)
 
         ncoefs = nangle
         #expansion of the matrix
@@ -903,10 +902,10 @@ def mie_shell(aerosols, wavelengths, output=False, delta=1e-8, cutoff=1e-8, thmi
         scfile_name = specie + '.sc.' + '{:06.3f}'.format(wav)
 
         # calculation of the scattering matrix
-        u, wg, F, miec, nangle = mieshell.scatmat(m1,m2, wav, idis, thmin, thmax,
-                                                step, nsubr, ngaur, rmin,
-                                                rmax, r_eff, v_eff, par3, ratio,
-                                                weight2, delta)
+        u, wg, F, miec, nangle = mieshell.scatmat(m1,m2, wav, idis, nsubr,
+                                                  ngaur, rmin, rmax, r_eff,
+                                                  v_eff, par3, ratio, weight2,
+                                                  delta)
 
         ncoefs = nangle
         #expansion of the matrix
