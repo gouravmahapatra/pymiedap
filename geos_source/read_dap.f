@@ -1,7 +1,7 @@
-      SUBROUTINE READ_DAP(foufile,ngeos,alpha,thet0,theta,phi,beta,
+      SUBROUTINE READ_DAP(foufile,ngeos,thet0,theta,phi,beta,
      .                     rfou, Sv)
 
-Cf2py intent(in) foufile,alpha,ngeos,thet0,theta,phi,beta,rfou
+Cf2py intent(in) foufile,ngeos,thet0,theta,phi,beta,rfou
 Cf2py intent(out) Sv
 
 *----------------------------------------------------------------------------
@@ -23,7 +23,7 @@ Cf2py intent(out) Sv
 
       DOUBLE PRECISION fac,mu,mu0,eps,be,rf3,SvQ,SvU
 
-      DOUBLE PRECISION xmu(nmuMAX),beta(ngeosMAX), alpha(ngeosMAX),
+      DOUBLE PRECISION xmu(nmuMAX),beta(ngeosMAX), 
      .                 thet0(ngeosMAX),theta(ngeosMAX),phi(ngeosMAX),
      .                 rfou(nmatMAX*nmuMAX,nmuMAX,0:nfouMAX),
      .                 rfm(nmatMAX),RM(nmatMAX),Bplus(4),

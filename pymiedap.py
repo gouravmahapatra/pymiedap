@@ -1235,18 +1235,16 @@ def read_dap_output(phase, sza, emission, filename, beta=None, phi=None,
     ngeos = len(phase)
 
     #Preparing vectors for FORTRAN function
-    phaseF = np.zeros(ngeosMAX, order='F')
     szaF = np.zeros(ngeosMAX, order='F')
     emissionF = np.zeros(ngeosMAX, order='F')
 
-    phaseF[:ngeos] = phase
     szaF[:ngeos] = sza
     emissionF[:ngeos] = emission
     # make sure all input angles are in degrees
 
     # Reading Stoke vector
     rfou = np.zeros((nmatMAX*nmuMAX,nmuMAX,nfouMAX+1), order='F')
-    Sv = geos.read_dap(filename, ngeos, phaseF, szaF, emissionF, azimuthF, betaF, rfou)
+    Sv = geos.read_dap(filename, ngeos, szaF, emissionF, azimuthF, betaF, rfou)
 
     # storing output in proper Stokes elements
     I = Sv[0,:ngeos]
