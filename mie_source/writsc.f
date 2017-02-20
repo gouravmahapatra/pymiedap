@@ -40,7 +40,6 @@
       PARAMETER (eps=1.D-6)
 
       CHARACTER*60 s1,s2,s3,s4,s5,s6
-      CHARACTER wavfile*16
       CHARACTER outfile*16
 
 Cf2py intent(in) outfile,idis,nsubr,ngaur,coefs,ncoefs,csth,miec
