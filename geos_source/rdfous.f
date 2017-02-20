@@ -1,7 +1,9 @@
       SUBROUTINE rdfous(foufile,nfou,nmat,nmugs,xmu,rfou)
 
 Cf2py intent(in) foufile
-Cf2py intent(out) nfou,nmat,nmugs,xmu,rfou
+Cf2py intent(out) nfou,nmat,nmugs,xmu
+Cf2py intent(in,out) rfou
+
 *----------------------------------------------------------------------------
 *     Open and read the Fourier coefficients file:
 *----------------------------------------------------------------------------

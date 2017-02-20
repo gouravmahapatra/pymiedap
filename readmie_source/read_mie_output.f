@@ -17,15 +17,13 @@
 * 2015-03-16 L. Rossi
 *
 * AUTHOR:
-* D. M. Stam
+* D. M. Stam, L. Rossi
 ****************************************************************
       IMPLICIT NONE
 
-      INTEGER nstep,miewavel,i,j,n,length,NDcoef,
-     .        ncoef
+      INTEGER nstep,n,NDcoef, ncoef
       PARAMETER (NDcoef=3000)
 
-C      DOUBLE PRECISION theta,wavel,comp,coefs,F,POL,SSA
       DOUBLE PRECISION theta,coefs,F,POL,SSA
       DIMENSION coefs(4,4,0:NDcoef),F(6)
 
@@ -35,29 +33,14 @@ C      DOUBLE PRECISION theta,wavel,comp,coefs,F,POL,SSA
       DOUBLE PRECISION pi
       PARAMETER (pi=3.1415926535898D0)
 
-C      CHARACTER*8 dummy,namewavel
       CHARACTER*20 nameout,namein
-C      CHARACTER*18 name
       CHARACTER*23 title
-
-      LOGICAL ex
 
 Cf2py intent(in) namein, nameout
 Cf2py intent(out) thetas, Fs
 
 ****************************************************************
-* 1.  Get the input:
-****************************************************************
-C      WRITE(*,*) 
-C      WRITE(*,*) 'PROGRAM aer'
-C      WRITE(*,*) 
-C      WRITE(*,*) '  Give the name of the input file:'
-C      READ(*,'(A20)') namein
-C      WRITE(*,*) '  Give the name of the output file:'
-C      READ(*,'(A20)') nameout
-
-****************************************************************
-* 3.  Open the output file and write the input away:
+* 1.  Open the output file and write the input away:
 ****************************************************************
       OPEN(unit=4,file=nameout)
 
@@ -71,7 +54,7 @@ C      READ(*,'(A20)') nameout
      .       '           F12           F34        POL')
 
 ****************************************************************
-* 7.a Read the expansion coefficients file:
+* 2 Read the expansion coefficients file:
 ****************************************************************
       OPEN (unit=10,file=namein,status='old')
          READ (10,'(A23)') title
@@ -82,7 +65,7 @@ C      READ(*,'(A20)') nameout
       CLOSE(10)
 
 ****************************************************************
-* 4.  Loop over the scattering angle:
+* 3.  Loop over the scattering angle:
 ****************************************************************
 *      nstep= 181
       nstep= 901
@@ -94,12 +77,12 @@ C      READ(*,'(A20)') nameout
          theta= theta + 0.2D0
 
 ****************************************************************
-* 7.b Evaluate the expansion in GSF:
+* 4 Evaluate the expansion in GSF:
 ****************************************************************
          CALL expand(ncoef,coefs,theta,F)
             
 ****************************************************************
-* 7.c Write the results to the output file:
+* 5 Write the results to the output file:
 ****************************************************************
          POL= -F(5)/F(1)
          Fs(1,n) = F(1)

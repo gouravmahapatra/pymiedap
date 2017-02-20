@@ -1,4 +1,4 @@
-      SUBROUTINE scatmat(m1,m2,wav,idis,thmin,thmax,step,nsubr,ngaur,
+      SUBROUTINE scatmat(m1,m2,wav,idis,nsubr,ngaur,
      .                   rmin,rmax,par1,par2,par3,ratio,weight2,delta,
      .                   u,wg,F,miec,nangle)
 
@@ -16,9 +16,6 @@
 *     ratio       : ratio of inner radius to outer radius              *
 *     weight2     : weight of the second mode in case of bimodal dist  *
 *     delta        : cutoff used in truncation of the Mie sum          *
-*     thmin        : minimum scattering angle in degrees               *
-*     thmax        : maximum scattering angle in degrees               *
-*     step         : step in scattering angle in degrees               *
 *  On exit, the following results are RETURNed :                       *
 *     u            : cosines of scattering angles                      *
 *     wg          : Gaussian weights associated with u                *
@@ -36,7 +33,7 @@
       INTEGER NDn,NDr
       PARAMETER (NDn=50000,NDr=10000)
 
-      DOUBLE PRECISION wav,thmin,thmax,step,rmin,rmax,
+      DOUBLE PRECISION wav,rmin,rmax,
      .                 par1,par2,par3,weight2,delta,numpar,
      .                 volume,xeff,albedo,Qext,Qsca,aux,pie,
      .                 Cscasum,Cextsum,zabs,x,y,sw,dr,fac90,
@@ -46,18 +43,17 @@
       DOUBLE PRECISION F(nmatMAX,nangMAX),u(nangMAX),wg(nangMAX),
      .                 miec(13),nwithr(NDr),pi(NDn),tau(NDn),
 C     .                 fi(0:NDn),chi(0:NDn),D(NDn),r(NDr),w(NDr),
-     .                 fi(0:NDn),chi(0:NDn),r(NDr),w(NDr),
+     .                 r(NDr),w(NDr),
      .                 facf(NDn),facb(NDn)
 
       DOUBLE COMPLEX m1,m2,ci,Splusf,Sminf,cSplusf,cSminf,Splusb,
      .               Sminb,cSplusb,cSminb
 
       DOUBLE COMPLEX an(NDn),bn(NDn)
-      DOUBLE COMPLEX D(NDn)
 
       LOGICAL     symth
 
-Cf2py intent(in) m, wav, idis, thmin, thmax, step, nsubr, ngaur, rmin
+Cf2py intent(in) m, wav, idis, nsubr, ngaur, rmin
 Cf2py intent(in) rmax, par1, par2, par3, weight2, delta
 Cf2py intent(out) u, wg, F, miec, nangle 
 

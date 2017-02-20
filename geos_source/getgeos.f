@@ -14,12 +14,12 @@ Cf2py intent(out) xs, ys
 
       INTEGER i,j,ngeos,npix,nn
 
-      DOUBLE PRECISION ph,alpha,angle,apix,bet,
-     .                 calp,step,y,xlat,clat,slat,x,xlon,clon,slon,
-     .                 alon,cthet,cthe0,sthet,sthe0,slst
+      DOUBLE PRECISION ph,alpha,apix,bet,
+     .                 calp,step,y,xlat,slat,x,xlon,
+     .                 cthet,cthe0,sthet,sthe0,slst
 
       DOUBLE PRECISION t1,t2,t3,the,th0,xstar,zstar,
-     .                 z,the2,aa1,aa2,th02,alph
+     .                 z,the2,th02
 
       DOUBLE PRECISION thet0(ngeosMAX),theta(ngeosMAX),
      .                 phi(ngeosMAX), beta(ngeosMAX),

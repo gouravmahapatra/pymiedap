@@ -756,7 +756,7 @@ def mie_code(aerosols, wavelengths, output=False, delta=1e-8, cutoff=1e-8, thmin
     idis = aerosols.psd  # index of the particle size dist
 
     # Getting extrema for radii
-    rmin, rmax = mie.rminmax(idis, nsubr, ngaur, r_eff, v_eff, par3, weight2,
+    rmin, rmax = mie.rminmax(idis, r_eff, v_eff, par3, weight2,
                                 cutoff)
     # -----
     # LOOP ON WAVELENGTHS
@@ -773,10 +773,9 @@ def mie_code(aerosols, wavelengths, output=False, delta=1e-8, cutoff=1e-8, thmin
         scfile_name = specie + '.sc.' + '{:06.3f}'.format(wav)
 
         # calculation of the scattering matrix
-        u, wg, F, miec, nangle = mie.scatmat(m, wav, idis, thmin, thmax,
-                                                step, nsubr, ngaur, rmin,
-                                                rmax, r_eff, v_eff, par3,
-                                                weight2, delta)
+        u, wg, F, miec, nangle = mie.scatmat(m, wav, idis, nsubr, ngaur, rmin,
+                                             rmax, r_eff, v_eff, par3, weight2,
+                                             delta)
 
         ncoefs = nangle
         #expansion of the matrix
@@ -879,7 +878,7 @@ def mie_shell(aerosols, wavelengths, output=False, delta=1e-8, cutoff=1e-8, thmi
     idis = aerosols.psd  # index of the particle size dist
 
     # Getting extrema for radii
-    rmin, rmax = mie.rminmax(idis, nsubr, ngaur, r_eff, v_eff, par3, weight2,
+    rmin, rmax = mie.rminmax(idis, r_eff, v_eff, par3, weight2,
                                 cutoff)
     # -----
     # LOOP ON WAVELENGTHS
@@ -903,10 +902,10 @@ def mie_shell(aerosols, wavelengths, output=False, delta=1e-8, cutoff=1e-8, thmi
         scfile_name = specie + '.sc.' + '{:06.3f}'.format(wav)
 
         # calculation of the scattering matrix
-        u, wg, F, miec, nangle = mieshell.scatmat(m1,m2, wav, idis, thmin, thmax,
-                                                step, nsubr, ngaur, rmin,
-                                                rmax, r_eff, v_eff, par3, ratio,
-                                                weight2, delta)
+        u, wg, F, miec, nangle = mieshell.scatmat(m1,m2, wav, idis, nsubr,
+                                                  ngaur, rmin, rmax, r_eff,
+                                                  v_eff, par3, ratio, weight2,
+                                                  delta)
 
         ncoefs = nangle
         #expansion of the matrix
@@ -1195,7 +1194,8 @@ def dap_code(model, rename=False, output_name='modelA',
         print('End of DAP program')
 
 
-def read_dap_output(phase, sza, emission, filename, beta=None, phi=None, ngeosMAX=200000):
+def read_dap_output(phase, sza, emission, filename, beta=None, phi=None,
+                    ngeosMAX=200000, nmuMAX=400, nfouMAX=4000, nmatMAX=4):
     """ This function takes a geometry and reads the supermatrices coefficients
     from the DAP code.
     Input:
@@ -1234,17 +1234,16 @@ def read_dap_output(phase, sza, emission, filename, beta=None, phi=None, ngeosMA
     ngeos = len(phase)
 
     #Preparing vectors for FORTRAN function
-    phaseF = np.zeros(ngeosMAX, order='F')
     szaF = np.zeros(ngeosMAX, order='F')
     emissionF = np.zeros(ngeosMAX, order='F')
 
-    phaseF[:ngeos] = phase
     szaF[:ngeos] = sza
     emissionF[:ngeos] = emission
     # make sure all input angles are in degrees
 
     # Reading Stoke vector
-    Sv = geos.read_dap(filename, ngeos, phaseF, szaF, emissionF, azimuthF, betaF)
+    rfou = np.zeros((nmatMAX*nmuMAX,nmuMAX,nfouMAX+1), order='F')
+    Sv = geos.read_dap(filename, ngeos, szaF, emissionF, azimuthF, betaF, rfou)
 
     # storing output in proper Stokes elements
     I = Sv[0,:ngeos]
@@ -1612,8 +1611,8 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
             ax.add_patch(circ)
             sc = ax.scatter(x, y, c=100*atm_model.P[j,:],lw=0,
                             marker='s',s=(0.6*figsize/npix2)**2,
-                            cmap=mpl.cm.seismic, zorder=10,
-                            vmin=-5, vmax=5)
+                            cmap=mpl.cm.seismic, zorder=10,)
+                            #vmin=-10, vmax=10)
             fig.tight_layout(pad=1.2)
             cb = fig.colorbar(sc,pad=0.02, extend='both')
             cb.set_label('Degree of linear polarization (%)',size=font_size)
@@ -1650,8 +1649,8 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
             ax.add_patch(circ)
             sc = ax.scatter(x, y, c=atm_model.I[j,:],lw=0,marker='s',
                             s=(0.6*figsize/npix2)**2,
-                            cmap=mpl.cm.YlOrRd, zorder=10,
-                            vmin=0, vmax=1)
+                            cmap=mpl.cm.YlOrRd, zorder=10,)
+                            #vmin=0, vmax=1)
             fig.tight_layout(pad=1.2)
             cb = fig.colorbar(sc,pad=0.02, extend='both')
             cb.set_label('Intensity',size=font_size)
@@ -1689,8 +1688,8 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
             ax.add_patch(circ)
             sc = ax.scatter(x, y, c=100*Ptot[j,:],lw=0,
                             marker='s',s=(0.6*figsize/npix2)**2,
-                            cmap=mpl.cm.YlOrRd, zorder=10,
-                            vmin=0, vmax=5)
+                            cmap=mpl.cm.YlOrRd, zorder=10,)
+                            #vmin=0, vmax=5)
             fig.tight_layout(pad=1.2)
             cb = fig.colorbar(sc,pad=0.02, extend='both')
             cb.set_label('Degree of linear polarization (%)',size=font_size)

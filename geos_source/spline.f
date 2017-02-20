@@ -20,11 +20,12 @@ Cf2py intent(out) y2
 *     n is the number of elements in x and y
 *     nMAX is the maximum number of elements in x and y
 *----------------------------------------------------------------------------
-      IMPLICIT DOUBLE PRECISION (a-h,o-z)
+      IMPLICIT NONE 
 
-      INTEGER nMAX, n
+      INTEGER nMAX, n, i, k
 
       DOUBLE PRECISION x(nMAX),y(nMAX),y2(nMAX),u(nMAX)
+      DOUBLE PRECISION p, sig, qn, un
 
 *----------------------------------------------------------------------------
       y2(1)= 0.D0

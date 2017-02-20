@@ -1,6 +1,7 @@
-      SUBROUTINE READ_DAP(foufile,ngeos,alpha,thet0,theta,phi,beta,Sv)
+      SUBROUTINE READ_DAP(foufile,ngeos,thet0,theta,phi,beta,
+     .                     rfou, Sv)
 
-Cf2py intent(in) foufile,alpha,ngeos,thet0,theta,phi,beta
+Cf2py intent(in) foufile,ngeos,thet0,theta,phi,beta,rfou
 Cf2py intent(out) Sv
 
 *----------------------------------------------------------------------------
@@ -18,12 +19,11 @@ Cf2py intent(out) Sv
 
       INCLUDE 'max_incl'
 
-      INTEGER i,j,nmat,nmugs,nfou,npix,ngeos,ni,ki,j1,j2,kj,m,k,ii,mpix,
-     .        nalpha
+      INTEGER i,j,nmat,nmugs,nfou,ngeos,ni,ki,j1,j2,m,k
 
-      DOUBLE PRECISION fac,mu,mu0,eps,be,rf3,SvQ,SvU,apix,alph,pol
+      DOUBLE PRECISION fac,mu,mu0,eps,be,rf3,SvQ,SvU
 
-      DOUBLE PRECISION xmu(nmuMAX),beta(ngeosMAX), alpha(ngeosMAX),
+      DOUBLE PRECISION xmu(nmuMAX),beta(ngeosMAX), 
      .                 thet0(ngeosMAX),theta(ngeosMAX),phi(ngeosMAX),
      .                 rfou(nmatMAX*nmuMAX,nmuMAX,0:nfouMAX),
      .                 rfm(nmatMAX),RM(nmatMAX),Bplus(4),
