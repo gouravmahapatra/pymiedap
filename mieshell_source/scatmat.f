@@ -43,14 +43,13 @@
       DOUBLE PRECISION F(nmatMAX,nangMAX),u(nangMAX),wg(nangMAX),
      .                 miec(13),nwithr(NDr),pi(NDn),tau(NDn),
 C     .                 fi(0:NDn),chi(0:NDn),D(NDn),r(NDr),w(NDr),
-     .                 fi(0:NDn),chi(0:NDn),r(NDr),w(NDr),
+     .                 r(NDr),w(NDr),
      .                 facf(NDn),facb(NDn)
 
       DOUBLE COMPLEX m1,m2,ci,Splusf,Sminf,cSplusf,cSminf,Splusb,
      .               Sminb,cSplusb,cSminb
 
       DOUBLE COMPLEX an(NDn),bn(NDn)
-      DOUBLE COMPLEX D(NDn)
 
       LOGICAL     symth
 
