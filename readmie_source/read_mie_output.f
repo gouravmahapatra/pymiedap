@@ -17,12 +17,11 @@
 * 2015-03-16 L. Rossi
 *
 * AUTHOR:
-* D. M. Stam
+* D. M. Stam, L. Rossi
 ****************************************************************
       IMPLICIT NONE
 
-      INTEGER nstep,miewavel,i,j,n,length,NDcoef,
-     .        ncoef
+      INTEGER nstep,n,NDcoef, ncoef
       PARAMETER (NDcoef=3000)
 
 C      DOUBLE PRECISION theta,wavel,comp,coefs,F,POL,SSA
@@ -39,8 +38,6 @@ C      CHARACTER*8 dummy,namewavel
       CHARACTER*20 nameout,namein
 C      CHARACTER*18 name
       CHARACTER*23 title
-
-      LOGICAL ex
 
 Cf2py intent(in) namein, nameout
 Cf2py intent(out) thetas, Fs
