@@ -1633,7 +1633,7 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
         Rs = 696342000.
         Dvs = 108208930000.0
         omegas = np.pi * (atm_model.Rs/atm_model.Dps)**2
-        atm_model.I2 = atm_model.I * B[:,np.newaxis] * omegas
+        atm_model.I2 = atm_model.I * B[:,np.newaxis,np.newaxis] * omegas
 
         atm_model.Q = Qf
         atm_model.U = Uf
@@ -1751,6 +1751,30 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
         ppPt.close()
 
     mpl.ion()
+
+def plot_pixels(X,Y,Z, title='Polarization', cmap='YlOrRd',vmin=0,vmax=1, font_size=12, npix=20):
+    """ Function to nicely plot a resolved planet """
+    figsize = 850
+    dpi = 90
+
+    fig = mpl.figure(figsize=(figsize/dpi,figsize/dpi), dpi=dpi)
+    ax = fig.add_subplot(111, aspect=1)
+    ax.set_title(title)
+    circ = mpl.Circle((0,0),1,color='gray')
+    ax.add_patch(circ)
+    sc = ax.scatter(X, Y, c=Z,lw=0, marker='s',
+                    s=(0.6*figsize/npix)**2,
+                    cmap=cmap, zorder=10,
+                    vmin=vmin, vmax=vmax)
+    fig.tight_layout(pad=1.2)
+    cb = fig.colorbar(sc,pad=0.02, extend='both')
+    cb.set_label('Degree of linear polarization (%)',size=font_size)
+    ax.set_xlim(-np.nanmax(X),np.nanmax(X))
+    ax.set_ylim(-np.nanmax(Y),np.nanmax(Y))
+    ax.set_aspect('equal')
+
+    return fig,ax
+
 
 
 def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
