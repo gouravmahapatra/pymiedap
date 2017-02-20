@@ -1,6 +1,7 @@
-      SUBROUTINE READ_DAP(foufile,ngeos,alpha,thet0,theta,phi,beta,Sv)
+      SUBROUTINE READ_DAP(foufile,ngeos,alpha,thet0,theta,phi,beta,
+     .                     rfou, Sv)
 
-Cf2py intent(in) foufile,alpha,ngeos,thet0,theta,phi,beta
+Cf2py intent(in) foufile,alpha,ngeos,thet0,theta,phi,beta,rfou
 Cf2py intent(out) Sv
 
 *----------------------------------------------------------------------------

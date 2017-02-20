@@ -1195,7 +1195,8 @@ def dap_code(model, rename=False, output_name='modelA',
         print('End of DAP program')
 
 
-def read_dap_output(phase, sza, emission, filename, beta=None, phi=None, ngeosMAX=200000):
+def read_dap_output(phase, sza, emission, filename, beta=None, phi=None,
+                    ngeosMAX=200000, nmuMAX=400, nfouMAX=4000, nmatMAX=4):
     """ This function takes a geometry and reads the supermatrices coefficients
     from the DAP code.
     Input:
@@ -1244,7 +1245,8 @@ def read_dap_output(phase, sza, emission, filename, beta=None, phi=None, ngeosMA
     # make sure all input angles are in degrees
 
     # Reading Stoke vector
-    Sv = geos.read_dap(filename, ngeos, phaseF, szaF, emissionF, azimuthF, betaF)
+    rfou = np.zeros((nmatMAX*nmuMAX,nmuMAX,nfouMAX+1), order='F')
+    Sv = geos.read_dap(filename, ngeos, phaseF, szaF, emissionF, azimuthF, betaF, rfou)
 
     # storing output in proper Stokes elements
     I = Sv[0,:ngeos]
@@ -1611,8 +1613,8 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
             ax.add_patch(circ)
             sc = ax.scatter(x, y, c=100*atm_model.P[j,:],lw=0,
                             marker='s',s=(0.6*figsize/npix2)**2,
-                            cmap=mpl.cm.seismic, zorder=10,
-                            vmin=-5, vmax=5)
+                            cmap=mpl.cm.seismic, zorder=10,)
+                            #vmin=-10, vmax=10)
             fig.tight_layout(pad=1.2)
             cb = fig.colorbar(sc,pad=0.02, extend='both')
             cb.set_label('Degree of linear polarization (%)',size=font_size)
@@ -1649,8 +1651,8 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
             ax.add_patch(circ)
             sc = ax.scatter(x, y, c=atm_model.I[j,:],lw=0,marker='s',
                             s=(0.6*figsize/npix2)**2,
-                            cmap=mpl.cm.YlOrRd, zorder=10,
-                            vmin=0, vmax=1)
+                            cmap=mpl.cm.YlOrRd, zorder=10,)
+                            #vmin=0, vmax=1)
             fig.tight_layout(pad=1.2)
             cb = fig.colorbar(sc,pad=0.02, extend='both')
             cb.set_label('Intensity',size=font_size)
@@ -1688,8 +1690,8 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
             ax.add_patch(circ)
             sc = ax.scatter(x, y, c=100*Ptot[j,:],lw=0,
                             marker='s',s=(0.6*figsize/npix2)**2,
-                            cmap=mpl.cm.YlOrRd, zorder=10,
-                            vmin=0, vmax=5)
+                            cmap=mpl.cm.YlOrRd, zorder=10,)
+                            #vmin=0, vmax=5)
             fig.tight_layout(pad=1.2)
             cb = fig.colorbar(sc,pad=0.02, extend='both')
             cb.set_label('Degree of linear polarization (%)',size=font_size)
