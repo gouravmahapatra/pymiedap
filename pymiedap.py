@@ -1195,7 +1195,7 @@ def dap_code(model, rename=False, output_name='modelA',
 
 
 def read_dap_output(phase, sza, emission, filename, beta=None, phi=None,
-                    ngeosMAX=200000, nmuMAX=400, nfouMAX=4000, nmatMAX=4):
+                    ngeosMAX=100000, nmuMAX=300, nfouMAX=2000, nmatMAX=4):
     """ This function takes a geometry and reads the supermatrices coefficients
     from the DAP code.
     Input:
@@ -1244,6 +1244,7 @@ def read_dap_output(phase, sza, emission, filename, beta=None, phi=None,
     # Reading Stoke vector
     rfou = np.zeros((nmatMAX*nmuMAX,nmuMAX,nfouMAX+1), order='F')
     Sv = geos.read_dap(filename, ngeos, szaF, emissionF, azimuthF, betaF, rfou)
+    del(rfou)
 
     # storing output in proper Stokes elements
     I = Sv[0,:ngeos]
