@@ -2064,6 +2064,7 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
     atm_model.Pl = np.sqrt( (Qt**2+Ut**2)/It**2 )
     atm_model.Pt = np.sqrt( (Qt**2+Ut**2+Vt**2)/It**2 )
     atm_model.Pu = Ut/It
+    atm_model.Pv = Vt/It
 
     # store global results in first input model
     atm_model.Iall = Iall
@@ -2074,10 +2075,12 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
     atm_model.Plall = np.sqrt( (Qall**2+Uall**2)/Iall**2 )
     atm_model.Ptall = np.sqrt( (Qall**2+Uall**2+Vall**2)/Iall**2 )
     atm_model.Puall = Uall/Iall
+    atm_model.Pvall = Vall/Iall
 
     # saving dispersion
     atm_model.Pqstd = np.std(atm_model.Pqall, axis=2)
     atm_model.Pustd = np.std(atm_model.Puall, axis=2)
+    atm_model.Pvstd = np.std(atm_model.Pvall, axis=2)
     atm_model.Plstd = np.std(atm_model.Plall, axis=2)
     atm_model.Ptstd = np.std(atm_model.Ptall, axis=2)
     atm_model.Istd = np.std(atm_model.Iall, axis=2)
