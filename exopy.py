@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
+
 """
-Exo-Moons model
-------------------
+Exopy: Exoplanets and exomoons model
+-------------------------------------
 Author: J. Berzosa Molina
 
 Date: 2016-2017
+-------------------------------------
 
-------------------
-
-Model created in the framework of my master thesis work on exomoons.
+Model created in the framework of my master thesis work on exoplanets and exomoons.
 
 Recipe: 
 
@@ -16,56 +16,30 @@ Recipe:
   2) ...
 
   J. Berzosa
+
 """
 
 # ==============
 # IMPORT MODULES
 # ==============
 
-import exopy_PLOT as plot
-import exopy_COMPUTE as compute
-import exopy_cfg as cfg
-from matplotlib import rc
-rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
+import exopy_plot as plot
+import exopy_config as cfg
+import exopy_compute as compute
+from matplotlib import rc as _rc
+_rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 ## for Palatino and other serif fonts use:
 #rc('font',**{'family':'serif','serif':['Palatino']})
-rc('text', usetex=True)
-import matplotlib.pyplot as plt
-plt.rc('text', usetex=True)
-plt.rc('font', family='serif')
+_rc('text', usetex=True)
+import matplotlib.pyplot as _plt
+_plt.rc('text', usetex=True)
+_plt.rc('font', family='serif')
+
+# ======================================
+# ======================================
 
 if __name__ == "__main__":
     print(__doc__)  
-
-
-'''
-
-def save(name = None, directory = None):
-	import os
-	import pickle
-	if name is None:
-
-		name = raw_input('Name of the file: ')
-
-	if directory is None:
-
-		print('Current directory: '+os.getcwd()+'/')
-		directory = raw_input('Save directory: ')
-		
-		with open(os.getcwd()+'/'+directory+'/'+name+'.pickle', 'w') as f:
-			pickle.dump([Earth,Moon], f)
-
-def load(name = None, directory = None):
-	import os
-	if name is None and directory is None:
-
-		print('Current directory: '+os.getcwd()+'/')
-                directory = raw_input('Load directory: ')
-		
-		print('List of available files:')
-		print(os.listdir(os.getcwd()+'/'+directory))
-
-'''
 
 
 def test_integration(body, scene='clear', plot = 'no'):
@@ -209,7 +183,7 @@ as the shadowing conditions
 
 ===============================================================================    
     '''
-    import module_functions as fun
+    import exopy_functions as fun
     import numpy as np
     
     if type(names)==str:
@@ -266,7 +240,7 @@ as the shadowing conditions
 
 ===============================================================================    
     '''    
-    import module_functions as fun
+    import exopy_functions as fun
     
     if identifier == 'transit':
     
