@@ -1263,7 +1263,8 @@ def read_dap_output(phase, sza, emission, filename, beta=None, phi=None,
 def compute_model(atm_model, force=False,
                path_input='./dap_database/', set_taus=False, rename=False,
                output_name='modelA', nmug_mie=20, nmug=20, nsubr=50, nmat=4):
-    """ to read the files associated with a model.
+    """
+    Function to compute the Fourier files associated with a Model object.
     INPUTS:
         atm_model : a Model object with all the input parameters
     KEYWORDS:
@@ -1349,32 +1350,10 @@ def read_model(atm_model,data,step=20, force=False,
     Ut = np.zeros((len(wvl),n_pts))
     Vt = np.zeros((len(wvl),n_pts))
 
-    # If the model is not yet computed or is forced to
-    if atm_model.name[0] == '' or force is True:
-        # Execute Mie on all aerosols types on all layers
-        for lay, layer in vars(atm_model.layers).items():
-            #If there is already an aerosol mix, we overwrite it
-            if hasattr(layer,'mixed_aerosols') is True:
-                del(layer.mixed_aerosols)
-            for aero_name, aero in vars(layer).items():
-                if isinstance(aero, Aerosols):
-                    if aero.layered is False:
-                        mie_code(aero, atm_model.wvl_list, ngaur=nmug_mie, nsubr=nsubr)
-                    else:
-                        mie_shell(aero, atm_model.wvl_list, ngaur=nmug_mie, nsubr=nsubr)
-
-            layer.mix_aerosols() #mix aerosols
-
-        # Set the opacities
-        if set_taus is True:
-            for lay, layer in vars(atm_model.layers).items():
-                layer.tau = layer.col_dens * layer.mixed_aerosols.sext
-
-        #execute DAP
-        # making sure that the directory we write to is the same we'll read
-        # from
-        dap_code(atm_model, rename=rename, output_name=output_name, nmug=nmug,
-                 nmat=nmat, path_output=path_input)
+    # compute Fourier file
+    compute_model(atm_model, force=force, path_input=path_input,
+                  set_taus=set_taus, rename=rename, output_name=output_name,
+                  nmug_mie=nmug_mie, nmug=nmug, nsubr=nsubr, nmat=nmat)
 
     #read files and store result
     for j,w in enumerate(wvl):
@@ -1840,27 +1819,9 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
 
     # loop on models to compute
     for M, model in enumerate(models):
-        # if not done yet or if forced
-        if model.name[0] == '' or force is True:
-            # Execute Mie on all aerosols types
-            for lay, layer in vars(model.layers).items():
-                for aero_name, aero in vars(layer).items():
-                    if isinstance(aero, Aerosols):
-                        if aero.layered is False:
-                            mie_code(aero, model.wvl_list, ngaur=nmug_mie, nsubr=nsubr)
-                        else:
-                            mie_shell(aero, model.wvl_list, ngaur=nmug_mie, nsubr=nsubr)
-
-                layer.mix_aerosols() #mix aerosols
-
-            # Set the opacities
-            if set_taus is True:
-                for lay, layer in vars(model.layers).items():
-                    layer.tau = layer.col_dens * layer.mixed_aerosols.sext
-
-            #execute DAP
-            dap_code(model, rename=rename, output_name=output_names[M], nmug=nmug,
-                    nmat=nmat)
+        compute_model(model, force=force,
+                      set_taus=set_taus, rename=rename, output_name=output_names[M],
+                      nmug_mie=nmug_mie, nmug=nmug, nsubr=nsubr, nmat=nmat)
 
 
     #At start, no specific cloud cover
