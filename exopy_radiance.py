@@ -32,17 +32,17 @@ def combine(bodies, reference):
                        zeros],
                       [zeros, zeros, zeros, ones]])
 
-		IQUV  = np.einsum('ijt,jt->it',L,IQUV)
+        IQUV  = np.einsum('ijt,jt->it',L,IQUV)
 
-		body.radiance.I_ref = distance_scale * size_scale * IQUV[0,:]
-		body.radiance.Q_ref = distance_scale * size_scale * IQUV[1,:]
-		body.radiance.U_ref = distance_scale * size_scale * IQUV[2,:]
-		body.radiance.V_ref = distance_scale * size_scale * IQUV[3,:]
+        body.radiance.I_ref = distance_scale * size_scale * IQUV[0,:]
+        body.radiance.Q_ref = distance_scale * size_scale * IQUV[1,:]
+        body.radiance.U_ref = distance_scale * size_scale * IQUV[2,:]
+        body.radiance.V_ref = distance_scale * size_scale * IQUV[3,:]
 
-		I = I + body.radiance.I_ref
-		Q = Q + body.radiance.Q_ref
-		U = U + body.radiance.U_ref
-		V = V + body.radiance.V_ref
+        I = I + body.radiance.I_ref
+        Q = Q + body.radiance.Q_ref
+        U = U + body.radiance.U_ref
+        V = V + body.radiance.V_ref
 
 	return I, Q, U, V,
 
@@ -53,7 +53,7 @@ def integration(body):
 
     print('\n    ... integrating radiance on ' + body.type + ' ' + body.name + ' disk \n')
 
-    files = dict(np.genfromtxt('exopy/scenes.dat', dtype='str'))
+    #files = dict(np.genfromtxt('exopy/scenes.dat', dtype='str'))
 
     time = body.ephemeris.time
     body.grid.I = np.zeros_like(body.grid.shadow)
@@ -75,6 +75,9 @@ def integration(body):
 
     scene = body.properties.fourier_scene
 
+    #for now l is 0
+    l=0
+
     for i,j in enumerate(time):
 
         print i+1, ' out of ', len(time)
@@ -87,7 +90,7 @@ def integration(body):
         ######################################################################################
 
         I,Q,U,V = pmd.read_dap_output(np.repeat(phase[i], sum(A)), sza[i,A],
-                                      emission[A], 'exopy/files/'+ files[scene],
+                                      emission[A], body.atmosphere.name[l],
                                       beta=beta[i,A],
                                       phi=phi[i,A])
 
