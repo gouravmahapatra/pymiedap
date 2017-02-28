@@ -1,8 +1,8 @@
-
-
+import numpy as np
+import pymiedap as pmd
+import module_geos as geos
 
 def combine(bodies, reference):
-	import numpy as np
 
 	print('\n    ... combining radiance results\n')
 
@@ -21,46 +21,45 @@ def combine(bodies, reference):
 
 		IQUV = [body.radiance.I, body.radiance.Q, body.radiance.U, body.radiance.V]
 
-		L = np.array([[ones ,                         zeros                      ,                     zeros                          , zeros],
-			      [zeros, np.cos(2*body.geometry.ref_plane_to_ref_line_angle), np.sin(2*body.geometry.ref_plane_to_ref_line_angle), zeros],
-			      [zeros,-np.sin(2*body.geometry.ref_plane_to_ref_line_angle), np.cos(2*body.geometry.ref_plane_to_ref_line_angle), zeros],
-			      [zeros,                         zeros                      ,                     zeros                          ,  ones]])
+        # this rotation could be written in a much much simpler way!
+        L = np.array([[ones , zeros, zeros, zeros],
+                      [zeros,
+                       np.cos(2*body.geometry.ref_plane_to_ref_line_angle),
+                       np.sin(2*body.geometry.ref_plane_to_ref_line_angle),
+                       zeros],
+                      [zeros,-np.sin(2*body.geometry.ref_plane_to_ref_line_angle),
+                       np.cos(2*body.geometry.ref_plane_to_ref_line_angle),
+                       zeros],
+                      [zeros, zeros, zeros, ones]])
 
 		IQUV  = np.einsum('ijt,jt->it',L,IQUV)
-
 
 		body.radiance.I_ref = distance_scale * size_scale * IQUV[0,:]
 		body.radiance.Q_ref = distance_scale * size_scale * IQUV[1,:]
 		body.radiance.U_ref = distance_scale * size_scale * IQUV[2,:]
 		body.radiance.V_ref = distance_scale * size_scale * IQUV[3,:]
 
-
 		I = I + body.radiance.I_ref
 		Q = Q + body.radiance.Q_ref
 		U = U + body.radiance.U_ref
 		V = V + body.radiance.V_ref
 
-
-
 	return I, Q, U, V,
 
 
-
 def integration(body):
-	import numpy as np
-	import pymiedap as pmd
-	import module_geos as geos
+
     ngeosMAX=200000
 
     print('\n    ... integrating radiance on ' + body.type + ' ' + body.name + ' disk \n')
 
     files = dict(np.genfromtxt('exopy/scenes.dat', dtype='str'))
 
-	time = body.ephemeris.time
-	body.grid.I = np.zeros_like(body.grid.shadow)
-	body.grid.Q = np.zeros_like(body.grid.shadow)
-	body.grid.U = np.zeros_like(body.grid.shadow)
-	body.grid.V = np.zeros_like(body.grid.shadow)
+    time = body.ephemeris.time
+    body.grid.I = np.zeros_like(body.grid.shadow)
+    body.grid.Q = np.zeros_like(body.grid.shadow)
+    body.grid.U = np.zeros_like(body.grid.shadow)
+    body.grid.V = np.zeros_like(body.grid.shadow)
 
     Ip = np.zeros_like(time)
     Qp = np.zeros_like(time)
@@ -74,12 +73,12 @@ def integration(body):
     beta  = np.degrees(body.grid.beta)
     phi   = np.degrees(body.grid.azimuth)
 
-	scene = body.properties.fourier_scene
+    scene = body.properties.fourier_scene
 
     for i,j in enumerate(time):
 
         print i+1, ' out of ', len(time)
-            A = body.grid.shadow[i,:]>10E-10
+        A = body.grid.shadow[i,:]>10E-10
 
         IQUV = np.zeros([4,body.grid.N_points])
 
