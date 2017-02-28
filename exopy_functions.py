@@ -82,9 +82,9 @@ VIDEO_TAG = """<video controls>
 </video>"""
 
 
-'''%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'''
-'''--------------------------    CLASSES    --------------------------------'''
-'''%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'''
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'''
+#--------------------------    CLASSES    --------------------------------'''
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'''
 
 
 class body():
@@ -196,6 +196,7 @@ class properties():
         print('   Mass (m) = ', self.m, ' kg')
         print('   Radius (R) = ', self.R, 'm')
 
+
 class ephemeris():
 
     def __init__(self):
@@ -207,6 +208,7 @@ class ephemeris():
         print('\nRelation of body ephemeris:')
 
         print('   Time (time) = ', self.time[index], 's')
+
 
 class geometry():
 
@@ -220,6 +222,7 @@ class geometry():
 
         print('   Phase (phase) = ', self.phase[index], ' deg')
 
+
 class radiance():
 
     def __init__(self):
@@ -228,7 +231,6 @@ class radiance():
 	self.U = [None]
 	self.V = [None]
 	self.Q = [None]
-
 
 
 class orbital_elements():
@@ -250,6 +252,7 @@ class orbital_elements():
         print('   Inclination (i) = ', self.i, ' deg')
         print('   Right ascension of the ascending node (Omega) = ', self.Omega, ' deg')
         print('   Argument of periapsis (omega) = ', self.omega, ' deg')
+
 
 class flag():
 
@@ -276,6 +279,7 @@ class flag():
         print('   Eclipse exists (eclipse) = ', self.eclipse[index])
         print('   Transit 1 exists (transit1) = ', self.transit1[index])
         print('   Transit 2 exists (transit2) = ', self.transit2[index])
+
 
 class grid():
 
@@ -307,26 +311,26 @@ class grid():
         ax.text(-0.4,  0.525,'Points: '+ str(self.N_points), fontsize= 15)
         ax.text(0.14,  0.525,'$\^{A}$: '+ str(np.round(np.sum(self.area)/(m.pi*0.5**2),3)), fontsize= 15)
 
-#    def show_shadow(self,t):
-#
-#        polygon = list(np.zeros(self.N_points))
-#        p   = list(np.zeros(self.N_points))
-#
-#        fig , ax = plt.subplots()
-#        plt.plot(self.nodes[:,0], self.nodes[:,1], 'or')
-#        for i in range(self.N_points):
-#            plt.plot(self.faces[i,0,:], self.faces[i,1,:], 'b-', linewidth = '2',zorder=2)
-#            polygon[i] = PolygonPatch(Poly(self.faces[i,:,:].T))
-#            p[i] = PatchCollection([polygon[i]], alpha=1, color=str(int(self.shadow[t,i])),edgecolor='none', zorder=1)
-#            ax.add_collection(p[i])
-#
-#        circle1 = plt.Circle((0, 0), 0.5, color = 'r', fill=False, zorder=3)
-#        ax.add_artist(circle1)
-#        ax.set_aspect('equal', adjustable='box')
-#        ax.set_xlim([-0.55, 0.55])
-#        ax.set_ylim([-0.55, 0.6])
-#        ax.text(-0.4,  0.525,'Points: '+ str(self.N_points), fontsize= 15)
-#        ax.text(0.14,  0.525,'$\^{A}$: '+ str(np.round(np.sum(self.area)/(m.pi*0.5**2),3)), fontsize= 15)
+    #def show_shadow(self,t):
+
+    #    polygon = list(np.zeros(self.N_points))
+    #    p   = list(np.zeros(self.N_points))
+
+    #    fig , ax = plt.subplots()
+    #    plt.plot(self.nodes[:,0], self.nodes[:,1], 'or')
+    #    for i in range(self.N_points):
+    #        plt.plot(self.faces[i,0,:], self.faces[i,1,:], 'b-', linewidth = '2',zorder=2)
+    #        polygon[i] = PolygonPatch(Poly(self.faces[i,:,:].T))
+    #        p[i] = PatchCollection([polygon[i]], alpha=1, color=str(int(self.shadow[t,i])),edgecolor='none', zorder=1)
+    #        ax.add_collection(p[i])
+
+    #    circle1 = plt.Circle((0, 0), 0.5, color = 'r', fill=False, zorder=3)
+    #    ax.add_artist(circle1)
+    #    ax.set_aspect('equal', adjustable='box')
+    #    ax.set_xlim([-0.55, 0.55])
+    #    ax.set_ylim([-0.55, 0.6])
+    #    ax.text(-0.4,  0.525,'Points: '+ str(self.N_points), fontsize= 15)
+    #    ax.text(0.14,  0.525,'$\^{A}$: '+ str(np.round(np.sum(self.area)/(m.pi*0.5**2),3)), fontsize= 15)
 
     def set_grid(self, grid_type='square', Nlon=7, Nlat=7, cos1 = 80, cos2 = 60, diff = 0.009, Nsq = 7, Nang=15, Nrad=3, max_area=0.03, min_angle=30, circle_edges = 20, centre = False):
 
@@ -344,7 +348,6 @@ class grid():
             print('  Spherical grid created!')
         else:
             sys.exit('ERROR: Grid type not recognized!')
-
 
 
 class ProgressBar(object):
@@ -385,16 +388,16 @@ class ProgressBar(object):
         print('', file=self.output)
 
 
-
 class Arrow3D(FancyArrowPatch):
-
-#==============================================================================
-#   October 2016, Javier B.M., TU Delft
-#------------------------------------------------------------------------------
-#   Class for the creation of three dimensional arrow objects, based on [4]
-#
-#   [4] stackoverflow.com/questions/29188612/arrows-in-matplotlib-using-mplot3d
-#==============================================================================
+    """
+    #==============================================================================
+    #   October 2016, Javier B.M., TU Delft
+    #------------------------------------------------------------------------------
+    #   Class for the creation of three dimensional arrow objects, based on [4]
+    #
+    #   [4] stackoverflow.com/questions/29188612/arrows-in-matplotlib-using-mplot3d
+    #==============================================================================
+    """
 
     def __init__(self, xs, ys, zs, *args, **kwargs):
         FancyArrowPatch.__init__(self, (0,0), (0,0), *args, **kwargs)
@@ -407,25 +410,26 @@ class Arrow3D(FancyArrowPatch):
         FancyArrowPatch.draw(self, renderer)
 
 
-'''%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'''
-'''--------------------------   FUNCTIONS   --------------------------------'''
-'''%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'''
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'''
+#--------------------------   FUNCTIONS   --------------------------------'''
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'''
 
 def anim_to_html(anim):
+    """
+    ==============================================================================
+       October 2016, Javier B.M., TU Delft
+    ------------------------------------------------------------------------------
+       Converts a python animation object to a HTML format compatible with
+       Jupyter Notebook. Based on [1].
 
-#==============================================================================
-#   October 2016, Javier B.M., TU Delft
-#------------------------------------------------------------------------------
-#   Converts a python animation object to a HTML format compatible with
-#   Jupyter Notebook. Based on [1].
-#
-#   Inputs:
-#       - anim: Animation object.
-#   Outputs:
-#       - Encoded video animation.
-#
-#   [1] jakevdp.github.io/blog/2013/05/12/embedding-matplotlib-animations/
-#==============================================================================
+       Inputs:
+           - anim: Animation object.
+       Outputs:
+           - Encoded video animation.
+
+       [1] jakevdp.github.io/blog/2013/05/12/embedding-matplotlib-animations/
+    ==============================================================================
+    """
 
     if not hasattr(anim, '_encoded_video'):
         with NamedTemporaryFile(suffix='.mp4') as f:
@@ -437,60 +441,65 @@ def anim_to_html(anim):
 
 
 def display_animation(anim):
+    """
+    ==============================================================================
+       October 2016, Javier B.M., TU Delft
+    ------------------------------------------------------------------------------
+       Displays an animation in Jupyter Notebook. Based on [1].
 
-#==============================================================================
-#   October 2016, Javier B.M., TU Delft
-#------------------------------------------------------------------------------
-#   Displays an animation in Jupyter Notebook. Based on [1].
-#
-#   Inputs:
-#       - anim: Animation object.
-#   Outputs:
-#       - HTML video.
-#
-#   [1] jakevdp.github.io/blog/2013/05/12/embedding-matplotlib-animations/
-#==============================================================================
+       Inputs:
+           - anim: Animation object.
+       Outputs:
+           - HTML video.
+
+       [1] jakevdp.github.io/blog/2013/05/12/embedding-matplotlib-animations/
+    ==============================================================================
+    """
 
     plt.close(anim._fig)
-#   return HTML(anim_to_html(anim))
+    #return HTML(anim_to_html(anim))
     return HTML(anim.to_html5_video())
 
 
 def PolyArea(x,y): # Shoelace formula
-#==============================================================================
-#   October 2016, Javier B.M., TU Delft
-#------------------------------------------------------------------------------
-#   Calculates the area inside a simple non-intersecting polygon, based on the
-#    formula [2].
-#
-#   Inputs:
-#       - anim: Animation object.
-#   Outputs:
-#       - HTML video.
-#
-#   [2] https://en.wikipedia.org/wiki/Shoelace_formula
-#==============================================================================
+    """
+    ==============================================================================
+       October 2016, Javier B.M., TU Delft
+    ------------------------------------------------------------------------------
+       Calculates the area inside a simple non-intersecting polygon, based on the
+        formula [2].
 
+       Inputs:
+           - anim: Animation object.
+       Outputs:
+           - HTML video.
+
+       [2] https://en.wikipedia.org/wiki/Shoelace_formula
+    ==============================================================================
+    """
     return 0.5*np.abs(np.einsum('tN,tN->t', x, np.roll(y,1,axis=1))-np.einsum('tN,tN->t', y, np.roll(x,1,axis=1)))
 
+
 def plot_xy(x, y1, y2 = None, info = ['x [-]', 'y [-]', ' ', None]):
-    # X axis label, Y axis label, Title, Legend
-#==============================================================================
-#   October 2016, Javier B.M., TU Delft
-#------------------------------------------------------------------------------
-#   Predefined function for 2D plots, e.g. phase vs time.
-#
-#   Inputs:
-#       - x: Horizontal coordinate.
-#       - y1: Vertical coordinate.
-#       - y2: Second vertical coordinate.
-#       - info = (0) x-label
-#                (1) y-label
-#                (2) title
-#                (3) legend
-#   Outputs:
-#       - Plot.
-#==============================================================================
+    """
+        # X axis label, Y axis label, Title, Legend
+    ==============================================================================
+       October 2016, Javier B.M., TU Delft
+    ------------------------------------------------------------------------------
+       Predefined function for 2D plots, e.g. phase vs time.
+
+       Inputs:
+           - x: Horizontal coordinate.
+           - y1: Vertical coordinate.
+           - y2: Second vertical coordinate.
+           - info = (0) x-label
+                    (1) y-label
+                    (2) title
+                    (3) legend
+       Outputs:
+           - Plot.
+    ==============================================================================
+    """
 
     plt.figure()
     plt.plot(x,y1,linewidth=2, linestyle="-", label="Curve 1")
@@ -511,22 +520,24 @@ def plot_xy(x, y1, y2 = None, info = ['x [-]', 'y [-]', ' ', None]):
     plt.grid()
     plt.show()
 
+
 def symp(x, deg = False):
+    """
+    ==============================================================================
+       October 2016, Javier B.M., TU Delft
+    ------------------------------------------------------------------------------
+       Convert an input angle to the range 0, 2pi.
 
-#==============================================================================
-#   October 2016, Javier B.M., TU Delft
-#------------------------------------------------------------------------------
-#   Convert an input angle to the range 0, 2pi.
-#
-#   Inputs:
-#       - x: Input angle.
-#       - deg: True,  if x is given in degrees.
-#              False, if x is given in radians. (Default)
-#       - y2: Second vertical coordinate.
+       Inputs:
+           - x: Input angle.
+           - deg: True,  if x is given in degrees.
+                  False, if x is given in radians. (Default)
+           - y2: Second vertical coordinate.
 
-#   Outputs:
-#       - x: Output angle.
-#==============================================================================
+       Outputs:
+           - x: Output angle.
+    ==============================================================================
+    """
 
     if deg is False:
         x = x * 180 / m.pi
@@ -541,22 +552,24 @@ def symp(x, deg = False):
         x = x * m.pi / 180
     return x
 
+
 def symp1(x, deg = False):
+    """
+    ==============================================================================
+       October 2016, Javier B.M., TU Delft
+    ------------------------------------------------------------------------------
+       Convert an input angle to the range -pi, pi.
 
-#==============================================================================
-#   October 2016, Javier B.M., TU Delft
-#------------------------------------------------------------------------------
-#   Convert an input angle to the range -pi, pi.
-#
-#   Inputs:
-#       - x: Input angle.
-#       - deg: True,  if x is given in degrees.
-#              False, if x is given in radians. (Default)
-#       - y2: Second vertical coordinate.
+       Inputs:
+           - x: Input angle.
+           - deg: True,  if x is given in degrees.
+                  False, if x is given in radians. (Default)
+           - y2: Second vertical coordinate.
 
-#   Outputs:
-#       - x: Output angle.
-#==============================================================================
+       Outputs:
+           - x: Output angle.
+    ==============================================================================
+    """
 
     if deg is False:
         x = x * 180 / m.pi
@@ -570,23 +583,25 @@ def symp1(x, deg = False):
         x = x * m.pi / 180
     return x
 
-def query_yes_no(question, default="no"):
 
-#==============================================================================
-#   October 2016, Javier B.M., TU Delft
-#------------------------------------------------------------------------------
-#   Ask a yes/no question via input() and return their answer, based on [3]
-#
-#   Inputs:
-#       - question: String to be presented to the user.
-#       - default: Presumed answer if user presses <Enter>. Values
-#                  admitted: 'yes', 'no' (default), None (meaning an answer is
-#                  required of the user).
-#   Outputs:
-#       - True or False for positive and negative answers accordingly.
-#
-#   [3] Recipe 577058 from activestate.com. Adapted to Python 3.
-#==============================================================================
+def query_yes_no(question, default="no"):
+    """
+    ==============================================================================
+    October 2016, Javier B.M., TU Delft
+    ------------------------------------------------------------------------------
+    Ask a yes/no question via input() and return their answer, based on [3]
+
+    Inputs:
+        - question: String to be presented to the user.
+        - default: Presumed answer if user presses <Enter>. Values
+                    admitted: 'yes', 'no' (default), None (meaning an answer is
+                    required of the user).
+    Outputs:
+        - True or False for positive and negative answers accordingly.
+
+    [3] Recipe 577058 from activestate.com. Adapted to Python 3.
+    ==============================================================================
+    """
 
     valid = {"yes": True, "y": True, "ye": True,
              "no": False, "n": False}
@@ -622,6 +637,6 @@ def grid_area(grid,t):
     return area
 
 
-'''%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'''
-'''-------------------------- End of script --------------------------------'''
-'''%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'''
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'''
+#-------------------------- End of script --------------------------------'''
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'''
