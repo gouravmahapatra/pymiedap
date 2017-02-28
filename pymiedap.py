@@ -1260,6 +1260,56 @@ def read_dap_output(phase, sza, emission, filename, beta=None, phi=None,
     return I,Q,U,V
 
 
+def compute_model(atm_model, force=False,
+               path_input='./dap_database/', set_taus=False, rename=False,
+               output_name='modelA', nmug_mie=20, nmug=20, nsubr=50, nmat=4):
+    """ to read the files associated with a model.
+    INPUTS:
+        atm_model : a Model object with all the input parameters
+    KEYWORDS:
+        force : if 0, existing Fourier files are not overwritten; if 1
+            existing files are replaced by newer versions
+        path_input : path of the fourier DAP files
+        set_taus: if True, will set opacities following scattering cross section and column density
+        rename: if true, output_name is used
+        output_name: custom name radical for the output files of the DAP code
+        nmug: number of Gauss points for Mie and DAP calculations
+        nmat: number of Stokes elements to compute
+    OUTPUT: computes the Fourier files  related to the given model. Also stores
+    their names in the model object.
+    """
+
+    # Get wvl list
+    wvl = atm_model.wvl_list
+
+    # If the model is not yet computed or is forced to
+    if atm_model.name[0] == '' or force is True:
+        # Execute Mie on all aerosols types on all layers
+        for lay, layer in vars(atm_model.layers).items():
+            #If there is already an aerosol mix, we overwrite it
+            if hasattr(layer,'mixed_aerosols') is True:
+                del(layer.mixed_aerosols)
+            for aero_name, aero in vars(layer).items():
+                if isinstance(aero, Aerosols):
+                    if aero.layered is False:
+                        mie_code(aero, atm_model.wvl_list, ngaur=nmug_mie, nsubr=nsubr)
+                    else:
+                        mie_shell(aero, atm_model.wvl_list, ngaur=nmug_mie, nsubr=nsubr)
+
+            layer.mix_aerosols() #mix aerosols
+
+        # Set the opacities
+        if set_taus is True:
+            for lay, layer in vars(atm_model.layers).items():
+                layer.tau = layer.col_dens * layer.mixed_aerosols.sext
+
+        #execute DAP
+        # making sure that the directory we write to is the same we'll read
+        # from
+        dap_code(atm_model, rename=rename, output_name=output_name, nmug=nmug,
+                 nmat=nmat, path_output=path_input)
+
+
 def read_model(atm_model,data,step=20, force=False,
                path_input='./dap_database/', set_taus=False, rename=False,
                output_name='modelA', nmug_mie=20, nmug=20, nsubr=50, nmat=4):
