@@ -1495,28 +1495,9 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
     mpl.ioff()
 
     for M, model in enumerate(models):
-        # compute the models if not done yet
-        if model.name[0] == '' or force is True:
-            # Execute Mie on all aerosols types
-            for lay, layer in vars(model.layers).items():
-                for aero_name, aero in vars(layer).items():
-                    if isinstance(aero, Aerosols):
-                        if aero.layered is False:
-                            mie_code(aero, model.wvl_list, ngaur=nmug_mie, nsubr=nsubr)
-                        else:
-                            mie_shell(aero, model.wvl_list, ngaur=nmug_mie, nsubr=nsubr)
-
-                layer.mix_aerosols() #mix aerosols
-
-            # Set the opacities
-            if set_taus is True:
-                for lay, layer in vars(model.layers).items():
-                    layer.tau = layer.col_dens * layer.mixed_aerosols.sext
-
-            #execute DAP
-            dap_code(model, rename=rename, output_name=output_names[M], nmug=nmug,
-                    nmat=nmat)
-
+        compute_model(model, force=force,
+                      set_taus=set_taus, rename=rename, output_name=output_names[M],
+                      nmug_mie=nmug_mie, nmug=nmug, nsubr=nsubr, nmat=nmat)
 
     #At start, no specific cloud cover
     picture_full = None
