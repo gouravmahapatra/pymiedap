@@ -131,8 +131,8 @@ def int_radiance(bodies):
 def combine(bodies):
 
     for body in bodies:
-	if body.name == _cfg.ref_body:
-	    I,Q,U,V = _comb(bodies,body)
-	    break
+        if body.name == _cfg.ref_body:
+            I,Q,U,V = _comb(bodies,body)
+            break
 
     return I,Q,U,V
