@@ -69,6 +69,7 @@ from tempfile import NamedTemporaryFile
 import base64
 import re
 import exopy_grid as grd
+import pymiedap as pmd
 
 plt.ion()
 
@@ -140,8 +141,6 @@ class body():
         self.type = Type
         body.__track.append([len(body.__track), name, Type])
 
-	import pymiedap as pmd
-
         self.properties = properties()
         self.ephemeris = ephemeris()
         self.orbital_elements = orbital_elements()
@@ -149,7 +148,7 @@ class body():
         self.flag = flag()
         self.grid = grid()
         self.radiance = radiance()
-	self.atmosphere = pmd.Model()
+        self.atmosphere = pmd.Model()
 
     def show(self):
         print('\nList of bodies:\n')
