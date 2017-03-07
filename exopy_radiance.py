@@ -21,23 +21,17 @@ def combine(bodies, reference):
 
 		IQUV = [body.radiance.I, body.radiance.Q, body.radiance.U, body.radiance.V]
 
-        # this rotation could be written in a much much simpler way!
-        L = np.array([[ones , zeros, zeros, zeros],
-                      [zeros,
-                       np.cos(2*body.geometry.ref_plane_to_ref_line_angle),
-                       np.sin(2*body.geometry.ref_plane_to_ref_line_angle),
-                       zeros],
-                      [zeros,-np.sin(2*body.geometry.ref_plane_to_ref_line_angle),
-                       np.cos(2*body.geometry.ref_plane_to_ref_line_angle),
-                       zeros],
-                      [zeros, zeros, zeros, ones]])
+        # Rotation of the Stokes vectors into observer plane
+        nQ, nU = pmd.rotate_stokes(body.radiance.Q, body.radiance.U,
+                                   body.geometry.ref_plane_to_ref_line_angle)
 
-        IQUV  = np.einsum('ijt,jt->it',L,IQUV)
+        body.radiance.Q = nQ
+        body.radiance.U = nU
 
-        body.radiance.I_ref = distance_scale * size_scale * IQUV[0,:]
-        body.radiance.Q_ref = distance_scale * size_scale * IQUV[1,:]
-        body.radiance.U_ref = distance_scale * size_scale * IQUV[2,:]
-        body.radiance.V_ref = distance_scale * size_scale * IQUV[3,:]
+        body.radiance.I_ref = distance_scale * size_scale * body.radiance.I
+        body.radiance.Q_ref = distance_scale * size_scale * body.radiance.Q
+        body.radiance.U_ref = distance_scale * size_scale * body.radiance.U
+        body.radiance.V_ref = distance_scale * size_scale * body.radiance.V
 
         I = I + body.radiance.I_ref
         Q = Q + body.radiance.Q_ref
@@ -82,9 +76,6 @@ def integration(body):
 
     scene = body.properties.fourier_scene
 
-
-    print(ngrids)
-    print(wvl_list)
     for l,wvl in enumerate(wvl_list):
         for i,j in enumerate(time):
 
