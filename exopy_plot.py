@@ -91,55 +91,58 @@ def geometry_d(body, t = 0, save = False, dots = False):
 
 
 
-def radiance(body, phase = False, save = False):
+def radiance(body, wvl=0, phase = False, save = False):
 
-        # create a figure with subplots
-    	fig = _plt.figure(figsize=(9,12))
-        ax1 = _plt.subplot2grid((4,1), (0,0))
-        ax2 = _plt.subplot2grid((4,1), (1,0),sharex=ax1)
-	ax3 = _plt.subplot2grid((4,1), (2,0),sharex=ax1)
-	ax4 = _plt.subplot2grid((4,1), (3,0),sharex=ax1)
+    # create a figure with subplots
+    fig = _plt.figure(figsize=(9,12))
+    ax1 = _plt.subplot2grid((4,1), (0,0))
+    ax2 = _plt.subplot2grid((4,1), (1,0),sharex=ax1)
+    ax3 = _plt.subplot2grid((4,1), (2,0),sharex=ax1)
+    ax4 = _plt.subplot2grid((4,1), (3,0),sharex=ax1)
 
-	ax1.grid()
-	ax1.set_title(body.name + ' I parameter')
-	ax1.set_xlabel('Time [Earth days]')
-	if phase is False:
-		ax1.plot(body.ephemeris.time/3600/24, body.radiance.I_ref,'-b')
-	else:
-		ax1.plot(_np.rad2deg(body.geometry.phase_angle), body.radiance.I_ref,'-b')
+    if phase==False:
+        xlabelstr = 'Time [Earth days]'
+    else:
+        xlabelstr = 'Phase angle'
 
-	ax2.grid()
-	ax2.set_title(body.name + ' Q parameter')
-	ax2.set_xlabel('Time [Earth days]')
-	if phase is False:
-		ax2.plot(body.ephemeris.time/3600/24, body.radiance.Q_ref,'-g')
-	else:
-		ax2.plot(_np.rad2deg(body.geometry.phase_angle), body.radiance.Q_ref,'-g')
-	ax3.grid()
-	ax3.set_title(body.name + ' U parameter')
-        ax3.set_xlabel('Time [Earth days]')
-	if phase is False:
-		ax3.plot(body.ephemeris.time/3600/24, body.radiance.U_ref,'-r')
-	else:
-		ax3.plot(_np.rad2deg(body.geometry.phase_angle), body.radiance.U_ref,'-r')
+    ax1.grid()
+    ax1.set_title(body.name + ' I parameter')
+    ax1.set_xlabel(xlabelstr)
+    if phase is False:
+        ax1.plot(body.ephemeris.time/3600/24, body.radiance.I[wvl,:],'-b')
+    else:
+        ax1.plot(_np.rad2deg(body.geometry.phase_angle), body.radiance.I[wvl,:],'-b')
 
-	ax4.grid()
-	ax4.set_title(body.name + ' V parameter')
-        ax4.set_xlabel('Time [Earth days]')
-	if phase is False:
-		ax4.plot(body.ephemeris.time/3600/24, body.radiance.V_ref,'-k')
-	else:
-		ax4.plot(_np.rad2deg(body.geometry.phase_angle), body.radiance.V_ref,'-k')
+    ax2.grid()
+    ax2.set_title(body.name + ' Q parameter')
+    ax2.set_xlabel(xlabelstr)
+    if phase is False:
+        ax2.plot(body.ephemeris.time/3600/24, body.radiance.Q[wvl,:],'-g')
+    else:
+        ax2.plot(_np.rad2deg(body.geometry.phase_angle), body.radiance.Q[wvl,:],'-g')
+        ax3.grid()
+    ax3.set_title(body.name + ' U parameter')
+    ax3.set_xlabel(xlabelstr)
+    if phase is False:
+        ax3.plot(body.ephemeris.time/3600/24, body.radiance.U[wvl,:],'-r')
+    else:
+        ax3.plot(_np.rad2deg(body.geometry.phase_angle), body.radiance.U[wvl,:],'-r')
 
-	_plt.tight_layout()
+    ax4.grid()
+    ax4.set_title(body.name + ' V parameter')
+    ax4.set_xlabel(xlabelstr)
+    if phase is False:
+        ax4.plot(body.ephemeris.time/3600/24, body.radiance.V[wvl,:],'-k')
+    else:
+        ax4.plot(_np.rad2deg(body.geometry.phase_angle), body.radiance.V[wvl,:],'-k')
 
-	if save:
+    _plt.tight_layout()
 
+    if save:
 		filename = 'radiance_' + body.properties.fourier_scene + '_alpha-' + str(int(_np.round(_np.degrees(body.geometry.phase_angle[t])))) + '_'  + _time.strftime("%d-%m-%Y") + '_' + _time.strftime("%X")
 
 		fig.savefig('Images/'+filename + '.eps')
 		fig.savefig('Images/'+filename + '.png')
-
 
 
 def detail_radiance(bodies,I,Q,U,V, save = False):
