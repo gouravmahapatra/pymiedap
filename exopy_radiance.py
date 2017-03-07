@@ -93,6 +93,10 @@ def integration(body):
 
             IQUV = np.zeros([4,body.grid.N_points])
 
+            # If atmosphere not calculated yet
+            if body.atmosphere.name[l] == '':
+                pmd.compute_model(body.atmosphere)
+
             ######################################################################################
             #######################       PMD.READ_DAP_OUTPUT      ###############################
             ######################################################################################
