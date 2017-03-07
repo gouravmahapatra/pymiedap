@@ -56,18 +56,22 @@ def integration(body):
     #files = dict(np.genfromtxt('exopy/scenes.dat', dtype='str'))
 
     time = body.ephemeris.time
-    wvl_list = body.atmosphere.wvl_list
+    wvl_list = np.array(body.atmosphere.wvl_list)
     nwvl = len(wvl_list)
 
-    body.grid.I = np.zeros_like((nwvl,body.grid.shadow))
-    body.grid.Q = np.zeros_like((nwvl,body.grid.shadow))
-    body.grid.U = np.zeros_like((nwvl,body.grid.shadow))
-    body.grid.V = np.zeros_like((nwvl,body.grid.shadow))
+    ngrids = np.shape(body.grid.shadow)
+    ngrids = (nwvl,) + ngrids
+    body.grid.I = np.zeros(ngrids)
+    body.grid.Q = np.zeros(ngrids)
+    body.grid.U = np.zeros(ngrids)
+    body.grid.V = np.zeros(ngrids)
 
-    Ip = np.zeros_like((nwvl,time))
-    Qp = np.zeros_like((nwvl,time))
-    Up = np.zeros_like((nwvl,time))
-    Vp = np.zeros_like((nwvl,time))
+    ngrids = np.shape(time)
+    ngrids = (nwvl,) + ngrids
+    Ip = np.zeros(ngrids)
+    Qp = np.zeros(ngrids)
+    Up = np.zeros(ngrids)
+    Vp = np.zeros(ngrids)
 
     area  = np.repeat(body.grid.area[:,np.newaxis],4,1).T
     phase = np.degrees(body.geometry.phase_angle)
@@ -79,7 +83,9 @@ def integration(body):
     scene = body.properties.fourier_scene
 
 
-    for l,wvl in wvl_list:
+    print(ngrids)
+    print(wvl_list)
+    for l,wvl in enumerate(wvl_list):
         for i,j in enumerate(time):
 
             print i+1, ' out of ', len(time)
