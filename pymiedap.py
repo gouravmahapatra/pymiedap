@@ -1195,7 +1195,7 @@ def dap_code(model, rename=False, output_name='modelA',
 
 
 def read_dap_output(phase, sza, emission, filename, beta=None, phi=None,
-                    ngeosMAX=200000, nmuMAX=400, nfouMAX=4000, nmatMAX=4):
+                    ngeosMAX=100000, nmuMAX=300, nfouMAX=2000, nmatMAX=4):
     """ This function takes a geometry and reads the supermatrices coefficients
     from the DAP code.
     Input:
@@ -1244,6 +1244,7 @@ def read_dap_output(phase, sza, emission, filename, beta=None, phi=None,
     # Reading Stoke vector
     rfou = np.zeros((nmatMAX*nmuMAX,nmuMAX,nfouMAX+1), order='F')
     Sv = geos.read_dap(filename, ngeos, szaF, emissionF, azimuthF, betaF, rfou)
+    del(rfou)
 
     # storing output in proper Stokes elements
     I = Sv[0,:ngeos]
@@ -1258,6 +1259,57 @@ def read_dap_output(phase, sza, emission, filename, beta=None, phi=None,
     V = V/np.pi
 
     return I,Q,U,V
+
+
+def compute_model(atm_model, force=False,
+               path_input='./dap_database/', set_taus=False, rename=False,
+               output_name='modelA', nmug_mie=20, nmug=20, nsubr=50, nmat=4):
+    """
+    Function to compute the Fourier files associated with a Model object.
+    INPUTS:
+        atm_model : a Model object with all the input parameters
+    KEYWORDS:
+        force : if 0, existing Fourier files are not overwritten; if 1
+            existing files are replaced by newer versions
+        path_input : path of the fourier DAP files
+        set_taus: if True, will set opacities following scattering cross section and column density
+        rename: if true, output_name is used
+        output_name: custom name radical for the output files of the DAP code
+        nmug: number of Gauss points for Mie and DAP calculations
+        nmat: number of Stokes elements to compute
+    OUTPUT: computes the Fourier files  related to the given model. Also stores
+    their names in the model object.
+    """
+
+    # Get wvl list
+    wvl = atm_model.wvl_list
+
+    # If the model is not yet computed or is forced to
+    if atm_model.name[0] == '' or force is True:
+        # Execute Mie on all aerosols types on all layers
+        for lay, layer in vars(atm_model.layers).items():
+            #If there is already an aerosol mix, we overwrite it
+            if hasattr(layer,'mixed_aerosols') is True:
+                del(layer.mixed_aerosols)
+            for aero_name, aero in vars(layer).items():
+                if isinstance(aero, Aerosols):
+                    if aero.layered is False:
+                        mie_code(aero, atm_model.wvl_list, ngaur=nmug_mie, nsubr=nsubr)
+                    else:
+                        mie_shell(aero, atm_model.wvl_list, ngaur=nmug_mie, nsubr=nsubr)
+
+            layer.mix_aerosols() #mix aerosols
+
+        # Set the opacities
+        if set_taus is True:
+            for lay, layer in vars(atm_model.layers).items():
+                layer.tau = layer.col_dens * layer.mixed_aerosols.sext
+
+        #execute DAP
+        # making sure that the directory we write to is the same we'll read
+        # from
+        dap_code(atm_model, rename=rename, output_name=output_name, nmug=nmug,
+                 nmat=nmat, path_output=path_input)
 
 
 def read_model(atm_model,data,step=20, force=False,
@@ -1299,32 +1351,10 @@ def read_model(atm_model,data,step=20, force=False,
     Ut = np.zeros((len(wvl),n_pts))
     Vt = np.zeros((len(wvl),n_pts))
 
-    # If the model is not yet computed or is forced to
-    if atm_model.name[0] == '' or force is True:
-        # Execute Mie on all aerosols types on all layers
-        for lay, layer in vars(atm_model.layers).items():
-            #If there is already an aerosol mix, we overwrite it
-            if hasattr(layer,'mixed_aerosols') is True:
-                del(layer.mixed_aerosols)
-            for aero_name, aero in vars(layer).items():
-                if isinstance(aero, Aerosols):
-                    if aero.layered is False:
-                        mie_code(aero, atm_model.wvl_list, ngaur=nmug_mie, nsubr=nsubr)
-                    else:
-                        mie_shell(aero, atm_model.wvl_list, ngaur=nmug_mie, nsubr=nsubr)
-
-            layer.mix_aerosols() #mix aerosols
-
-        # Set the opacities
-        if set_taus is True:
-            for lay, layer in vars(atm_model.layers).items():
-                layer.tau = layer.col_dens * layer.mixed_aerosols.sext
-
-        #execute DAP
-        # making sure that the directory we write to is the same we'll read
-        # from
-        dap_code(atm_model, rename=rename, output_name=output_name, nmug=nmug,
-                 nmat=nmat, path_output=path_input)
+    # compute Fourier file
+    compute_model(atm_model, force=force, path_input=path_input,
+                  set_taus=set_taus, rename=rename, output_name=output_name,
+                  nmug_mie=nmug_mie, nmug=nmug, nsubr=nsubr, nmat=nmat)
 
     #read files and store result
     for j,w in enumerate(wvl):
@@ -1463,40 +1493,45 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
 
     atm_model = models[0]
     wvl = atm_model.wvl_list
+    nwvl = len(atm_model.wvl_list)
+    nalpha = len(alpha)
     mpl.ioff()
 
+    # Computing the model atmosphere
+    # ------------------------------
+
     for M, model in enumerate(models):
-        # compute the models if not done yet
-        if model.name[0] == '' or force is True:
-            # Execute Mie on all aerosols types
-            for lay, layer in vars(model.layers).items():
-                for aero_name, aero in vars(layer).items():
-                    if isinstance(aero, Aerosols):
-                        if aero.layered is False:
-                            mie_code(aero, model.wvl_list, ngaur=nmug_mie, nsubr=nsubr)
-                        else:
-                            mie_shell(aero, model.wvl_list, ngaur=nmug_mie, nsubr=nsubr)
-
-                layer.mix_aerosols() #mix aerosols
-
-            # Set the opacities
-            if set_taus is True:
-                for lay, layer in vars(model.layers).items():
-                    layer.tau = layer.col_dens * layer.mixed_aerosols.sext
-
-            #execute DAP
-            dap_code(model, rename=rename, output_name=output_names[M], nmug=nmug,
-                    nmat=nmat)
-
+        compute_model(model, force=force,
+                      set_taus=set_taus, rename=rename, output_name=output_names[M],
+                      nmug_mie=nmug_mie, nmug=nmug, nsubr=nsubr, nmat=nmat)
 
     #At start, no specific cloud cover
     picture_full = None
     atm_model.fcloud = np.zeros(len(alpha))
     atm_model.asym = np.zeros(len(alpha))
 
+    # Preparing arrays
+    # ------------------
+    If = np.nan*np.zeros((nwvl,nalpha,(2*npix)**2))
+    Qf = np.nan*np.zeros((nwvl,nalpha,(2*npix)**2))
+    Uf = np.nan*np.zeros((nwvl,nalpha,(2*npix)**2))
+    Vf = np.nan*np.zeros((nwvl,nalpha,(2*npix)**2))
+
+    phaf = np.nan*np.zeros((nwvl,nalpha,(2*npix)**2))
+    szaf = np.nan*np.zeros((nwvl,nalpha,(2*npix)**2))
+    emif = np.nan*np.zeros((nwvl,nalpha,(2*npix)**2))
+    azif = np.nan*np.zeros((nwvl,nalpha,(2*npix)**2))
+    betf = np.nan*np.zeros((nwvl,nalpha,(2*npix)**2))
+    latf = np.nan*np.zeros((nwvl,nalpha,(2*npix)**2))
+    lonf = np.nan*np.zeros((nwvl,nalpha,(2*npix)**2))
+    xf = np.nan*np.zeros((nwvl,nalpha,(2*npix)**2))
+    yf = np.nan*np.zeros((nwvl,nalpha,(2*npix)**2))
+
     if len(alpha)!=len(delta_c):
         delta_c = delta_c[0]*np.ones(len(alpha))
 
+    # Loop on wvl
+    # -------------
     for j,w in enumerate(wvl):
         ppI = PdfPages('I_phase_wvl{:1.3f}.pdf'.format(w))
         ppPl = PdfPages('Pl_phase_wvl{:1.3f}.pdf'.format(w))
@@ -1505,6 +1540,8 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
         ppPt = PdfPages('Pt_phase_wvl{:1.3f}.pdf'.format(w))
 
 
+        # Loop on phase angle
+        # -------------------
         for A,alph in enumerate(alpha):
 
             if fixed_pattern is False:
@@ -1531,14 +1568,17 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
             phase = np.ones(ngeos)*alph
             x = xs[:ngeos]
             y = ys[:ngeos]
-            atm_model.geom.phase = phase
-            atm_model.phase = phase
-            atm_model.geom.sza = theta0
-            atm_model.geom.emission = theta
-            atm_model.geom.azimuth = phi
-            atm_model.geom.beta = beta
-            atm_model.geom.latitude = lats
-            atm_model.geom.longitude = longs
+
+            phaf[j,A,:ngeos] = alph*np.ones(ngeos)
+            szaf[j,A,:ngeos] = theta0[:ngeos]
+            emif[j,A,:ngeos] = theta[:ngeos]
+            azif[j,A,:ngeos] = phi[:ngeos]
+            betf[j,A,:ngeos] = beta[:ngeos]
+            latf[j,A,:ngeos] = lats[:ngeos]
+            lonf[j,A,:ngeos] = longs[:ngeos]
+            xf[j,A,:ngeos] = xs[:ngeos]
+            yf[j,A,:ngeos] = ys[:ngeos]
+
 
             # Create table to store output
             It = np.zeros((len(wvl),ngeos))
@@ -1581,123 +1621,140 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
                 Ut[j,mask==pixtype] = UB*np.cos(np.radians(theta0B))
                 Vt[j,mask==pixtype] = VB*np.cos(np.radians(theta0B))
 
-            atm_model.I = It
+            If[j,A,:ngeos] = It[j,:]
+            Qf[j,A,:ngeos] = Qt[j,:]
+            Uf[j,A,:ngeos] = Ut[j,:]
+            Vf[j,A,:ngeos] = Vt[j,:]
 
-            # Compute adjusted radiance
-            B = sunblackbody(np.array(atm_model.wvl_list)*1e-6, Ts=atm_model.Ts)
-            Rs = 696342000.
-            Dvs = 108208930000.0
-            omegas = np.pi * (atm_model.Rs/atm_model.Dps)**2
-            atm_model.I2 = atm_model.I * B[:,np.newaxis] * omegas
+        atm_model.geom.phase = phaf
+        atm_model.phase = phaf
+        atm_model.geom.sza = szaf
+        atm_model.geom.emission = emif
+        atm_model.geom.azimuth = azif
+        atm_model.geom.beta = betf
+        atm_model.geom.latitude = latf
+        atm_model.geom.longitude = lonf
+        atm_model.geom.x = xf
+        atm_model.geom.y = yf
 
-            atm_model.Q = Qt
-            atm_model.U = Ut
-            atm_model.V = Vt
-            atm_model.P = -Qt/It
 
-            # PLOT
-            font_size=14
-            # BUG PIXEL SIZE?
-            #pixsize = max(np.diff(lats))
+        atm_model.I = If
 
-            figsize = 850
-            dpi = 90
+        # Compute adjusted radiance
+        B = sunblackbody(np.array(atm_model.wvl_list)*1e-6, Ts=atm_model.Ts)
+        Rs = 696342000.
+        Dvs = 108208930000.0
+        omegas = np.pi * (atm_model.Rs/atm_model.Dps)**2
+        atm_model.I2 = atm_model.I * B[:,np.newaxis,np.newaxis] * omegas
 
-            # plot Pl
-            fig = mpl.figure(figsize=(figsize/dpi,figsize/dpi), dpi=dpi)
-            ax = fig.add_subplot(111, aspect=1)
-            ax.set_title('Polarization at phase angle: {:3.2f}'.format(alph))
-            circ = mpl.Circle((0,0),1,color='gray')
-            ax.add_patch(circ)
-            sc = ax.scatter(x, y, c=100*atm_model.P[j,:],lw=0,
-                            marker='s',s=(0.6*figsize/npix2)**2,
-                            cmap=mpl.cm.seismic, zorder=10,)
-                            #vmin=-10, vmax=10)
-            fig.tight_layout(pad=1.2)
-            cb = fig.colorbar(sc,pad=0.02, extend='both')
-            cb.set_label('Degree of linear polarization (%)',size=font_size)
-            ax.set_ylim(-1,1)
-            ax.set_xlim(-1,1)
-            #fig.savefig('Pl_phase_{:01.3f}_{:3.2f}.png'.format(w,alph))
-            ppPl.savefig(fig)
-            mpl.close(fig)
+        atm_model.Q = Qf
+        atm_model.U = Uf
+        atm_model.V = Vf
+        atm_model.P = -Qf/If
 
-            # plot U/I
-            fig = mpl.figure(figsize=(figsize/dpi,figsize/dpi), dpi=dpi)
-            ax = fig.add_subplot(111, aspect=1)
-            ax.set_title('Polarization at phase angle: {:3.2f}'.format(alph))
-            circ = mpl.Circle((0,0),1,color='gray')
-            ax.add_patch(circ)
-            sc = ax.scatter(x, y, c=100*(atm_model.U[j,:]/atm_model.I[j,:]),lw=0,
-                            marker='s',s=(0.6*figsize/npix2)**2,
-                            cmap=mpl.cm.seismic, zorder=10,
-                            vmin=-5, vmax=5)
-            fig.tight_layout(pad=1.2)
-            cb = fig.colorbar(sc,pad=0.02, extend='both')
-            cb.set_label('U/I (%)',size=font_size)
-            ax.set_ylim(-1,1)
-            ax.set_xlim(-1,1)
-            #fig.savefig('U_phase_{:01.3f}_{:3.2f}.png'.format(w,alph))
-            ppU.savefig(fig)
-            mpl.close(fig)
+        # PLOT
+        font_size=14
+        # BUG PIXEL SIZE?
+        #pixsize = max(np.diff(lats))
 
-            # plot I
-            fig = mpl.figure(figsize=(figsize/dpi,figsize/dpi), dpi=dpi)
-            ax = fig.add_subplot(111,aspect=1)
-            ax.set_title('Intensity at phase angle: {:3.2f}'.format(alph))
-            circ = mpl.Circle((0,0),1,color='gray')
-            ax.add_patch(circ)
-            sc = ax.scatter(x, y, c=atm_model.I[j,:],lw=0,marker='s',
-                            s=(0.6*figsize/npix2)**2,
-                            cmap=mpl.cm.YlOrRd, zorder=10,)
-                            #vmin=0, vmax=1)
-            fig.tight_layout(pad=1.2)
-            cb = fig.colorbar(sc,pad=0.02, extend='both')
-            cb.set_label('Intensity',size=font_size)
-            ax.set_ylim(-1,1)
-            ax.set_xlim(-1,1)
-            #fig.savefig('I_phase_{:01.3f}_{:3.2f}.png'.format(w,alph))
-            ppI.savefig(fig)
-            mpl.close(fig)
+        figsize = 850
+        dpi = 90
 
-            # plot V/I
-            fig = mpl.figure(figsize=(figsize/dpi,figsize/dpi), dpi=dpi)
-            ax = fig.add_subplot(111,aspect=1)
-            ax.set_title('Circular polarization V/I at alpha= {:3.2f}'.format(alph))
-            circ = mpl.Circle((0,0),1,color='gray')
-            ax.add_patch(circ)
-            sc = ax.scatter(x, y, c=100*(atm_model.V[j,:]/atm_model.I[j,:]),lw=0,marker='s',
-                            s=(0.6*figsize/npix2)**2,
-                            cmap=mpl.cm.seismic, zorder=10,
-                            vmin=-0.1, vmax=0.1)
-            fig.tight_layout(pad=1.2)
-            cb = fig.colorbar(sc,pad=0.02, extend='both')
-            cb.set_label('V/I (%)',size=font_size)
-            ax.set_ylim(-1,1)
-            ax.set_xlim(-1,1)
-            #fig.savefig('V_phase_{:01.3f}_{:3.2f}.png'.format(w,alph))
-            ppV.savefig(fig)
-            mpl.close(fig)
+           ## plot Pl
+           #fig = mpl.figure(figsize=(figsize/dpi,figsize/dpi), dpi=dpi)
+           #ax = fig.add_subplot(111, aspect=1)
+           #ax.set_title('Polarization at phase angle: {:3.2f}'.format(alph))
+           #circ = mpl.Circle((0,0),1,color='gray')
+           #ax.add_patch(circ)
+           #sc = ax.scatter(x, y, c=100*atm_model.P[j,A,:len(x)],lw=0,
+           #                marker='s',s=(0.6*figsize/npix2)**2,
+           #                cmap=mpl.cm.seismic, zorder=10,)
+           #                #vmin=-10, vmax=10)
+           #fig.tight_layout(pad=1.2)
+           #cb = fig.colorbar(sc,pad=0.02, extend='both')
+           #cb.set_label('Degree of linear polarization (%)',size=font_size)
+           #ax.set_ylim(-1,1)
+           #ax.set_xlim(-1,1)
+           ##fig.savefig('Pl_phase_{:01.3f}_{:3.2f}.png'.format(w,alph))
+           #ppPl.savefig(fig)
+           #mpl.close(fig)
 
-            # plot Ptot
-            Ptot = np.sqrt((atm_model.Q**2+atm_model.U**2+atm_model.V**2)/atm_model.I)
-            fig = mpl.figure(figsize=(figsize/dpi,figsize/dpi), dpi=dpi)
-            ax = fig.add_subplot(111, aspect=1)
-            ax.set_title('Polarization at phase angle: {:3.2f}'.format(alph))
-            circ = mpl.Circle((0,0),1,color='gray')
-            ax.add_patch(circ)
-            sc = ax.scatter(x, y, c=100*Ptot[j,:],lw=0,
-                            marker='s',s=(0.6*figsize/npix2)**2,
-                            cmap=mpl.cm.YlOrRd, zorder=10,)
-                            #vmin=0, vmax=5)
-            fig.tight_layout(pad=1.2)
-            cb = fig.colorbar(sc,pad=0.02, extend='both')
-            cb.set_label('Degree of linear polarization (%)',size=font_size)
-            ax.set_ylim(-1,1)
-            ax.set_xlim(-1,1)
-            #fig.savefig('Pt_phase_{:01.3f}_{:3.2f}.png'.format(w,alph))
-            ppPt.savefig(fig)
-            mpl.close(fig)
+           ## plot U/I
+           #fig = mpl.figure(figsize=(figsize/dpi,figsize/dpi), dpi=dpi)
+           #ax = fig.add_subplot(111, aspect=1)
+           #ax.set_title('Polarization at phase angle: {:3.2f}'.format(alph))
+           #circ = mpl.Circle((0,0),1,color='gray')
+           #ax.add_patch(circ)
+           #sc = ax.scatter(x, y, c=100*(atm_model.U[j,A,:]/atm_model.I[j,A,:]),lw=0,
+           #                marker='s',s=(0.6*figsize/npix2)**2,
+           #                cmap=mpl.cm.seismic, zorder=10,
+           #                vmin=-5, vmax=5)
+           #fig.tight_layout(pad=1.2)
+           #cb = fig.colorbar(sc,pad=0.02, extend='both')
+           #cb.set_label('U/I (%)',size=font_size)
+           #ax.set_ylim(-1,1)
+           #ax.set_xlim(-1,1)
+           ##fig.savefig('U_phase_{:01.3f}_{:3.2f}.png'.format(w,alph))
+           #ppU.savefig(fig)
+           #mpl.close(fig)
+
+           ## plot I
+           #fig = mpl.figure(figsize=(figsize/dpi,figsize/dpi), dpi=dpi)
+           #ax = fig.add_subplot(111,aspect=1)
+           #ax.set_title('Intensity at phase angle: {:3.2f}'.format(alph))
+           #circ = mpl.Circle((0,0),1,color='gray')
+           #ax.add_patch(circ)
+           #sc = ax.scatter(x, y, c=atm_model.I[j,A,:],lw=0,marker='s',
+           #                s=(0.6*figsize/npix2)**2,
+           #                cmap=mpl.cm.YlOrRd, zorder=10,)
+           #                #vmin=0, vmax=1)
+           #fig.tight_layout(pad=1.2)
+           #cb = fig.colorbar(sc,pad=0.02, extend='both')
+           #cb.set_label('Intensity',size=font_size)
+           #ax.set_ylim(-1,1)
+           #ax.set_xlim(-1,1)
+           ##fig.savefig('I_phase_{:01.3f}_{:3.2f}.png'.format(w,alph))
+           #ppI.savefig(fig)
+           #mpl.close(fig)
+
+           ## plot V/I
+           #fig = mpl.figure(figsize=(figsize/dpi,figsize/dpi), dpi=dpi)
+           #ax = fig.add_subplot(111,aspect=1)
+           #ax.set_title('Circular polarization V/I at alpha= {:3.2f}'.format(alph))
+           #circ = mpl.Circle((0,0),1,color='gray')
+           #ax.add_patch(circ)
+           #sc = ax.scatter(x, y, c=100*(atm_model.V[j,A,:]/atm_model.I[j,A,:]),lw=0,marker='s',
+           #                s=(0.6*figsize/npix2)**2,
+           #                cmap=mpl.cm.seismic, zorder=10,
+           #                vmin=-0.1, vmax=0.1)
+           #fig.tight_layout(pad=1.2)
+           #cb = fig.colorbar(sc,pad=0.02, extend='both')
+           #cb.set_label('V/I (%)',size=font_size)
+           #ax.set_ylim(-1,1)
+           #ax.set_xlim(-1,1)
+           ##fig.savefig('V_phase_{:01.3f}_{:3.2f}.png'.format(w,alph))
+           #ppV.savefig(fig)
+           #mpl.close(fig)
+
+           ## plot Ptot
+           #Ptot = np.sqrt((atm_model.Q**2+atm_model.U**2+atm_model.V**2)/atm_model.I)
+           #fig = mpl.figure(figsize=(figsize/dpi,figsize/dpi), dpi=dpi)
+           #ax = fig.add_subplot(111, aspect=1)
+           #ax.set_title('Polarization at phase angle: {:3.2f}'.format(alph))
+           #circ = mpl.Circle((0,0),1,color='gray')
+           #ax.add_patch(circ)
+           #sc = ax.scatter(x, y, c=100*Ptot[j,A,:],lw=0,
+           #                marker='s',s=(0.6*figsize/npix2)**2,
+           #                cmap=mpl.cm.YlOrRd, zorder=10,)
+           #                #vmin=0, vmax=5)
+           #fig.tight_layout(pad=1.2)
+           #cb = fig.colorbar(sc,pad=0.02, extend='both')
+           #cb.set_label('Degree of linear polarization (%)',size=font_size)
+           #ax.set_ylim(-1,1)
+           #ax.set_xlim(-1,1)
+           ##fig.savefig('Pt_phase_{:01.3f}_{:3.2f}.png'.format(w,alph))
+           #ppPt.savefig(fig)
+           #mpl.close(fig)
 
         ppI.close()
         ppPl.close()
@@ -1706,6 +1763,30 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
         ppPt.close()
 
     mpl.ion()
+
+def plot_pixels(X,Y,Z, title='Polarization', cmap='YlOrRd',vmin=0,vmax=1, font_size=12, npix=20):
+    """ Function to nicely plot a resolved planet """
+    figsize = 850
+    dpi = 90
+
+    fig = mpl.figure(figsize=(figsize/dpi,figsize/dpi), dpi=dpi)
+    ax = fig.add_subplot(111, aspect=1)
+    ax.set_title(title)
+    circ = mpl.Circle((0,0),1,color='gray')
+    ax.add_patch(circ)
+    sc = ax.scatter(X, Y, c=Z,lw=0, marker='s',
+                    s=(0.6*figsize/npix)**2,
+                    cmap=cmap, zorder=10,
+                    vmin=vmin, vmax=vmax)
+    fig.tight_layout(pad=1.2)
+    cb = fig.colorbar(sc,pad=0.02, extend='both')
+    cb.set_label('Degree of linear polarization (%)',size=font_size)
+    ax.set_xlim(-np.nanmax(X),np.nanmax(X))
+    ax.set_ylim(-np.nanmax(Y),np.nanmax(Y))
+    ax.set_aspect('equal')
+
+    return fig,ax
+
 
 
 def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
@@ -1790,27 +1871,9 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
 
     # loop on models to compute
     for M, model in enumerate(models):
-        # if not done yet or if forced
-        if model.name[0] == '' or force is True:
-            # Execute Mie on all aerosols types
-            for lay, layer in vars(model.layers).items():
-                for aero_name, aero in vars(layer).items():
-                    if isinstance(aero, Aerosols):
-                        if aero.layered is False:
-                            mie_code(aero, model.wvl_list, ngaur=nmug_mie, nsubr=nsubr)
-                        else:
-                            mie_shell(aero, model.wvl_list, ngaur=nmug_mie, nsubr=nsubr)
-
-                layer.mix_aerosols() #mix aerosols
-
-            # Set the opacities
-            if set_taus is True:
-                for lay, layer in vars(model.layers).items():
-                    layer.tau = layer.col_dens * layer.mixed_aerosols.sext
-
-            #execute DAP
-            dap_code(model, rename=rename, output_name=output_names[M], nmug=nmug,
-                    nmat=nmat)
+        compute_model(model, force=force,
+                      set_taus=set_taus, rename=rename, output_name=output_names[M],
+                      nmug_mie=nmug_mie, nmug=nmug, nsubr=nsubr, nmat=nmat)
 
 
     #At start, no specific cloud cover
@@ -1994,6 +2057,7 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
     atm_model.Pl = np.sqrt( (Qt**2+Ut**2)/It**2 )
     atm_model.Pt = np.sqrt( (Qt**2+Ut**2+Vt**2)/It**2 )
     atm_model.Pu = Ut/It
+    atm_model.Pv = Vt/It
 
     # store global results in first input model
     atm_model.Iall = Iall
@@ -2004,10 +2068,12 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
     atm_model.Plall = np.sqrt( (Qall**2+Uall**2)/Iall**2 )
     atm_model.Ptall = np.sqrt( (Qall**2+Uall**2+Vall**2)/Iall**2 )
     atm_model.Puall = Uall/Iall
+    atm_model.Pvall = Vall/Iall
 
     # saving dispersion
     atm_model.Pqstd = np.std(atm_model.Pqall, axis=2)
     atm_model.Pustd = np.std(atm_model.Puall, axis=2)
+    atm_model.Pvstd = np.std(atm_model.Pvall, axis=2)
     atm_model.Plstd = np.std(atm_model.Plall, axis=2)
     atm_model.Ptstd = np.std(atm_model.Ptall, axis=2)
     atm_model.Istd = np.std(atm_model.Iall, axis=2)
