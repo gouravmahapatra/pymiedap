@@ -483,14 +483,12 @@ def run_simulation(body1, body2 ,star,dt, tf, t0_moon=0, t0_planet=0):
     compute.phases([body1,body2], star)
     compute.transits([body1, body2, star])
     compute.eclipses([body1,body2], star)
-	
+
+    body1.atmosphere.name = 'Hola'
+    body2.atmosphere.name = 'Adios'
     compute.int_radiance([body1, body2])    
     I,Q,U,V = compute.combine([body1, body2])
 
-#    I = 0
-#    Q = 0
-#    U = 0
-#    V = 0
     return I,Q,U,V
 
 

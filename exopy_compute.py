@@ -15,7 +15,6 @@ from exopy_radiance import combine     as _comb
 from exopy_orbit    import nested2bp   as _2bp
 
 def orbit(moon, planet, star, delta_t, final_t, t0_moon = 0, t0_planet = 0):
-    import module_orbit as orbit
 
     moon, planet, star = _2bp(moon, planet, star, t0_moon, t0_planet, delta_t, final_t)
 

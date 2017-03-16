@@ -21,8 +21,8 @@ def combine(bodies, reference):
 
 		IQUV = [body.radiance.I, body.radiance.Q, body.radiance.U, body.radiance.V]
 
-        # this rotation could be written in a much much simpler way!
-        L = np.array([[ones , zeros, zeros, zeros],
+        	# this rotation could be written in a much much simpler way!
+        	L = np.array([[ones , zeros, zeros, zeros],
                       [zeros,
                        np.cos(2*body.geometry.ref_plane_to_ref_line_angle),
                        np.sin(2*body.geometry.ref_plane_to_ref_line_angle),
@@ -32,17 +32,17 @@ def combine(bodies, reference):
                        zeros],
                       [zeros, zeros, zeros, ones]])
 
-        IQUV  = np.einsum('ijt,jt->it',L,IQUV)
+        	IQUV  = np.einsum('ijt,jt->it',L,IQUV)
 
-        body.radiance.I_ref = distance_scale * size_scale * IQUV[0,:]
-        body.radiance.Q_ref = distance_scale * size_scale * IQUV[1,:]
-        body.radiance.U_ref = distance_scale * size_scale * IQUV[2,:]
-        body.radiance.V_ref = distance_scale * size_scale * IQUV[3,:]
+        	body.radiance.I_ref = distance_scale * size_scale * IQUV[0,:]
+        	body.radiance.Q_ref = distance_scale * size_scale * IQUV[1,:]
+        	body.radiance.U_ref = distance_scale * size_scale * IQUV[2,:]
+        	body.radiance.V_ref = distance_scale * size_scale * IQUV[3,:]
 
-        I = I + body.radiance.I_ref
-        Q = Q + body.radiance.Q_ref
-        U = U + body.radiance.U_ref
-        V = V + body.radiance.V_ref
+        	I = I + body.radiance.I_ref
+       		Q = Q + body.radiance.Q_ref
+        	U = U + body.radiance.U_ref
+        	V = V + body.radiance.V_ref
 
 	return I, Q, U, V,
 
@@ -59,15 +59,15 @@ def integration(body):
     wvl_list = body.atmosphere.wvl_list
     nwvl = len(wvl_list)
 
-    body.grid.I = np.zeros_like((nwvl,body.grid.shadow))
-    body.grid.Q = np.zeros_like((nwvl,body.grid.shadow))
-    body.grid.U = np.zeros_like((nwvl,body.grid.shadow))
-    body.grid.V = np.zeros_like((nwvl,body.grid.shadow))
+    body.grid.I = np.zeros((nwvl,np.size(body.grid.shadow)))
+    body.grid.Q = np.zeros((nwvl,np.size(body.grid.shadow)))
+    body.grid.U = np.zeros((nwvl,np.size(body.grid.shadow)))
+    body.grid.V = np.zeros((nwvl,np.size(body.grid.shadow)))
 
-    Ip = np.zeros_like((nwvl,time))
-    Qp = np.zeros_like((nwvl,time))
-    Up = np.zeros_like((nwvl,time))
-    Vp = np.zeros_like((nwvl,time))
+    Ip = np.zeros((nwvl,np.size(time)))
+    Qp = np.zeros((nwvl,np.size(time)))
+    Up = np.zeros((nwvl,np.size(time)))
+    Vp = np.zeros((nwvl,np.size(time)))
 
     area  = np.repeat(body.grid.area[:,np.newaxis],4,1).T
     phase = np.degrees(body.geometry.phase_angle)
@@ -79,7 +79,7 @@ def integration(body):
     scene = body.properties.fourier_scene
 
 
-    for l,wvl in wvl_list:
+    for l,wvl in enumerate(wvl_list):
         for i,j in enumerate(time):
 
             print i+1, ' out of ', len(time)
