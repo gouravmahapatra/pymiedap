@@ -21,28 +21,22 @@ def combine(bodies, reference):
 
 		IQUV = [body.radiance.I, body.radiance.Q, body.radiance.U, body.radiance.V]
 
-        	# this rotation could be written in a much much simpler way!
-        	L = np.array([[ones , zeros, zeros, zeros],
-                      [zeros,
-                       np.cos(2*body.geometry.ref_plane_to_ref_line_angle),
-                       np.sin(2*body.geometry.ref_plane_to_ref_line_angle),
-                       zeros],
-                      [zeros,-np.sin(2*body.geometry.ref_plane_to_ref_line_angle),
-                       np.cos(2*body.geometry.ref_plane_to_ref_line_angle),
-                       zeros],
-                      [zeros, zeros, zeros, ones]])
+        # Rotation of the Stokes vectors into observer plane
+        nQ, nU = pmd.rotate_stokes(body.radiance.Q, body.radiance.U,
+                                   body.geometry.ref_plane_to_ref_line_angle)
 
-        	IQUV  = np.einsum('ijt,jt->it',L,IQUV)
+        body.radiance.Q = nQ
+        body.radiance.U = nU
 
-        	body.radiance.I_ref = distance_scale * size_scale * IQUV[0,:]
-        	body.radiance.Q_ref = distance_scale * size_scale * IQUV[1,:]
-        	body.radiance.U_ref = distance_scale * size_scale * IQUV[2,:]
-        	body.radiance.V_ref = distance_scale * size_scale * IQUV[3,:]
+        body.radiance.I_ref = distance_scale * size_scale * body.radiance.I
+        body.radiance.Q_ref = distance_scale * size_scale * body.radiance.Q
+        body.radiance.U_ref = distance_scale * size_scale * body.radiance.U
+        body.radiance.V_ref = distance_scale * size_scale * body.radiance.V
 
-        	I = I + body.radiance.I_ref
-       		Q = Q + body.radiance.Q_ref
-        	U = U + body.radiance.U_ref
-        	V = V + body.radiance.V_ref
+        I = I + body.radiance.I_ref
+        Q = Q + body.radiance.Q_ref
+        U = U + body.radiance.U_ref
+        V = V + body.radiance.V_ref
 
 	return I, Q, U, V,
 
@@ -56,18 +50,22 @@ def integration(body):
     #files = dict(np.genfromtxt('exopy/scenes.dat', dtype='str'))
 
     time = body.ephemeris.time
-    wvl_list = body.atmosphere.wvl_list
+    wvl_list = np.array(body.atmosphere.wvl_list)
     nwvl = len(wvl_list)
 
-    body.grid.I = np.zeros((nwvl,np.size(body.grid.shadow)))
-    body.grid.Q = np.zeros((nwvl,np.size(body.grid.shadow)))
-    body.grid.U = np.zeros((nwvl,np.size(body.grid.shadow)))
-    body.grid.V = np.zeros((nwvl,np.size(body.grid.shadow)))
+    ngrids = np.shape(body.grid.shadow)
+    ngrids = (nwvl,) + ngrids
+    body.grid.I = np.zeros(ngrids)
+    body.grid.Q = np.zeros(ngrids)
+    body.grid.U = np.zeros(ngrids)
+    body.grid.V = np.zeros(ngrids)
 
-    Ip = np.zeros((nwvl,np.size(time)))
-    Qp = np.zeros((nwvl,np.size(time)))
-    Up = np.zeros((nwvl,np.size(time)))
-    Vp = np.zeros((nwvl,np.size(time)))
+    ngrids = np.shape(time)
+    ngrids = (nwvl,) + ngrids
+    Ip = np.zeros(ngrids)
+    Qp = np.zeros(ngrids)
+    Up = np.zeros(ngrids)
+    Vp = np.zeros(ngrids)
 
     area  = np.repeat(body.grid.area[:,np.newaxis],4,1).T
     phase = np.degrees(body.geometry.phase_angle)
@@ -78,7 +76,6 @@ def integration(body):
 
     scene = body.properties.fourier_scene
 
-
     for l,wvl in enumerate(wvl_list):
         for i,j in enumerate(time):
 
@@ -86,6 +83,10 @@ def integration(body):
             A = body.grid.shadow[i,:]>10E-10
 
             IQUV = np.zeros([4,body.grid.N_points])
+
+            # If atmosphere not calculated yet
+            if body.atmosphere.name[l] == '':
+                pmd.compute_model(body.atmosphere)
 
             ######################################################################################
             #######################       PMD.READ_DAP_OUTPUT      ###############################
