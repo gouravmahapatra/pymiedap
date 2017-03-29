@@ -68,27 +68,27 @@ def test_integration(body, scene='clear', plot = 'no'):
 	sza   = np.degrees(body.grid.solar_zenith_angle)
 	emission = np.degrees(body.grid.observer_zenith_angle)
 	beta  = np.degrees(body.grid.beta)
-    	phi   = np.degrees(body.grid.azimuth)
+    phi   = np.degrees(body.grid.azimuth)
 
 	for i,j in enumerate(time):
-	    t1 = t.time()
-	    print i+1, ' out of ', len(time)
-	    A = body.grid.shadow[i,:]>10E-10
+        t1 = t.time()
+        print i+1, ' out of ', len(time)
+        A = body.grid.shadow[i,:]>10E-10
 
-	    I,Q,U,V = pmd.read_dap_output(np.repeat(phase[i], sum(A)), sza[i,A], emission[A], file2[scene], beta=beta[i,A], phi=phi[i,A])
+        I,Q,U,V = pmd.read_dap_output(np.repeat(phase[i], sum(A)), sza[i,A], emission[A], file2[scene], beta=beta[i,A], phi=phi[i,A])
 
-	    output[0,i,A] = 4*np.cos(np.radians(sza[i,A]))*body.grid.shadow[i,A]*area[0,A]*I/np.pi
-	    output[1,i,A] = 4*np.cos(np.radians(sza[i,A]))*body.grid.shadow[i,A]*area[1,A]*Q/np.pi
-	    output[2,i,A] = 4*np.cos(np.radians(sza[i,A]))*body.grid.shadow[i,A]*area[2,A]*U/np.pi
-	    print t.time()-t1
+        output[0,i,A] = 4*np.cos(np.radians(sza[i,A]))*body.grid.shadow[i,A]*area[0,A]*I/np.pi
+        output[1,i,A] = 4*np.cos(np.radians(sza[i,A]))*body.grid.shadow[i,A]*area[1,A]*Q/np.pi
+        output[2,i,A] = 4*np.cos(np.radians(sza[i,A]))*body.grid.shadow[i,A]*area[2,A]*U/np.pi
+        print t.time()-t1
 
 	Ip = np.nansum(output[0,:],1)
 	Qp = np.nansum(output[1,:],1)
 	Up = np.nansum(output[2,:],1)
 
-#==========================================================================
-#==========================================================================
-#==========================================================================
+    #==========================================================================
+    #==========================================================================
+    #==========================================================================
 	if plot != 'no':
 
         	data = np.loadtxt(file1[scene])
@@ -132,56 +132,50 @@ def test_integration(body, scene='clear', plot = 'no'):
 	return [Ip, Qp, Up]
 
 
-
-
-
-
-
-
 def new_body(names, types):
     '''
-===============================================================================
-  Function: model.new_body        November 2016, Javier B.M., TU Delft
--------------------------------------------------------------------------------
+    ===============================================================================
+    Function: model.new_body        November 2016, Javier B.M., TU Delft
+    -------------------------------------------------------------------------------
 
-The function creates a set of new body objects
+    The function creates a set of new body objects
 
-Parameters
-----------
+    Parameters
+    ----------
 
-names : str/list
-    name of the body(ies) to be created
-types : str/list
-    type of body(ies) to be created: 'planet', 'moon', 'star'
+    names : str/list
+        name of the body(ies) to be created
+    types : str/list
+        type of body(ies) to be created: 'planet', 'moon', 'star'
 
-Returns
--------
+    Returns
+    -------
 
-bodies : model.body object/list
-    Output generated body(ies)
+    bodies : model.body object/list
+        Output generated body(ies)
 
-Body object description
-----------------------
+    Body object description
+    ----------------------
 
-A body object serves as binder element for all the information related to \
-a celestial body. The following subclasses are associated to a body-type \
-object:
+    A body object serves as binder element for all the information related to \
+    a celestial body. The following subclasses are associated to a body-type \
+    object:
 
-* Properties: contains the main physical properties of the body
+    * Properties: contains the main physical properties of the body
 
-* Orbital elements: contains the orbital elements describing the orbit of the \
-body
+    * Orbital elements: contains the orbital elements describing the orbit of the \
+    body
 
-* Ephemeris: contains the position of each body for each epoch
+    * Ephemeris: contains the position of each body for each epoch
 
-* Geometry: contains the angles defining the geometry for each epoch, as well \
-as the shadowing conditions
+    * Geometry: contains the angles defining the geometry for each epoch, as well \
+    as the shadowing conditions
 
-* Flags: contains a series of flag indicators as a function of time
+    * Flags: contains a series of flag indicators as a function of time
 
-* Grid: contains the grid properties for discretizing the body
+    * Grid: contains the grid properties for discretizing the body
 
-===============================================================================
+    ===============================================================================
     '''
     import exopy_functions as fun
     import numpy as np
@@ -198,47 +192,47 @@ as the shadowing conditions
 
 def new_system(identifier):
     '''
-===============================================================================
-  Function: model.new_system        November 2016, Javier B.M., TU Delft
--------------------------------------------------------------------------------
+    ===============================================================================
+    Function: model.new_system        November 2016, Javier B.M., TU Delft
+    -------------------------------------------------------------------------------
 
-The function creates a set of new body objects, based on a predefined system \
-stored in the 'model.py' file.
+    The function creates a set of new body objects, based on a predefined system \
+    stored in the 'model.py' file.
 
-Parameters
-----------
+    Parameters
+    ----------
 
-identifier : str
-    identification string of the system of bodies to be loaded
+    identifier : str
+        identification string of the system of bodies to be loaded
 
-Returns
--------
+    Returns
+    -------
 
-bodies : model.body object/list
-    Output generated body(ies)
+    bodies : model.body object/list
+        Output generated body(ies)
 
-Body object description
-----------------------
+    Body object description
+    ----------------------
 
-A body object serves as binder element for all the information related to \
-a celestial body. The following subclasses are associated to a body-type \
-object:
+    A body object serves as binder element for all the information related to \
+    a celestial body. The following subclasses are associated to a body-type \
+    object:
 
-* Properties: contains the main physical properties of the body
+    * Properties: contains the main physical properties of the body
 
-* Orbital elements: contains the orbital elements describing the orbit of the \
-body
+    * Orbital elements: contains the orbital elements describing the orbit of the \
+    body
 
-* Ephemeris: contains the position of each body for each epoch
+    * Ephemeris: contains the position of each body for each epoch
 
-* Geometry: contains the angles defining the geometry for each epoch, as well \
-as the shadowing conditions
+    * Geometry: contains the angles defining the geometry for each epoch, as well \
+    as the shadowing conditions
 
-* Flags: contains a series of flag indicators as a function of time
+    * Flags: contains a series of flag indicators as a function of time
 
-* Grid: contains the grid properties for discretizing the body
+    * Grid: contains the grid properties for discretizing the body
 
-===============================================================================
+    ===============================================================================
     '''
     import exopy_functions as fun
 
