@@ -2358,7 +2358,6 @@ def fourier_matrix(nmu=20, surf_mat=np.diag([1,0,0,0])):
     L = np.zeros((nmat,nmat,nmu,nmu), order='F')
 
     L[0:,0:,:,:] = surf_mat[:,:,np.newaxis,np.newaxis]
-    L = L/2*np.pi
     #Bmp = np.zeros((nmat,nmat,nphi,nm))
     #Bmm = np.zeros((nmat,nmat,nphi,nm))
 
@@ -2374,7 +2373,7 @@ def fourier_matrix(nmu=20, surf_mat=np.diag([1,0,0,0])):
     #L2 = scpinteg.simps(Lm,phi,axis=4)
     #L2 = L2/(phi[-1]-phi[0])
 
-    Lfin = np.zeros((4*nmuMAX,4*nmuMAX))
+    Lfin = np.zeros((4*nmuMAX,4*nmuMAX),order='F')
     for k in np.arange(nmat):
         for l in np.arange(nmat):
             for i in np.arange(nmu):
