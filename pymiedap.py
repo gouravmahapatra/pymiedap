@@ -85,6 +85,7 @@ class Layer():
         updates the vectors that depend on wavelength"""
         self.tau = self.tau[0] * np.ones(nitems)
         self.tau_g = self.tau_g[0] * np.ones(nitems)
+        self.tau_ray = self.tau_ray[0] * np.ones(nitems)
         self.bmsca = self.bmsca[0] * np.ones(nitems)
         self.bmabs = self.bmabs[0] * np.ones(nitems)
         self.basca = self.basca[0] * np.ones(nitems)
