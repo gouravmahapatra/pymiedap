@@ -98,10 +98,10 @@ def integration(body):
                                         phi=phi[i,A])
 
             # renormalizing
-            IQUV[0,A] = 4*np.cos(np.radians(sza[i,A]))*body.grid.shadow[i,A]*area[0,A]*I/np.pi
-            IQUV[1,A] = 4*np.cos(np.radians(sza[i,A]))*body.grid.shadow[i,A]*area[1,A]*Q/np.pi
-            IQUV[2,A] = 4*np.cos(np.radians(sza[i,A]))*body.grid.shadow[i,A]*area[2,A]*U/np.pi
-            IQUV[3,A] = 4*np.cos(np.radians(sza[i,A]))*body.grid.shadow[i,A]*area[3,A]*V/np.pi
+            IQUV[0,A] = np.cos(np.radians(sza[i,A]))*body.grid.shadow[i,A]*area[0,A]*I
+            IQUV[1,A] = np.cos(np.radians(sza[i,A]))*body.grid.shadow[i,A]*area[1,A]*Q
+            IQUV[2,A] = np.cos(np.radians(sza[i,A]))*body.grid.shadow[i,A]*area[2,A]*U
+            IQUV[3,A] = np.cos(np.radians(sza[i,A]))*body.grid.shadow[i,A]*area[3,A]*V
 
             # storing disk resolved case
             body.grid.I[l,i,:] = IQUV[0,:]
