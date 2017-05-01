@@ -1,29 +1,79 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Dec 12 17:49:51 2016
+==================================================================
+EXOPY module: exopy_transit.py
+Delft University of Technology
+------------------------------------------------------------------
+Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+Date: 2016-2017
+------------------------------------------------------------------
 
-@author: javier
+Dependences:
+
+DESCRIPTION
+------------------------------------------------------------------
+The 'expoy_transit' script contain the functions required for the
+computation of the pixel darkening of the planetary system bodies 
+due to shadowing through transits.
+
+LIST OF FUNCTIONS
+------------------------------------------------------------------
+ - transits: Function computing the transits shadowing of the extra-
+	     solar planetary system.
+
+
 """
 
 
 import exopy_config as _cfg
 import numpy as np
-from exopy_functions import PolyArea
+#from exopy_functions import PolyArea
 
 
 def transits(bodies, ref_line_angle = None):   
-    '''
-    bodies = [Earth,Moon,Sun]
-    compute = 'cd'
-    N = 200
-    el = 0
-    az = 0
-    ref_line_angle = None
+    """
+==================================================================
+EXOPY function: eclipse()
+Delft University of Technology
+------------------------------------------------------------------
+Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+Date: 2016-2017
+------------------------------------------------------------------
+
+Dependences:
+
+DESCRIPTION
+------------------------------------------------------------------
+Computes the degree of pixel darkening due to eclipses shadowing 
+among the different bodies.
+
+INPUTS
+------------------------------------------------------------------
+ - bodies: list of body type of objects [-] (list)
+ - ref_line_angle: shift angle towards reference line for the com-
+		   putation of reflected radiance [rad] (numpy 
+		   array)
+
+OUTPUTS
+------------------------------------------------------------------
+ - bodies: updated body objects list [-] (list)
+
+
+    """
+
+#    '''
+#    bodies = [Earth,Moon,Sun]
+#    compute = 'cd'
+#    N = 200
+#    el = 0
+#    az = 0
+#    ref_line_angle = None
+#    
+#    for body in bodies:
+#        if not hasattr(body.grid, 'shadow'):
+#           body.grid.shadow = np.zeros([len(body.ephemeris.time), len(body.grid.nodes)])  
+#    '''
     
-    for body in bodies:
-        if not hasattr(body.grid, 'shadow'):
-           body.grid.shadow = np.zeros([len(body.ephemeris.time), len(body.grid.nodes)])  
-    '''    
     import itertools
     
     # Time vector

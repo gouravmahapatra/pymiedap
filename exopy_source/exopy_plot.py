@@ -1,9 +1,26 @@
 # -*- coding: utf-8 -*-
 
 """
-Created on Sun Nov 20 22:01:58 2016
+==================================================================
+EXOPY module: exopy_plot.py
+Delft University of Technology
+------------------------------------------------------------------
+Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+Date: 2016-2017
+------------------------------------------------------------------
 
-@author: javier
+Dependences:
+
+DESCRIPTION
+------------------------------------------------------------------
+Script containing the functions pre-defined to display the results
+from EXOPY.
+
+LIST OF FUNCTIONS
+------------------------------------------------------------------
+ - -- TBC --
+
+
 """
 
 import matplotlib as _matplotlib
@@ -17,82 +34,232 @@ from exopy_functions import grid_area as _grid_area
 import time as _time
 import exopy_config as _cfg
 
+
+def IQ2(bodies, t = 0, wvl=0, phase = False, save = False):
+    from matplotlib.patches import Rectangle
+    # create a figure with subplots
+    fig = _plt.figure(figsize=(15,7))
+    ax1 = _plt.subplot2grid((2,4), (0,0), colspan=2)
+    ax2 = _plt.subplot2grid((2,4), (1,0), sharex=ax1, colspan=2)
+    ax3 = _plt.subplot2grid((2,4), (0,2))
+    ax5 = _plt.subplot2grid((2,4), (0,3))
+    ax4 = _plt.subplot2grid((2,4), (1,2))
+    ax6 = _plt.subplot2grid((2,4), (1,3))
+
+    if phase==False:
+        xlabelstr = 'Time [Earth days]'
+    else:
+        xlabelstr = 'Phase angle [deg]'
+	
+    I0ref = max(abs(bodies[0].radiance.I_ref[wvl,:]))
+    I1ref = max(abs(bodies[1].radiance.I_ref[wvl,:]))
+    Q0ref = max(abs(bodies[0].radiance.Q_ref[wvl,:]))
+    Q1ref = max(abs(bodies[1].radiance.Q_ref[wvl,:]))
+
+    ax1.grid()
+    ax1.set_title('Flux')
+    ax1.set_xlabel(xlabelstr)
+    ax1.set_ylabel('$\hat I~[-]$')
+    I0 = bodies[0].radiance.I[wvl,:]#/I0ref
+    I0[_np.isnan(I0)] = 0
+    I1 = bodies[1].radiance.I[wvl,:]#/I1ref
+    I1[_np.isnan(I1)] = 0
+    if phase is False:
+        ax1.plot(bodies[0].ephemeris.time/3600/24, I0,'-k', linewidth = 1.5, label = bodies[0].name)
+        ax1.plot(bodies[1].ephemeris.time/3600/24, I1,'k' , dashes=[10, 5, 10, 5], linewidth = 1.5, label = bodies[1].name)
+    else:
+        ax1.plot(_np.rad2deg(bodies[0].geometry.phase_angle), I0,'-k', linewidth = 1.5, label = bodies[0].name)
+        ax1.plot(_np.rad2deg(bodies[1].geometry.phase_angle), I1,'k' , dashes=[10, 10, 10, 10], linewidth = 1.5, label = bodies[1].name)
+
+    #ax1.legend(loc=1)
+
+    ax2.grid()
+    ax2.set_title('Q parameter')
+    ax2.set_xlabel(xlabelstr)
+    ax2.set_ylabel('$\hat Q~[-]$')
+    Q0 = bodies[0].radiance.Q[wvl,:]#/Q0ref
+    Q0[_np.isnan(Q0)] = 0
+    Q1 = bodies[1].radiance.Q[wvl,:]#/Q1ref
+    Q1[_np.isnan(Q1)] = 0    
+    if phase is False:
+        ax2.plot(bodies[0].ephemeris.time/3600/24, Q0,'-k', linewidth = 1.5, label = bodies[0].name)
+        ax2.plot(bodies[1].ephemeris.time/3600/24, Q1,'k' , dashes=[10, 5, 10, 5], linewidth = 1.5, label = bodies[1].name)
+    else:
+        ax2.plot(_np.rad2deg(bodies[0].geometry.phase_angle), Q0,'-k', linewidth = 1.5, label = bodies[0].name)
+        ax2.plot(_np.rad2deg(bodies[1].geometry.phase_angle), Q1,'k' , dashes=[10, 5, 10, 5], linewidth = 1.5, label = bodies[1].name)
+
+    ax2.legend(loc=4)
+
+
+
+    circle1 = _plt.Circle((0, 0), 1, facecolor = _plot_color('circle1'), edgecolor = _plot_color('circle'), linewidth = 2.5)
+    circle2 = _plt.Circle((0, 0), 1, edgecolor = _plot_color('circle'), facecolor = _plot_color('circle1'), fill=True , linewidth = 2.5)
+    circle3 = _plt.Circle((0, 0), 1, edgecolor = _plot_color('circle'), facecolor = _plot_color('circle1'), fill=True , linewidth = 2.5)
+    circle4 = _plt.Circle((0, 0), 1, edgecolor = _plot_color('circle'), facecolor = _plot_color('circle1'), fill=True , linewidth = 2.5)
+    ax3.add_artist(circle1)
+    ax4.add_artist(circle2)
+    ax5.add_artist(circle3)
+    ax6.add_artist(circle4)
+
+    #faces = _plot_color('faces')
+    faces = "none"
+
+    N 	= _np.sum(bodies[0].grid.shadow[t,:]!=0)
+    faces00	= bodies[0].grid.faces[bodies[0].grid.shadow[t,:]!=0,0,0]
+    faces10	= bodies[0].grid.faces[bodies[0].grid.shadow[t,:]!=0,1,0]
+    faces01	= bodies[0].grid.faces[bodies[0].grid.shadow[t,:]!=0,0,1]
+    I0	= bodies[0].grid.I[wvl,t,bodies[0].grid.shadow[t,:]!=0]#/I0ref
+    Q0	= bodies[0].grid.Q[wvl,t,bodies[0].grid.shadow[t,:]!=0]#/Q0ref
+    
+    patches = []
+    for i in range(N):
+        square = Rectangle( (faces00[i]*2,faces10[i]*2),-2*faces00[i]+2*faces01[i],-2*faces00[i]+2*faces01[i] )
+        patches.append(square)
+
+    p1 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
+    p2 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
+
+    p1.set_array(I0)
+    p2.set_array(Q0)
+    aux3 = ax3.add_collection(p1)
+    fig.colorbar(aux3,ax=ax3,fraction=0.046, pad=0.04)
+    aux4 = ax4.add_collection(p2)
+    fig.colorbar(aux4,ax=ax4,fraction=0.046, pad=0.04)
+
+    ax3.set_title('Planet I parameter')
+    ax4.set_title('Planet Q parameter')
+
+    _plot_config_r(ax3)
+    _plot_config_r(ax4)
+
+    _plt.tight_layout()
+
+    circle5 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+    circle6 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+    ax3.add_artist(circle5)
+    ax4.add_artist(circle6)
+	
+
+
+
+    N 	= _np.sum(bodies[1].grid.shadow[t,:]!=0)
+    faces00	= bodies[1].grid.faces[bodies[1].grid.shadow[t,:]!=0,0,0]
+    faces10	= bodies[1].grid.faces[bodies[1].grid.shadow[t,:]!=0,1,0]
+    faces01	= bodies[1].grid.faces[bodies[1].grid.shadow[t,:]!=0,0,1]
+    I1	= bodies[1].grid.I[wvl,t,bodies[1].grid.shadow[t,:]!=0]#/I1ref
+    Q1	= bodies[1].grid.Q[wvl,t,bodies[1].grid.shadow[t,:]!=0]#/Q1ref
+    
+    patches = []
+    for i in range(N):
+        square = Rectangle( (faces00[i]*2,faces10[i]*2),-2*faces00[i]+2*faces01[i],-2*faces00[i]+2*faces01[i] )
+        patches.append(square)
+
+    p3 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
+    p4 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
+
+    p3.set_array(I1)
+    p4.set_array(Q1)
+    aux5 = ax5.add_collection(p3)
+    fig.colorbar(aux5,ax=ax5,fraction=0.046, pad=0.04)
+    aux6 = ax6.add_collection(p4)
+    fig.colorbar(aux6,ax=ax6,fraction=0.046, pad=0.04)
+
+    ax5.set_title('Moon I parameter')
+    ax6.set_title('Moon Q parameter')
+
+    _plot_config_r(ax5)
+    _plot_config_r(ax6)
+
+    circle7 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+    circle8 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+    ax5.add_artist(circle7)
+    ax6.add_artist(circle8)
+
+    _plt.tight_layout()
+
+
+    if save:
+        filename = 'IQ_' + '_'  + _time.strftime("%d-%m-%Y") + '_' + _time.strftime("%X")
+
+        fig.savefig('Images/'+filename + '.eps')
+        fig.savefig('Images/'+filename + '.png')
+
+
+
 def geometry_d(body, t = 0, save = False, dots = False):
 
-    	print('\n    ⇒ Plotting geometry parameters of ' + body.name+' at t = '+str(body.ephemeris.time[t])+' seconds')
-    	from matplotlib.patches import Rectangle
+    print('\n    ⇒ Plotting geometry parameters of ' + body.name+' at t = '+str(body.ephemeris.time[t])+' seconds')
+    from matplotlib.patches import Rectangle
 
-        # create a figure with subplots
-    	fig = _plt.figure(figsize=(10,8))
-        ax1 = _plt.subplot2grid((2,2), (0,0))
-        ax2 = _plt.subplot2grid((2,2), (0,1))
-	ax3 = _plt.subplot2grid((2,2), (1,0))
-	ax4 = _plt.subplot2grid((2,2), (1,1))
-
-    	if _cfg.plot_faces == True:
-    		faces = _plot_color('faces')
-    	else:
-		faces = "none"
-    	if dots:
-        	ax.plot(body.grid.nodes[:,0]*2, body.grid.nodes[:,1]*2, 'o', color = _plot_color('nodes'), markersize=3)
+    # create a figure with subplots
+    fig = _plt.figure(figsize=(10,8))
+    ax1 = _plt.subplot2grid((2,2), (0,0))
+    ax2 = _plt.subplot2grid((2,2), (0,1))
+    ax3 = _plt.subplot2grid((2,2), (1,0))
+    ax4 = _plt.subplot2grid((2,2), (1,1))
 
 
+    if _cfg.plot_faces == True:
+    	faces = _plot_color('faces')
+    else:
+        faces = "none"
+    if dots:
+        ax.plot(body.grid.nodes[:,0]*2, body.grid.nodes[:,1]*2, 'o', color = _plot_color('nodes'), markersize=3)
 
-    	patches = []
-    	for i in range(body.grid.N_points):
-		square = Rectangle( (body.grid.faces[i,0,0]*2,body.grid.faces[i,1,0]*2),-2*body.grid.faces[i,0,0]+2*body.grid.faces[i,0,1],-2*body.grid.faces[i,0,0]+2*body.grid.faces[i,0,1] )
-		patches.append(square)
+    patches = []
+    for i in range(body.grid.N_points):
+        square = Rectangle( (body.grid.faces[i,0,0]*2,body.grid.faces[i,1,0]*2),-2*body.grid.faces[i,0,0]+2*body.grid.faces[i,0,1],-2*body.grid.faces[i,0,0]+2*body.grid.faces[i,0,1] )
+        patches.append(square)
 
-   	p1 = _PatchCollection(patches,cmap=_matplotlib.cm.YlOrRd, alpha = 1, edgecolor = faces)
-   	p2 = _PatchCollection(patches,cmap=_matplotlib.cm.YlOrRd, alpha = 1, edgecolor = faces)
-   	p3 = _PatchCollection(patches,cmap=_matplotlib.cm.coolwarm, alpha = 1, edgecolor = faces)
-   	p4 = _PatchCollection(patches,cmap=_matplotlib.cm.coolwarm, alpha = 1, edgecolor = faces)
+    p1 = _PatchCollection(patches,cmap=_matplotlib.cm.YlOrRd, alpha = 1, edgecolor = faces)
+    p2 = _PatchCollection(patches,cmap=_matplotlib.cm.YlOrRd, alpha = 1, edgecolor = faces)
+    p3 = _PatchCollection(patches,cmap=_matplotlib.cm.coolwarm, alpha = 1, edgecolor = faces)
+    p4 = _PatchCollection(patches,cmap=_matplotlib.cm.coolwarm, alpha = 1, edgecolor = faces)
 
 
-	p1.set_array(_np.degrees(body.grid.solar_zenith_angle[t,:]))
-	p2.set_array(_np.degrees(body.grid.observer_zenith_angle))
-	p3.set_array(_np.degrees(body.grid.beta[t,:]))
-	p4.set_array(_np.degrees(body.grid.azimuth[t,:]))
-    	aux1 = ax1.add_collection(p1)
-    	fig.colorbar(aux1,ax=ax1,fraction=0.046, pad=0.04)
-    	aux2 = ax2.add_collection(p2)
-    	fig.colorbar(aux2,ax=ax2,fraction=0.046, pad=0.04)
-    	aux3 = ax3.add_collection(p3)
-    	fig.colorbar(aux3,ax=ax3,fraction=0.046, pad=0.04)
-    	aux4 = ax4.add_collection(p4)
-    	fig.colorbar(aux4,ax=ax4,fraction=0.046, pad=0.04)
+    p1.set_array(_np.degrees(body.grid.solar_zenith_angle[t,:]))
+    p2.set_array(_np.degrees(body.grid.observer_zenith_angle))
+    p3.set_array(_np.degrees(body.grid.beta[t,:]))
+    p4.set_array(_np.degrees(body.grid.azimuth[t,:]))
+    aux1 = ax1.add_collection(p1)
+    fig.colorbar(aux1,ax=ax1,fraction=0.046, pad=0.04)
+    aux2 = ax2.add_collection(p2)
+    fig.colorbar(aux2,ax=ax2,fraction=0.046, pad=0.04)
+    aux3 = ax3.add_collection(p3)
+    fig.colorbar(aux3,ax=ax3,fraction=0.046, pad=0.04)
+    aux4 = ax4.add_collection(p4)
+    fig.colorbar(aux4,ax=ax4,fraction=0.046, pad=0.04)
 
-	circle1 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
-	circle2 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
-	circle3 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
-	circle4 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
-    	ax1.add_artist(circle1)
-    	ax2.add_artist(circle2)
-    	ax3.add_artist(circle3)
-    	ax4.add_artist(circle4)
+    circle1 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+    circle2 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+    circle3 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+    circle4 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+    ax1.add_artist(circle1)
+    ax2.add_artist(circle2)
+    ax3.add_artist(circle3)
+    ax4.add_artist(circle4)
 
-        ax1.set_title('SZA')
-        ax2.set_title('EMISSION')
-        ax3.set_title('BETA')
-        ax4.set_title('PHI')
+    ax1.set_title('SZA')
+    ax2.set_title('EMISSION')
+    ax3.set_title('BETA')
+    ax4.set_title('PHI')
 
-    	_plot_config_r(ax1)
-    	_plot_config_r(ax2)
-    	_plot_config_r(ax3)
-    	_plot_config_r(ax4)
-    	_plt.tight_layout()
+    _plot_config_r(ax1)
+    _plot_config_r(ax2)
+    _plot_config_r(ax3)
+    _plot_config_r(ax4)
+    _plt.tight_layout()
 
-	if save:
+    if save:
 
-		filename = 'geometry-pixels_' + planet1.properties.fourier_scene + '_alpha-' + str(int(_np.round(_np.degrees(body.geometry.phase_angle[t])))) + '_'  + _time.strftime("%d-%m-%Y") + '_' + _time.strftime("%X")
+        filename = 'geometry-pixels_' + planet1.properties.fourier_scene + '_alpha-' + str(int(_np.round(_np.degrees(body.geometry.phase_angle[t])))) + '_'  + _time.strftime("%d-%m-%Y") + '_' + _time.strftime("%X")
 
-		fig.savefig('Images/'+filename + '.eps')
-		fig.savefig('Images/'+filename + '.png')
+        fig.savefig('Images/'+filename + '.eps')
+        fig.savefig('Images/'+filename + '.png')
 
 
 
 def radiance(body, wvl=0, phase = False, save = False):
-
     # create a figure with subplots
     fig = _plt.figure(figsize=(9,12))
     ax1 = _plt.subplot2grid((4,1), (0,0))
@@ -139,59 +306,62 @@ def radiance(body, wvl=0, phase = False, save = False):
     _plt.tight_layout()
 
     if save:
-		filename = 'radiance_' + body.properties.fourier_scene + '_alpha-' + str(int(_np.round(_np.degrees(body.geometry.phase_angle[t])))) + '_'  + _time.strftime("%d-%m-%Y") + '_' + _time.strftime("%X")
+        filename = 'radiance_' + body.properties.fourier_scene + '_alpha-' + str(int(_np.round(_np.degrees(body.geometry.phase_angle[t])))) + '_'  + _time.strftime("%d-%m-%Y") + '_' + _time.strftime("%X")
 
-		fig.savefig('Images/'+filename + '.eps')
-		fig.savefig('Images/'+filename + '.png')
+        fig.savefig('Images/'+filename + '.eps')
+        fig.savefig('Images/'+filename + '.png')
+
+    _plt.show()
 
 
-def detail_radiance(bodies,I,Q,U,V, save = False):
+def detail_radiance(bodies,I,Q,U,V, wvl = 0, save = False):
 
-	body1 = bodies[0]
-	body2 = bodies[1]
+        body1 = bodies[0]
+        body2 = bodies[1]
 
         # create a figure with subplots
         ax3 = _plt.subplot2grid((2,2), (0,0))
         ax4 = _plt.subplot2grid((2,2), (0,1),sharey  = ax3)
-	ax5 = _plt.subplot2grid((2,2), (1,0),colspan = 2  )
+        ax5 = _plt.subplot2grid((2,2), (1,0),colspan = 2  )
 
-	ax3.grid()
-	ax3.set_title(body1.name + ' reflected light')
-	ax3.set_xlabel('Time [Earth days]')
-	ax3.plot(body1.ephemeris.time/3600/24, body1.radiance.I_ref,'-')
+        ax3.grid()
+        ax3.set_title(body1.name + ' reflected light')
+        ax3.set_xlabel('Time [Earth days]')
+        ax3.plot(body1.ephemeris.time/3600/24, body1.radiance.I_ref[wvl,:],'-')
         #ax3.plot(body2.ephemeris.time, body2.radiance.I)
-        ax3.plot(body1.ephemeris.time/3600/24, body1.radiance.Q_ref,'-')
+        ax3.plot(body1.ephemeris.time/3600/24, body1.radiance.Q_ref[wvl,:],'-')
         #ax3.plot(body2.ephemeris.time, body2.radiance.Q)
-        ax3.plot(body1.ephemeris.time/3600/24, body1.radiance.U_ref,'-')
+        ax3.plot(body1.ephemeris.time/3600/24, body1.radiance.U_ref[wvl,:],'-')
         #ax3.plot(body2.ephemeris.time, body2.radiance.U)
 
-	ax4.grid()
-	ax4.set_title(body2.name + ' reflected light')
-	ax4.set_xlabel('Time [Earth days]')
-	_plt.setp(ax4.get_yticklabels(), visible=False)
-	#ax4.plot(body1.ephemeris.time, body1.radiance.I_ref)
-        ax4.plot(body2.ephemeris.time/3600/24, body2.radiance.I_ref,'-')
+        ax4.grid()
+        ax4.set_title(body2.name + ' reflected light')
+        ax4.set_xlabel('Time [Earth days]')
+        _plt.setp(ax4.get_yticklabels(), visible=False)
+        #ax4.plot(body1.ephemeris.time, body1.radiance.I_ref)
+        ax4.plot(body2.ephemeris.time/3600/24, body2.radiance.I_ref[wvl,:],'-')
         #ax4.plot(body1.ephemeris.time, body1.radiance.Q_ref)
-        ax4.plot(body2.ephemeris.time/3600/24, body2.radiance.Q_ref,'-')
+        ax4.plot(body2.ephemeris.time/3600/24, body2.radiance.Q_ref[wvl,:],'-')
         #ax4.plot(body1.ephemeris.time, body1.radiance.U_ref)
-        ax4.plot(body2.ephemeris.time/3600/24, body2.radiance.U_ref,'-')
+        ax4.plot(body2.ephemeris.time/3600/24, body2.radiance.U_ref[wvl,:],'-')
 
-	ax5.grid()
+        ax5.grid()
         ax5.set_title('Total reflected light')
         ax5.set_xlabel('Time [Earth days]')
-	ax5.plot(body2.ephemeris.time/3600/24, I,'-')
-        ax5.plot(body2.ephemeris.time/3600/24, Q,'-')
-        ax5.plot(body2.ephemeris.time/3600/24, U,'-')
-	ax5.legend(['I','Q','U'])
-	_plt.tight_layout()
+        ax5.plot(body2.ephemeris.time/3600/24, I[wvl,:],'-')
+        ax5.plot(body2.ephemeris.time/3600/24, Q[wvl,:],'-')
+        ax5.plot(body2.ephemeris.time/3600/24, U[wvl,:],'-')
+        ax5.legend(['I','Q','U'])
+        _plt.tight_layout()
 
-	if save:
+        if save:
 
-		filename = 'detail-radiance_' + body1.properties.fourier_scene +'-'+ body2.properties.fourier_scene + '_alpha-' + str(int(_np.round(_np.degrees(body.geometry.phase_angle[t])))) + '_'  + _time.strftime("%d-%m-%Y") + '_' + _time.strftime("%X")
+                filename = 'detail-radiance_' + body1.properties.fourier_scene +'-'+ body2.properties.fourier_scene + '_alpha-' + str(int(_np.round(_np.degrees(body.geometry.phase_angle[t])))) + '_'  + _time.strftime("%d-%m-%Y") + '_' + _time.strftime("%X")
 
-		fig.savefig('Images/'+filename + '.eps')
-		fig.savefig('Images/'+filename + '.png')
+                fig.savefig('Images/'+filename + '.eps')
+                fig.savefig('Images/'+filename + '.png')
 
+        _plt.show()
 
 def _move_figure(f, x, y):
     """Move figure's upper left corner to pixel (x, y)"""
@@ -448,8 +618,8 @@ def shadow_d(body, t = 0, save = False, dots = False):
     flags = _load_flags(body,'d',[t,t+1])
 
     # Drawing
-    fig = _plt.figure(figsize=(13,6))
-    _move_figure(fig, 155, 110)
+    fig = _plt.figure()
+    #_move_figure(fig, 155, 110)
     ax  = fig.add_subplot(1, 1, 1)
     cell        = []#list(_np.zeros(body.grid.N_points))
     patch_cells = []#list(_np.zeros(body.grid.N_points))
@@ -484,7 +654,7 @@ def shadow_d(body, t = 0, save = False, dots = False):
     ax.set_title('Discretized '+body.type+' '+body.name)
 
     _plot_config(ax)
-    _plt.tight_layout()
+#    _plt.tight_layout()
 
     if save:
 
@@ -493,51 +663,51 @@ def shadow_d(body, t = 0, save = False, dots = False):
     	fig.savefig('Images/'+filename + '.eps')
     	fig.savefig('Images/'+filename + '.png')
 
-
+    _plt.show()
 
 def shadow_dd(body, t = [0,0,0], save = False, dots = False):
 
-    	if not hasattr(body.grid, 'shadow'):
-       		body.grid.shadow = _np.ones([len(body.ephemeris.time), len(body.grid.nodes)])
+        if not hasattr(body.grid, 'shadow'):
+                body.grid.shadow = _np.ones([len(body.ephemeris.time), len(body.grid.nodes)])
 
-    	print('\n    ⇒ Plotting shadow of ' + body.type + ' ' + body.name+' at t ='+str(body.ephemeris.time[t[0]])+', t ='+str(body.ephemeris.time[t[1]])+', and t ='+str(body.ephemeris.time[t[2]])+' seconds')
-    	from matplotlib.patches import Rectangle
+        print('\n    ⇒ Plotting shadow of ' + body.type + ' ' + body.name+' at t ='+str(body.ephemeris.time[t[0]])+', t ='+str(body.ephemeris.time[t[1]])+', and t ='+str(body.ephemeris.time[t[2]])+' seconds')
+        from matplotlib.patches import Rectangle
 
         # create a figure with subplots
-    	fig = _plt.figure(figsize=(11,4))
+        fig = _plt.figure(figsize=(11,4))
         ax1 = _plt.subplot2grid((1,3), (0,0))
         ax2 = _plt.subplot2grid((1,3), (0,1))
-	ax3 = _plt.subplot2grid((1,3), (0,2))
+        ax3 = _plt.subplot2grid((1,3), (0,2))
 
-    	if _cfg.plot_faces == True:
-    		faces = _plot_color('faces')
-    	else:
-		faces = "none"
-    	if dots:
-        	ax.plot(body.grid.nodes[:,0]*2, body.grid.nodes[:,1]*2, 'o', color = _plot_color('nodes'), markersize=3)
+        if _cfg.plot_faces == True:
+    	        faces = _plot_color('faces')
+        else:
+                faces = "none"
+        if dots:
+                ax.plot(body.grid.nodes[:,0]*2, body.grid.nodes[:,1]*2, 'o', color = _plot_color('nodes'), markersize=3)
 
-    	patches = []
-    	for i in range(body.grid.N_points):
-		square = Rectangle( (body.grid.faces[i,0,0]*2,body.grid.faces[i,1,0]*2),-2*body.grid.faces[i,0,0]+2*body.grid.faces[i,0,1],-2*body.grid.faces[i,0,0]+2*body.grid.faces[i,0,1] )
-		patches.append(square)
+        patches = []
+        for i in range(body.grid.N_points):
+                square = Rectangle( (body.grid.faces[i,0,0]*2,body.grid.faces[i,1,0]*2),-2*body.grid.faces[i,0,0]+2*body.grid.faces[i,0,1],-2*body.grid.faces[i,0,0]+2*body.grid.faces[i,0,1] )
+                patches.append(square)
 
-   	p1 = _PatchCollection(patches, alpha = 1, cmap = 'Greys_r', edgecolor = faces)
-   	p2 = _PatchCollection(patches, alpha = 1, cmap = 'Greys_r', edgecolor = faces)
-   	p3 = _PatchCollection(patches, alpha = 1, cmap = 'Greys_r', edgecolor = faces)
+        p1 = _PatchCollection(patches, alpha = 1, cmap = 'Greys_r', edgecolor = faces)
+        p2 = _PatchCollection(patches, alpha = 1, cmap = 'Greys_r', edgecolor = faces)
+        p3 = _PatchCollection(patches, alpha = 1, cmap = 'Greys_r', edgecolor = faces)
 
-	p1.set_array(body.grid.shadow[t[0],:])
-	p2.set_array(body.grid.shadow[t[1],:])
-	p3.set_array(body.grid.shadow[t[2],:])
-    	aux1 = ax1.add_collection(p1)
-    	aux2 = ax2.add_collection(p2)
-    	aux3 = ax3.add_collection(p3)
+        p1.set_array(body.grid.shadow[t[0],:])
+        p2.set_array(body.grid.shadow[t[1],:])
+        p3.set_array(body.grid.shadow[t[2],:])
+        aux1 = ax1.add_collection(p1)
+        aux2 = ax2.add_collection(p2)
+        aux3 = ax3.add_collection(p3)
 
-	circle1 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
-	circle2 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
-	circle3 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
-    	ax1.add_artist(circle1)
-    	ax2.add_artist(circle2)
-    	ax3.add_artist(circle3)
+        circle1 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)        
+        circle2 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+        circle3 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+        ax1.add_artist(circle1)
+        ax2.add_artist(circle2)
+        ax3.add_artist(circle3)
 
         ax1.set_title('t = %1d days %1d hours'%
                      (int(body.ephemeris.time[t[0]]/60/60/24), (body.ephemeris.time[t[0]]/24/60/60-
@@ -549,19 +719,19 @@ def shadow_dd(body, t = [0,0,0], save = False, dots = False):
                      (int(body.ephemeris.time[t[2]]/60/60/24), (body.ephemeris.time[t[2]]/24/60/60-
                       int(body.ephemeris.time[t[2]]/60/60/24))*24))
 
-    	_plot_config_r(ax1)
-    	_plot_config_r(ax2)
-    	_plot_config_r(ax3)
-    	_plt.tight_layout()
+        _plot_config_r(ax1)
+        _plot_config_r(ax2)
+        _plot_config_r(ax3)
+        _plt.tight_layout()
 
         if save:
 
-    		filename = 'shadow3_' + body.properties.fourier_scene + '_alpha-' + str(int(_np.round(_np.degrees(body.geometry.phase_angle[t[0]])))) + '-'+str(int(_np.round(_np.degrees(body.geometry.phase_angle[t[1]])))) + '-' + str(int(_np.round(_np.degrees(body.geometry.phase_angle[t[2]])))) + '_'  + _time.strftime("%d-%m-%Y") + '_' + _time.strftime("%X")
+                filename = 'shadow3_' + body.properties.fourier_scene + '_alpha-' + str(int(_np.round(_np.degrees(body.geometry.phase_angle[t[0]])))) + '-'+str(int(_np.round(_np.degrees(body.geometry.phase_angle[t[1]])))) + '-' + str(int(_np.round(_np.degrees(body.geometry.phase_angle[t[2]])))) + '_'  + _time.strftime("%d-%m-%Y") + '_' + _time.strftime("%X")
 
-    		fig.savefig('Images/'+filename + '.eps')
-    		fig.savefig('Images/'+filename + '.png')
+                fig.savefig('Images/'+filename + '.eps')
+                fig.savefig('Images/'+filename + '.png')
 
-
+        _plt.show()
 
 def I_d(body, t = 0, wvl=0, dots = False):
 
@@ -579,14 +749,14 @@ def I_d(body, t = 0, wvl=0, dots = False):
     if _cfg.plot_faces == True:
     	faces = _plot_color('faces')
     else:
-	faces = "none"
+        faces = "none"
     if dots:
         ax.plot(body.grid.nodes[:,0]*2, body.grid.nodes[:,1]*2, 'o', color = _plot_color('nodes'), markersize=3)
 
     patches = []
     for i in range(body.grid.N_points):
-	square = Rectangle( (body.grid.faces[i,0,0]*2,body.grid.faces[i,1,0]*2),-2*body.grid.faces[i,0,0]+2*body.grid.faces[i,0,1],-2*body.grid.faces[i,0,0]+2*body.grid.faces[i,0,1] )
-	patches.append(square)
+        square = Rectangle( (body.grid.faces[i,0,0]*2,body.grid.faces[i,1,0]*2),-2*body.grid.faces[i,0,0]+2*body.grid.faces[i,0,1],-2*body.grid.faces[i,0,0]+2*body.grid.faces[i,0,1] )
+        patches.append(square)
 
     p = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces)
     p.set_array(body.grid.I[wvl, t,:])
@@ -618,16 +788,16 @@ def Q_d(body, t = 0, wvl=0, dots = False):
     ax  = fig.add_subplot(1, 1, 1)
 
     if _cfg.plot_faces == True:
-    	faces = _plot_color('faces')
+        faces = _plot_color('faces')
     else:
-	faces = "none"
+        faces = "none"
     if dots:
         ax.plot(body.grid.nodes[:,0]*2, body.grid.nodes[:,1]*2, 'o', color = _plot_color('nodes'), markersize=3)
 
     patches = []
     for i in range(body.grid.N_points):
-	square = Rectangle( (body.grid.faces[i,0,0]*2,body.grid.faces[i,1,0]*2),-2*body.grid.faces[i,0,0]+2*body.grid.faces[i,0,1],-2*body.grid.faces[i,0,0]+2*body.grid.faces[i,0,1] )
-	patches.append(square)
+        square = Rectangle( (body.grid.faces[i,0,0]*2,body.grid.faces[i,1,0]*2),-2*body.grid.faces[i,0,0]+2*body.grid.faces[i,0,1],-2*body.grid.faces[i,0,0]+2*body.grid.faces[i,0,1] )
+        patches.append(square)
 
     p = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces)
     p.set_array(body.grid.Q[wvl,t,:])
@@ -658,16 +828,16 @@ def U_d(body, t = 0, wvl=0, dots = False):
     ax  = fig.add_subplot(1, 1, 1)
 
     if _cfg.plot_faces == True:
-    	faces = _plot_color('faces')
+        faces = _plot_color('faces')
     else:
-	faces = "none"
+        faces = "none"
     if dots:
         ax.plot(body.grid.nodes[:,0]*2, body.grid.nodes[:,1]*2, 'o', color = _plot_color('nodes'), markersize=3)
 
     patches = []
     for i in range(body.grid.N_points):
-	square = Rectangle( (body.grid.faces[i,0,0]*2,body.grid.faces[i,1,0]*2),-2*body.grid.faces[i,0,0]+2*body.grid.faces[i,0,1],-2*body.grid.faces[i,0,0]+2*body.grid.faces[i,0,1] )
-	patches.append(square)
+        square = Rectangle( (body.grid.faces[i,0,0]*2,body.grid.faces[i,1,0]*2),-2*body.grid.faces[i,0,0]+2*body.grid.faces[i,0,1],-2*body.grid.faces[i,0,0]+2*body.grid.faces[i,0,1] )
+        patches.append(square)
 
     p = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces)
     p.set_array(body.grid.U[wvl,t,:])
@@ -698,16 +868,16 @@ def V_d(body, t = 0, wvl=0, dots = False):
     ax  = fig.add_subplot(1, 1, 1)
 
     if _cfg.plot_faces == True:
-    	faces = _plot_color('faces')
+        faces = _plot_color('faces')
     else:
-	faces = "none"
+        faces = "none"
     if dots:
         ax.plot(body.grid.nodes[:,0]*2, body.grid.nodes[:,1]*2, 'o', color = _plot_color('nodes'), markersize=3)
 
     patches = []
     for i in range(body.grid.N_points):
-	square = Rectangle( (body.grid.faces[i,0,0]*2,body.grid.faces[i,1,0]*2),-2*body.grid.faces[i,0,0]+2*body.grid.faces[i,0,1],-2*body.grid.faces[i,0,0]+2*body.grid.faces[i,0,1] )
-	patches.append(square)
+        square = Rectangle( (body.grid.faces[i,0,0]*2,body.grid.faces[i,1,0]*2),-2*body.grid.faces[i,0,0]+2*body.grid.faces[i,0,1],-2*body.grid.faces[i,0,0]+2*body.grid.faces[i,0,1] )
+        patches.append(square)
 
     p = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces)
     p.set_array(body.grid.V[wvl,t,:])
@@ -726,98 +896,96 @@ def V_d(body, t = 0, wvl=0, dots = False):
 
 def radiance_d(body, t = 0, wvl=0, save = False, dots = False):
 
-    	print('\n    ⇒ Plotting stokes parameters of ' + body.type + ' ' + body.name+' at t ='+str(body.ephemeris.time[t])+' seconds')
-    	from matplotlib.patches import Rectangle
+    print('\n    ⇒ Plotting stokes parameters of ' + body.type + ' ' + body.name+' at t ='+str(body.ephemeris.time[t])+' seconds')
+    from matplotlib.patches import Rectangle
 
-        # create a figure with subplots
-    	fig = _plt.figure(figsize=(10,8))
-        ax1 = _plt.subplot2grid((2,2), (0,0))
-        ax2 = _plt.subplot2grid((2,2), (0,1))
-	ax3 = _plt.subplot2grid((2,2), (1,0))
-	ax4 = _plt.subplot2grid((2,2), (1,1))
+    # create a figure with subplots
+    fig = _plt.figure(figsize=(10,8))
+    ax1 = _plt.subplot2grid((2,2), (0,0))
+    ax2 = _plt.subplot2grid((2,2), (0,1))
+    ax3 = _plt.subplot2grid((2,2), (1,0))
+    ax4 = _plt.subplot2grid((2,2), (1,1))
 
-	circle1 = _plt.Circle((0, 0), 1, facecolor = _plot_color('circle1'), edgecolor = _plot_color('circle'), linewidth = 2.5)
-	circle2 = _plt.Circle((0, 0), 1, edgecolor = _plot_color('circle'), facecolor = _plot_color('circle1'), fill=True , linewidth = 2.5)
-	circle3 = _plt.Circle((0, 0), 1, edgecolor = _plot_color('circle'), facecolor = _plot_color('circle1'), fill=True , linewidth = 2.5)
-	circle4 = _plt.Circle((0, 0), 1, edgecolor = _plot_color('circle'), facecolor = _plot_color('circle1'), fill=True , linewidth = 2.5)
-    	ax1.add_artist(circle1)
-    	ax2.add_artist(circle2)
-    	ax3.add_artist(circle3)
-    	ax4.add_artist(circle4)
+    circle1 = _plt.Circle((0, 0), 1, facecolor = _plot_color('circle1'), edgecolor = _plot_color('circle'), linewidth = 2.5)
+    circle2 = _plt.Circle((0, 0), 1, edgecolor = _plot_color('circle'), facecolor = _plot_color('circle1'), fill=True , linewidth = 2.5)
+    circle3 = _plt.Circle((0, 0), 1, edgecolor = _plot_color('circle'), facecolor = _plot_color('circle1'), fill=True , linewidth = 2.5)
+    circle4 = _plt.Circle((0, 0), 1, edgecolor = _plot_color('circle'), facecolor = _plot_color('circle1'), fill=True , linewidth = 2.5)
+    ax1.add_artist(circle1)
+    ax2.add_artist(circle2)
+    ax3.add_artist(circle3)
+    ax4.add_artist(circle4)
 
-    	if _cfg.plot_faces == True:
-    		faces = _plot_color('faces')
-    	else:
-		faces = "none"
-    	if dots:
-        	ax.plot(body.grid.nodes[:,0]*2, body.grid.nodes[:,1]*2, 'o', color = _plot_color('nodes'), markersize=3)
+    if _cfg.plot_faces == True:
+        faces = _plot_color('faces')
+    else:
+        faces = "none"
+        if dots:
+            ax.plot(body.grid.nodes[:,0]*2, body.grid.nodes[:,1]*2, 'o', color = _plot_color('nodes'), markersize=3)
 
-	N 	= _np.sum(body.grid.shadow[t,:]!=0)
-	faces00	= body.grid.faces[body.grid.shadow[t,:]!=0,0,0]
-	faces10	= body.grid.faces[body.grid.shadow[t,:]!=0,1,0]
-	faces01	= body.grid.faces[body.grid.shadow[t,:]!=0,0,1]
-	I	= body.grid.I[wvl,t,body.grid.shadow[t,:]!=0]
-	Q	= body.grid.Q[wvl,t,body.grid.shadow[t,:]!=0]
-	U	= body.grid.U[wvl,t,body.grid.shadow[t,:]!=0]
-	V	= body.grid.V[wvl,t,body.grid.shadow[t,:]!=0]
+    N 	= _np.sum(body.grid.shadow[t,:]!=0)
+    faces00	= body.grid.faces[body.grid.shadow[t,:]!=0,0,0]
+    faces10	= body.grid.faces[body.grid.shadow[t,:]!=0,1,0]
+    faces01	= body.grid.faces[body.grid.shadow[t,:]!=0,0,1]
+    I	= body.grid.I[wvl,t,body.grid.shadow[t,:]!=0]
+    Q	= body.grid.Q[wvl,t,body.grid.shadow[t,:]!=0]
+    U	= body.grid.U[wvl,t,body.grid.shadow[t,:]!=0]
+    V	= body.grid.V[wvl,t,body.grid.shadow[t,:]!=0]
 
-    	patches = []
-    	for i in range(N):
-		square = Rectangle( (faces00[i]*2,faces10[i]*2),-2*faces00[i]+2*faces01[i],-2*faces00[i]+2*faces01[i] )
-		patches.append(square)
+    patches = []
+    for i in range(N):
+        square = Rectangle( (faces00[i]*2,faces10[i]*2),-2*faces00[i]+2*faces01[i],-2*faces00[i]+2*faces01[i] )
+        patches.append(square)
 
-   	p1 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
-   	p2 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
-   	p3 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
-   	p4 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
+    p1 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
+    p2 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
+    p3 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
+    p4 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
 
-	Q_aux = -Q/I
-	U_aux = U/I
-	V_aux = V/I
+    Q_aux = -Q/I
+    U_aux = U/I
+    V_aux = V/I
 
-	Q_aux[_np.isnan(Q_aux)] = 0
-	U_aux[_np.isnan(U_aux)] = 0
-	V_aux[_np.isnan(V_aux)] = 0
+    Q_aux[_np.isnan(Q_aux)] = 0
+    U_aux[_np.isnan(U_aux)] = 0
+    V_aux[_np.isnan(V_aux)] = 0
 
-	p1.set_array(I)
-	p2.set_array(Q_aux)
-	p3.set_array(U_aux)
-	p4.set_array(V_aux)
-    	aux1 = ax1.add_collection(p1)
-    	fig.colorbar(aux1,ax=ax1,fraction=0.046, pad=0.04)
-    	aux2 = ax2.add_collection(p2)
-    	fig.colorbar(aux2,ax=ax2,fraction=0.046, pad=0.04)
-    	aux3 = ax3.add_collection(p3)
-    	fig.colorbar(aux3,ax=ax3,fraction=0.046, pad=0.04)
-    	aux4 = ax4.add_collection(p4)
-    	fig.colorbar(aux4,ax=ax4,fraction=0.046, pad=0.04)
+    p1.set_array(I)
+    p2.set_array(Q_aux)
+    p3.set_array(U_aux)
+    p4.set_array(V_aux)
+    aux1 = ax1.add_collection(p1)
+    fig.colorbar(aux1,ax=ax1,fraction=0.046, pad=0.04)
+    aux2 = ax2.add_collection(p2)
+    fig.colorbar(aux2,ax=ax2,fraction=0.046, pad=0.04)
+    aux3 = ax3.add_collection(p3)
+    fig.colorbar(aux3,ax=ax3,fraction=0.046, pad=0.04)
+    aux4 = ax4.add_collection(p4)
+    fig.colorbar(aux4,ax=ax4,fraction=0.046, pad=0.04)
 
-        ax1.set_title('I parameter')
-        ax2.set_title('Q parameter')
-        ax3.set_title('U parameter')
-        ax4.set_title('V parameter')
+    ax1.set_title('I parameter')
+    ax2.set_title('Q parameter')
+    ax3.set_title('U parameter')
+    ax4.set_title('V parameter')
 
-    	_plot_config_r(ax1)
-    	_plot_config_r(ax2)
-    	_plot_config_r(ax3)
-    	_plot_config_r(ax4)
-    	_plt.tight_layout()
+    _plot_config_r(ax1)
+    _plot_config_r(ax2)
+    _plot_config_r(ax3)
+    _plot_config_r(ax4)
+    _plt.tight_layout()
 
-	circle5 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
-	circle6 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
-	circle7 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
-	circle8 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
-    	ax1.add_artist(circle5)
-    	ax2.add_artist(circle6)
-    	ax3.add_artist(circle7)
-    	ax4.add_artist(circle8)
+    circle5 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+    circle6 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+    circle7 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+    circle8 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+    ax1.add_artist(circle5)
+    ax2.add_artist(circle6)
+    ax3.add_artist(circle7)
+    ax4.add_artist(circle8)
 
-	if save:
-
-		filename = 'radiance-pixels_' + body.properties.fourier_scene + '_alpha-' + str(int(_np.round(_np.degrees(body.geometry.phase_angle[t])))) + '_'  + _time.strftime("%d-%m-%Y") + '_' + _time.strftime("%X")
-
-		fig.savefig('Images/'+filename + '.eps')
-		fig.savefig('Images/'+filename + '.png')
+    if save:
+        filename = 'radiance-pixels_' + body.properties.fourier_scene + '_alpha-' + str(int(_np.round(_np.degrees(body.geometry.phase_angle[t])))) + '_'  + _time.strftime("%d-%m-%Y") + '_' + _time.strftime("%X")
+        fig.savefig('Images/'+filename + '.eps')
+        fig.savefig('Images/'+filename + '.png')
 
 
 def anim_shadow_1(body, dots = False, time  = 'all', info = [15, False]):
@@ -1173,10 +1341,10 @@ def xyorbit(position2D_1, position2D_2 = None,  info =
     fig = _plt.figure()
 
     # The orbits of the two bodies are plotted, if available
-    _plt.plot(position2D_1[0], position2D_1[1],'r', linewidth=2,
+    _plt.plot(position2D_1[0], position2D_1[1],'r', linewidth=1,
                                                  linestyle="-", label="Body 1")
     if position2D_2 is not None:
-        _plt.plot(position2D_2[0], position2D_2[1],'b', linewidth=2,
+        _plt.plot(position2D_2[0], position2D_2[1],'b', linewidth=1,
                                                  linestyle="-", label="Body 2")
 
     # Origin point and name
@@ -1251,7 +1419,7 @@ def XYZorbit(position3D_1, position3D_2 = None, info =
 #==============================================================================
 
     import statistics as stat
-    import module_functions as fun
+    import exopy_functions as fun
 
     fig = _plt.figure()
     ax = fig.add_subplot(111, projection='3d')
@@ -1372,7 +1540,7 @@ def XYZorbit(position3D_1, position3D_2 = None, info =
     ax.add_artist(Zvector)
 
     # Origin point and text
-    ax.scatter([0],[0],[0], color="k",s=100)
+    ax.scatter([0],[0],[0], color="k",s=40)
     ax.text(aux/100, aux/100, aux/100, info[5], [0,1,0])
 
     _plt.show()
@@ -1408,11 +1576,11 @@ def anim_orbit(time, position3D_1, position3D_2 = None, info =
 #       - Plot
 #==============================================================================
 
-    import matplotlib.pyplot as _plt
+    import matplotlib.pyplot as __plt
     import mpl_toolkits.mplot3d.axes3d as p3
     import matplotlib.animation as animation
     import statistics as stat
-    import module_functions as fun
+    import exopy_functions as fun
 
     # Update animation function
     def update_lines(num, dataLines, lines, pts) :
@@ -1549,7 +1717,7 @@ def anim_orbit(time, position3D_1, position3D_2 = None, info =
     ax.add_artist(Zvector)
 
     # Origin point and text
-    ax.scatter([0],[0],[0], color="k",s=100)
+    ax.scatter([0],[0],[0], color="k",s=40)
     ax.text(aux/100, aux/100, aux/100, info[5], [0,1,0])
 
     # Set up animation data

@@ -1,8 +1,26 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Nov 17 11:41:28 2016
+==================================================================
+EXOPY module: exopy_grid.py
+Delft University of Technology
+------------------------------------------------------------------
+Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+Date: 2016-2017
+------------------------------------------------------------------
 
-@author: javier
+Dependences:
+
+DESCRIPTION
+------------------------------------------------------------------
+Script containing the functions required for the definition of va-
+rious types of disk discretized grid.
+
+LIST OF FUNCTIONS
+------------------------------------------------------------------
+ - square: Defines a regular square-pixel grid.
+ - -- TBC --
+ 
+
 """
 
 from __future__ import division
@@ -20,6 +38,38 @@ from six.moves import range
 
 
 def square(Nsq):
+    """
+==================================================================
+EXOPY function: square()
+Delft University of Technology
+------------------------------------------------------------------
+Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+Date: 2016-2017
+------------------------------------------------------------------
+
+Dependences:
+
+DESCRIPTION
+------------------------------------------------------------------
+Defines a regular square-pixel grid.
+
+INPUTS
+------------------------------------------------------------------
+ - Nsq: Number of pixels along the equator [-] (int)
+
+OUTPUTS
+------------------------------------------------------------------
+ - mesh_nodes: 2D Cartesian coordinates of each pixel in grid refe-
+	       rence frame [-] (numpy array)
+ - mesh_faces: 2D Cartesian coordinates delimiting the vertices of
+	       each pixel [-] (numpy array)
+ - mesh_area: Area of each pixel along the gris [-] (numpy array)
+ - N_points: Total number of pixels in grid [-] (int)
+ - mesh_nodes_xyz: 3D Cartesian coordinates of each pixel in grid
+		   reference frame [-] (numpy array)
+
+
+    """
     
     if Nsq == 0:
         sys.exit('Error 1 in grid creation: Nsq must be > 0!')
