@@ -1,28 +1,27 @@
 # -*- coding: utf-8 -*-
-"""
-==================================================================
-EXOPY module: exopy_eclipse.py
-Delft University of Technology
-------------------------------------------------------------------
-Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
-Date: 2016-2017
-------------------------------------------------------------------
 
-Dependences:
-
-DESCRIPTION
-------------------------------------------------------------------
-The 'expoy_eclipse' script contain the functions required for the
-computation of the pixel darkening of the planetary system bodies 
-due to shadowing through eclipses.
-
-LIST OF FUNCTIONS
-------------------------------------------------------------------
- - eclipse: Function computing the eclipses shadowing of the extra-
-	    solar planetary system.
-
-
-"""
+# ==================================================================
+# EXOPY module: exopy_eclipse.py
+# Delft University of Technology
+# ------------------------------------------------------------------
+# Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+# Date: 2016-2017
+# ------------------------------------------------------------------
+#
+# Dependences:
+#
+# DESCRIPTION
+# ------------------------------------------------------------------
+# The 'expoy_eclipse' script contain the functions required for the
+# computation of the pixel darkening of the planetary system bodies
+# due to shadowing through eclipses.
+#
+# LIST OF FUNCTIONS
+# ------------------------------------------------------------------
+#  - eclipse: Function computing the eclipses shadowing of the extra-
+# 	    solar planetary system.
+#
+#
 
 
 import numpy as np
@@ -31,42 +30,40 @@ import exopy_config as _cfg
 
 def eclipse(bodies, star = None):
     """
-==================================================================
-EXOPY function: eclipse()
-Delft University of Technology
-------------------------------------------------------------------
-Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
-Date: 2016-2017
-------------------------------------------------------------------
+    ==================================================================
+    EXOPY function: eclipse()
+    Delft University of Technology
+    ------------------------------------------------------------------
+    Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+    Date: 2016-2017
+    ------------------------------------------------------------------
 
-Dependences:
+    Dependences:
 
-DESCRIPTION
-------------------------------------------------------------------
-Computes the degree of pixel darkening due to eclipses shadowing 
-among the different bodies.
+    DESCRIPTION
+    ------------------------------------------------------------------
+    Computes the degree of pixel darkening due to eclipses shadowing
+    among the different bodies.
 
-INPUTS
-------------------------------------------------------------------
- - bodies: list comprising a planet & moon object [-] (list)
- - star: star type of body object [-] (body object)
+    INPUTS
+    ------------------------------------------------------------------
+    - bodies: list comprising a planet & moon object [-] (list)
+    - star: star type of body object [-] (body object)
 
-OUTPUTS
-------------------------------------------------------------------
- - bodies: updated list comprising a planet & moon object [-]
-	   (list)
+    OUTPUTS
+    ------------------------------------------------------------------
+    - bodies: updated list comprising a planet & moon object [-]
+        (list)
 
 
     """
 
-    '''
-    bodies = [Moon,Earth]o
-    star = Sunp
+    #bodies = [Moon,Earth]o
+    #star = Sunp
 
-    for body in bodies:
-        if not hasattr(body.grid, 'shadow'):
-           body.grid.shadow = np.zeros([len(body.ephemeris.time), len(body.grid.nodes)])
-    '''
+    #for body in bodies:
+    #    if not hasattr(body.grid, 'shadow'):
+    #       body.grid.shadow = np.zeros([len(body.ephemeris.time), len(body.grid.nodes)])
 
     import time as tt
     a = tt.time()
@@ -244,8 +241,8 @@ OUTPUTS
         #   d1_nod1     = np.zeros([T,bodies[i].grid.N_points])
         #   aux         = np.zeros([T,bodies[i].grid.N_points])
 
-#		print len(remaining)
-#		print np.shape(Rphi_s)
+        #print len(remaining)
+        #print np.shape(Rphi_s)
 		dijaux  = np.einsum('ijtl,jtl->itl', Rphi_s[:,:,remaining,np.newaxis], -d_nod[:,remaining,:] + dj[:,remaining,np.newaxis])
 		dijp    = np.einsum('jitl,jtl->itl', Ralpha[:,:,remaining,np.newaxis], dijaux)
 
