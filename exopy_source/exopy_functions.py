@@ -1752,4 +1752,4 @@ def PolyArea(x,y): # Shoelace formula
     """
     return 0.5*np.abs(np.einsum('tN,tN->t', x, np.roll(y,1,axis=1))-np.einsum('tN,tN->t', y, np.roll(x,1,axis=1)))
 
-
+'''
