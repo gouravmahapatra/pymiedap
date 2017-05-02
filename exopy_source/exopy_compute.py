@@ -1,40 +1,39 @@
 # -*- coding: utf-8 -*-
-"""
-==================================================================
-EXOPY module: exopy_compute.py
-Delft University of Technology
-------------------------------------------------------------------
-Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
-Date: 2016-2017
-------------------------------------------------------------------
 
-Dependences:
-
-DESCRIPTION
-------------------------------------------------------------------
-The 'expoy_compute' script contain a series of functions which 
-serve as interface between the user and the exopy functions.
-
-In essence, these organize the information, identify potential 
-errors on the input data and takes the output back to the user.
-
-LIST OF FUNCTIONS
-------------------------------------------------------------------
- - orbit: Function computing the orbits of the bodies under the 
-	  assumption of a nested two body problem.
- - geometry: Function computing the geometric parameters involved 
-	     in the motion of the planetary system.
- - phases: Function computing the darkenned pixels according to the
-	   phase angle.
- - transits: Function computing the shadowed pixels due to transits
- - eclipses: Function computing the shadowed pixels due to eclipses
- - int_radiance: Function integrating the reflected radiance of 
-		 each body.
- - combine: Function combining the signal of the different bodies 
-	    into a single one.
-
-
-"""
+# ==================================================================
+# EXOPY module: exopy_compute.py
+# Delft University of Technology
+# ------------------------------------------------------------------
+# Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+# Date: 2016-2017
+# ------------------------------------------------------------------
+#
+# Dependences:
+#
+# DESCRIPTION
+# ------------------------------------------------------------------
+# The 'expoy_compute' script contain a series of functions which
+# serve as interface between the user and the exopy functions.
+#
+# In essence, these organize the information, identify potential
+# errors on the input data and takes the output back to the user.
+#
+# LIST OF FUNCTIONS
+# ------------------------------------------------------------------
+#  - orbit: Function computing the orbits of the bodies under the
+# 	  assumption of a nested two body problem.
+#  - geometry: Function computing the geometric parameters involved
+# 	     in the motion of the planetary system.
+#  - phases: Function computing the darkenned pixels according to the
+# 	   phase angle.
+#  - transits: Function computing the shadowed pixels due to transits
+#  - eclipses: Function computing the shadowed pixels due to eclipses
+#  - int_radiance: Function integrating the reflected radiance of
+# 		 each body.
+#  - combine: Function combining the signal of the different bodies
+# 	    into a single one.
+#
+#
 
 
 import exopy_config                    as _cfg
@@ -50,35 +49,34 @@ from exopy_orbit    import nested2bp   as _2bp
 
 def orbit(moon, planet, star, delta_t, final_t):
     '''
-==================================================================
-EXOPY function: exopy.compute.orbit
-Delft University of Technology
-------------------------------------------------------------------
-Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
-Date: 2016-2017
-------------------------------------------------------------------
+    ==================================================================
+    EXOPY function: exopy.compute.orbit
+    Delft University of Technology
+    ------------------------------------------------------------------
+    Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+    Date: 2016-2017
+    ------------------------------------------------------------------
 
-INPUTS
-------------------------------------------------------------------
- - moon: moon object [-] ('body' object)
- - planet: planet object [-] ('body' object)
- - star: star object [-] ('body' object)
- - delta_t: time interval between two consecutive computed epochs [s] (float)
- - final_f: final computation time [s] (float)
+    INPUTS
+    ------------------------------------------------------------------
+    - moon: moon object [-] ('body' object)
+    - planet: planet object [-] ('body' object)
+    - star: star object [-] ('body' object)
+    - delta_t: time interval between two consecutive computed epochs [s] (float)
+    - final_f: final computation time [s] (float)
 
-OUTPUTS
-------------------------------------------------------------------
- - moon: updated moon object [-] ('body' object)
- - planet: updated planet object [-] ('body' object)
- - star: updated star object [-] ('body' object)
+    OUTPUTS
+    ------------------------------------------------------------------
+    - moon: updated moon object [-] ('body' object)
+    - planet: updated planet object [-] ('body' object)
+    - star: updated star object [-] ('body' object)
 
-DESCRIPTION
-------------------------------------------------------------------
-Serves as interface between the user and the function computing 
-the orbits of the extrasolar planetary system.
+    DESCRIPTION
+    ------------------------------------------------------------------
+    Serves as interface between the user and the function computing
+    the orbits of the extrasolar planetary system.
 
-
-    ''' 
+    '''
 
     moon, planet, star = _2bp(moon, planet, star, delta_t, final_t)
 
@@ -87,30 +85,30 @@ the orbits of the extrasolar planetary system.
 
 def geometry(bodies):
     '''
-==================================================================
-EXOPY function: exopy.compute.geometry
-Delft University of Technology
-------------------------------------------------------------------
-Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
-Date: 2016-2017
-------------------------------------------------------------------
+    ==================================================================
+    EXOPY function: exopy.compute.geometry
+    Delft University of Technology
+    ------------------------------------------------------------------
+    Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+    Date: 2016-2017
+    ------------------------------------------------------------------
 
-INPUTS
-------------------------------------------------------------------
- - bodies: list comprising a planet moon & star object [-] (list)
+    INPUTS
+    ------------------------------------------------------------------
+    - bodies: list comprising a planet moon & star object [-] (list)
 
-OUTPUTS
-------------------------------------------------------------------
- - bodies: updated list comprising a planet moon & star object [-]
-	   (list)
+    OUTPUTS
+    ------------------------------------------------------------------
+    - bodies: updated list comprising a planet moon & star object [-]
+        (list)
 
-DESCRIPTION
-------------------------------------------------------------------
-Serves as interface between the user and the function computing 
-the geometry parameters of the extrasolar planetary system.
+    DESCRIPTION
+    ------------------------------------------------------------------
+    Serves as interface between the user and the function computing
+    the geometry parameters of the extrasolar planetary system.
 
 
-    ''' 
+    '''
 
     import sys
 
@@ -146,31 +144,31 @@ the geometry parameters of the extrasolar planetary system.
 
 def phases(bodies, star):
     '''
-==================================================================
-EXOPY function: exopy.compute.phases
-Delft University of Technology
-------------------------------------------------------------------
-Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
-Date: 2016-2017
-------------------------------------------------------------------
+    ==================================================================
+    EXOPY function: exopy.compute.phases
+    Delft University of Technology
+    ------------------------------------------------------------------
+    Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+    Date: 2016-2017
+    ------------------------------------------------------------------
 
-INPUTS
-------------------------------------------------------------------
- - bodies: list comprising a planet & moon object [-] (list)
- - star: star type of body object [-] (body object)
+    INPUTS
+    ------------------------------------------------------------------
+    - bodies: list comprising a planet & moon object [-] (list)
+    - star: star type of body object [-] (body object)
 
-OUTPUTS
-------------------------------------------------------------------
- - bodies: updated list comprising a planet & moon object [-]
-	   (list)
+    OUTPUTS
+    ------------------------------------------------------------------
+    - bodies: updated list comprising a planet & moon object [-]
+        (list)
 
-DESCRIPTION
-------------------------------------------------------------------
-Serves as interface between the user and the function computing 
-the phase shadowing of the extrasolar planetary system.
+    DESCRIPTION
+    ------------------------------------------------------------------
+    Serves as interface between the user and the function computing
+    the phase shadowing of the extrasolar planetary system.
 
 
-    ''' 
+    '''
 
     import sys
 
@@ -204,29 +202,29 @@ the phase shadowing of the extrasolar planetary system.
 
 def transits(bodies):
     '''
-==================================================================
-EXOPY function: exopy.compute.transits
-Delft University of Technology
-------------------------------------------------------------------
-Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
-Date: 2016-2017
-------------------------------------------------------------------
+    ==================================================================
+    EXOPY function: exopy.compute.transits
+    Delft University of Technology
+    ------------------------------------------------------------------
+    Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+    Date: 2016-2017
+    ------------------------------------------------------------------
 
-INPUTS
-------------------------------------------------------------------
- - bodies: list comprising a series of body objects [-] (list)
+    INPUTS
+    ------------------------------------------------------------------
+    - bodies: list comprising a series of body objects [-] (list)
 
-OUTPUTS
-------------------------------------------------------------------
- - bodies: updated list of body objects [-] (list)
+    OUTPUTS
+    ------------------------------------------------------------------
+    - bodies: updated list of body objects [-] (list)
 
-DESCRIPTION
-------------------------------------------------------------------
-Serves as interface between the user and the function computing 
-the transits shadowing of the extrasolar planetary system.
+    DESCRIPTION
+    ------------------------------------------------------------------
+    Serves as interface between the user and the function computing
+    the transits shadowing of the extrasolar planetary system.
 
 
-    ''' 
+    '''
 
     import numpy as np
     import sys
@@ -255,31 +253,31 @@ the transits shadowing of the extrasolar planetary system.
 
 def eclipses(bodies, star):
     '''
-==================================================================
-EXOPY function: exopy.compute.transits
-Delft University of Technology
-------------------------------------------------------------------
-Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
-Date: 2016-2017
-------------------------------------------------------------------
+    ==================================================================
+    EXOPY function: exopy.compute.transits
+    Delft University of Technology
+    ------------------------------------------------------------------
+    Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+    Date: 2016-2017
+    ------------------------------------------------------------------
 
-INPUTS
-------------------------------------------------------------------
- - bodies: list comprising a series of planet and moon objects [-]
-	   (list)
- - star: star type of body  object [-] (body object)
+    INPUTS
+    ------------------------------------------------------------------
+    - bodies: list comprising a series of planet and moon objects [-]
+        (list)
+    - star: star type of body  object [-] (body object)
 
-OUTPUTS
-------------------------------------------------------------------
- - bodies: updated list of planet and moon objects [-] (list)
+    OUTPUTS
+    ------------------------------------------------------------------
+    - bodies: updated list of planet and moon objects [-] (list)
 
-DESCRIPTION
-------------------------------------------------------------------
-Serves as interface between the user and the function computing 
-the eclipses shadowing of the extrasolar planetary system.
+    DESCRIPTION
+    ------------------------------------------------------------------
+    Serves as interface between the user and the function computing
+    the eclipses shadowing of the extrasolar planetary system.
 
 
-    ''' 
+    '''
 
     bodies = _eclipse(bodies, star)
 
@@ -288,34 +286,34 @@ the eclipses shadowing of the extrasolar planetary system.
 
 def int_radiance(bodies, path_input = './dap_database/', nmug = 20, nmug_mie = 20, nmat=4, nsubr=50):
     '''
-==================================================================
-EXOPY function: exopy.compute.int_radiance
-Delft University of Technology
-------------------------------------------------------------------
-Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
-Date: 2016-2017
-------------------------------------------------------------------
+    ==================================================================
+    EXOPY function: exopy.compute.int_radiance
+    Delft University of Technology
+    ------------------------------------------------------------------
+    Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+    Date: 2016-2017
+    ------------------------------------------------------------------
 
-INPUTS
-------------------------------------------------------------------
- - bodies: list comprising a series of planet and moon objects [-]
-	   (list)
- - path_input: Path to the Fourier files storage folder [-] 
-	       ('body' object)
- - nmug: number of Gauss points for DAP calculations [-] (int)
- - nmug_mie: number of Gauss points for MIE calculations [-] (int)
- - nmat: number of Stokes elements to compute [-] (int)
- - nsubr: number of subintervals for the distribution [-] (int)
+    INPUTS
+    ------------------------------------------------------------------
+    - bodies: list comprising a series of planet and moon objects [-]
+        (list)
+    - path_input: Path to the Fourier files storage folder [-]
+            ('body' object)
+    - nmug: number of Gauss points for DAP calculations [-] (int)
+    - nmug_mie: number of Gauss points for MIE calculations [-] (int)
+    - nmat: number of Stokes elements to compute [-] (int)
+    - nsubr: number of subintervals for the distribution [-] (int)
 
-OUTPUTS
-------------------------------------------------------------------
- - bodies: updated list comprising a series of planet and moon
-	   objects [-] (list)
+    OUTPUTS
+    ------------------------------------------------------------------
+    - bodies: updated list comprising a series of planet and moon
+        objects [-] (list)
 
-DESCRIPTION
-------------------------------------------------------------------
-Serves as interface between the user and the function integrating 
-the reflected radiance of each body.
+    DESCRIPTION
+    ------------------------------------------------------------------
+    Serves as interface between the user and the function integrating
+    the reflected radiance of each body.
 
 
     '''
@@ -328,36 +326,36 @@ the reflected radiance of each body.
 
 def combine(bodies):
     '''
-==================================================================
-EXOPY function: exopy.compute.combine
-Delft University of Technology
-------------------------------------------------------------------
-Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
-Date: 2016-2017
-------------------------------------------------------------------
+    ==================================================================
+    EXOPY function: exopy.compute.combine
+    Delft University of Technology
+    ------------------------------------------------------------------
+    Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+    Date: 2016-2017
+    ------------------------------------------------------------------
 
-INPUTS
-------------------------------------------------------------------
- - bodies: list comprising a series of planet and moon objects [-]
-	   (list)
+    INPUTS
+    ------------------------------------------------------------------
+    - bodies: list comprising a series of planet and moon objects [-]
+        (list)
 
-OUTPUTS
-------------------------------------------------------------------
- - I: First stokes vector: flux [normalized] (numpy array)
- - Q: Second stokes vector: linear polarization [normalized] (numpy
-      array)
- - U: Third stokes vector: linear polarization [normalized] (numpy 
-      array)
- - V: Fourth stokes vector: circular polarization [normalized] 
-      (numpy array)
+    OUTPUTS
+    ------------------------------------------------------------------
+    - I: First stokes vector: flux [normalized] (numpy array)
+    - Q: Second stokes vector: linear polarization [normalized] (numpy
+        array)
+    - U: Third stokes vector: linear polarization [normalized] (numpy
+        array)
+    - V: Fourth stokes vector: circular polarization [normalized]
+        (numpy array)
 
-DESCRIPTION
-------------------------------------------------------------------
-Serves as interface between the user and the function combining 
-the reflected radiance by different bodies.
+    DESCRIPTION
+    ------------------------------------------------------------------
+    Serves as interface between the user and the function combining
+    the reflected radiance by different bodies.
 
 
-    ''' 
+    '''
 
     for body in bodies:
         if body.name == _cfg.ref_body:
