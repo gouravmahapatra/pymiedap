@@ -29,7 +29,7 @@ from .. import pymiedap as pmd
 from .. import module_geos as geos
 
 def combine(bodies, reference):
-	"""
+    """
     ==================================================================
     EXOPY function: combine()
     Delft University of Technology
@@ -60,51 +60,50 @@ def combine(bodies, reference):
     - V: Fourth stokes vector: circular polarization [normalized]
     (numpy array)
 
-	"""
+    """
 
-	print('\n    ... combining radiance results\n')
+    print('\n    ... combining radiance results\n')
 
-	I = np.zeros_like(reference.radiance.I)
-	Q = np.zeros_like(I)
-	U = np.zeros_like(I)
-	V = np.zeros_like(I)
+    I = np.zeros_like(reference.radiance.I)
+    Q = np.zeros_like(I)
+    U = np.zeros_like(I)
+    V = np.zeros_like(I)
 
     #ones  = np.ones_like(reference.ephemeris.time)
     #zeros = np.zeros_like(reference.ephemeris.time)
 
-	for body in bodies:
-         body.radiance.I_ref = np.zeros_like(I)
-         body.radiance.Q_ref = np.zeros_like(I)
-         body.radiance.U_ref = np.zeros_like(I)
-         body.radiance.V_ref = np.zeros_like(I)
+    for body in bodies:
+        body.radiance.I_ref = np.zeros_like(I)
+        body.radiance.Q_ref = np.zeros_like(I)
+        body.radiance.U_ref = np.zeros_like(I)
+        body.radiance.V_ref = np.zeros_like(I)
 
     for wvl,j in enumerate(reference.atmosphere.wvl_list):
+        for body in bodies:
 
-         for body in bodies:
+            size_scale = body.properties.R/reference.properties.R
+            distance_scale = (reference.ephemeris.r_s/body.ephemeris.r_s)**2
 
-                size_scale = body.properties.R/reference.properties.R
-                distance_scale = (reference.ephemeris.r_s/body.ephemeris.r_s)**2
+            #IQUV = [body.radiance.I[wvl,:], body.radiance.Q[wvl,:], body.radiance.U[wvl,:], body.radiance.V[wvl,:]]
 
-                #IQUV = [body.radiance.I[wvl,:], body.radiance.Q[wvl,:], body.radiance.U[wvl,:], body.radiance.V[wvl,:]]
+            # Rotation of the Stokes vectors into observer plane
+            nQ, nU = pmd.rotate_stokes(body.radiance.Q[wvl,:], body.radiance.U[wvl,:],
+                                       body.geometry.ref_plane_to_ref_line_angle)
 
-                # Rotation of the Stokes vectors into observer plane
-                nQ, nU = pmd.rotate_stokes(body.radiance.Q[wvl,:], body.radiance.U[wvl,:],
-                                           body.geometry.ref_plane_to_ref_line_angle)
+            body.radiance.Q[wvl,:] = nQ
+            body.radiance.U[wvl,:] = nU
 
-                body.radiance.Q[wvl,:] = nQ
-                body.radiance.U[wvl,:] = nU
+            body.radiance.I_ref[wvl,:] = distance_scale * size_scale * body.radiance.I[wvl,:]
+            body.radiance.Q_ref[wvl,:] = distance_scale * size_scale * body.radiance.Q[wvl,:]
+            body.radiance.U_ref[wvl,:] = distance_scale * size_scale * body.radiance.U[wvl,:]
+            body.radiance.V_ref[wvl,:] = distance_scale * size_scale * body.radiance.V[wvl,:]
 
-                body.radiance.I_ref[wvl,:] = distance_scale * size_scale * body.radiance.I[wvl,:]
-                body.radiance.Q_ref[wvl,:] = distance_scale * size_scale * body.radiance.Q[wvl,:]
-                body.radiance.U_ref[wvl,:] = distance_scale * size_scale * body.radiance.U[wvl,:]
-                body.radiance.V_ref[wvl,:] = distance_scale * size_scale * body.radiance.V[wvl,:]
+            I[wvl,:] = I[wvl,:] + body.radiance.I_ref[wvl,:]
+            Q[wvl,:] = Q[wvl,:] + body.radiance.Q_ref[wvl,:]
+            U[wvl,:] = U[wvl,:] + body.radiance.U_ref[wvl,:]
+            V[wvl,:] = V[wvl,:] + body.radiance.V_ref[wvl,:]
 
-                I[wvl,:] = I[wvl,:] + body.radiance.I_ref[wvl,:]
-                Q[wvl,:] = Q[wvl,:] + body.radiance.Q_ref[wvl,:]
-                U[wvl,:] = U[wvl,:] + body.radiance.U_ref[wvl,:]
-                V[wvl,:] = V[wvl,:] + body.radiance.V_ref[wvl,:]
-
-	return I, Q, U, V,
+    return I, Q, U, V,
 
 
 def integration(body, path_input = './dap_database/', nmug = 20, nmug_mie = 20, nmat=4, nsubr=50):
