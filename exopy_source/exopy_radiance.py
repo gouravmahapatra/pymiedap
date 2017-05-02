@@ -1,30 +1,28 @@
 # -*- coding: utf-8 -*-
-"""
-==================================================================
-EXOPY module: exopy_radiance.py
-Delft University of Technology
-------------------------------------------------------------------
-Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
-Date: 2016-2017
-------------------------------------------------------------------
-
-Dependences:
-
-DESCRIPTION
-------------------------------------------------------------------
-Script containing the functions required for computing the indivi-
-dual and combined reflected signals at each time epoch.
-
-LIST OF FUNCTIONS
-------------------------------------------------------------------
- - combine: Function merging the radiance outputs of a planet and 
-	    moon bodies.
- - integration: Function computing the Stokes elements at each pi-
-		xel and time epoch and integrating them along the 
-		bodies' disks.
-
-
-"""
+# ==================================================================
+# EXOPY module: exopy_radiance.py
+# Delft University of Technology
+# ------------------------------------------------------------------
+# Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+# Date: 2016-2017
+# ------------------------------------------------------------------
+#
+# Dependences:
+#
+# DESCRIPTION
+# ------------------------------------------------------------------
+# Script containing the functions required for computing the indivi-
+# dual and combined reflected signals at each time epoch.
+#
+# LIST OF FUNCTIONS
+# ------------------------------------------------------------------
+#  - combine: Function merging the radiance outputs of a planet and
+# 	    moon bodies.
+#  - integration: Function computing the Stokes elements at each pi-
+# 		xel and time epoch and integrating them along the
+# 		bodies' disks.
+#
+#
 
 import numpy as np
 from .. import pymiedap as pmd
@@ -32,36 +30,35 @@ from .. import module_geos as geos
 
 def combine(bodies, reference):
 	"""
-==================================================================
-EXOPY function: combine()
-Delft University of Technology
-------------------------------------------------------------------
-Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
-Date: 2016-2017
-------------------------------------------------------------------
+    ==================================================================
+    EXOPY function: combine()
+    Delft University of Technology
+    ------------------------------------------------------------------
+    Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+    Date: 2016-2017
+    ------------------------------------------------------------------
 
-Dependences:
+    Dependences:
 
-DESCRIPTION
-------------------------------------------------------------------
-Function dedicated to merge the Stokes elements for a set of 
-planet and moon bodies.
+    DESCRIPTION
+    ------------------------------------------------------------------
+    Function dedicated to merge the Stokes elements for a set of
+    planet and moon bodies.
 
-INPUTS
-------------------------------------------------------------------
- - bodies: List of two body objects [-] (list)
- - reference: Reference body [-] ('body' object)
+    INPUTS
+    ------------------------------------------------------------------
+    - bodies: List of two body objects [-] (list)
+    - reference: Reference body [-] ('body' object)
 
-OUTPUTS
-------------------------------------------------------------------
- - I: First stokes vector: flux [normalized] (numpy array)
- - Q: Second stokes vector: linear polarization [normalized] (numpy
-      array)
- - U: Third stokes vector: linear polarization [normalized] (numpy 
-      array)
- - V: Fourth stokes vector: circular polarization [normalized] 
-      (numpy array)
-
+    OUTPUTS
+    ------------------------------------------------------------------
+    - I: First stokes vector: flux [normalized] (numpy array)
+    - Q: Second stokes vector: linear polarization [normalized] (numpy
+    array)
+    - U: Third stokes vector: linear polarization [normalized] (numpy
+    array)
+    - V: Fourth stokes vector: circular polarization [normalized]
+    (numpy array)
 
 	"""
 
@@ -72,74 +69,74 @@ OUTPUTS
 	U = np.zeros_like(I)
 	V = np.zeros_like(I)
 
-#	ones  = np.ones_like(reference.ephemeris.time)
-#	zeros = np.zeros_like(reference.ephemeris.time)
- 
+    #ones  = np.ones_like(reference.ephemeris.time)
+    #zeros = np.zeros_like(reference.ephemeris.time)
+
 	for body in bodies:
          body.radiance.I_ref = np.zeros_like(I)
          body.radiance.Q_ref = np.zeros_like(I)
          body.radiance.U_ref = np.zeros_like(I)
          body.radiance.V_ref = np.zeros_like(I)
- 
-	for wvl,j in enumerate(reference.atmosphere.wvl_list):
-         
+
+    for wvl,j in enumerate(reference.atmosphere.wvl_list):
+
          for body in bodies:
 
                 size_scale = body.properties.R/reference.properties.R
                 distance_scale = (reference.ephemeris.r_s/body.ephemeris.r_s)**2
-        
-#        		IQUV = [body.radiance.I[wvl,:], body.radiance.Q[wvl,:], body.radiance.U[wvl,:], body.radiance.V[wvl,:]]
-    
-            	# Rotation of the Stokes vectors into observer plane
-            	nQ, nU = pmd.rotate_stokes(body.radiance.Q[wvl,:], body.radiance.U[wvl,:],
-                                       body.geometry.ref_plane_to_ref_line_angle)
-    
-            	body.radiance.Q[wvl,:] = nQ
-            	body.radiance.U[wvl,:] = nU
-    
-            	body.radiance.I_ref[wvl,:] = distance_scale * size_scale * body.radiance.I[wvl,:]
-            	body.radiance.Q_ref[wvl,:] = distance_scale * size_scale * body.radiance.Q[wvl,:]
-            	body.radiance.U_ref[wvl,:] = distance_scale * size_scale * body.radiance.U[wvl,:]
-            	body.radiance.V_ref[wvl,:] = distance_scale * size_scale * body.radiance.V[wvl,:]
-    
-            	I[wvl,:] = I[wvl,:] + body.radiance.I_ref[wvl,:]
-            	Q[wvl,:] = Q[wvl,:] + body.radiance.Q_ref[wvl,:]
-            	U[wvl,:] = U[wvl,:] + body.radiance.U_ref[wvl,:]
-            	V[wvl,:] = V[wvl,:] + body.radiance.V_ref[wvl,:]
+
+                #IQUV = [body.radiance.I[wvl,:], body.radiance.Q[wvl,:], body.radiance.U[wvl,:], body.radiance.V[wvl,:]]
+
+                # Rotation of the Stokes vectors into observer plane
+                nQ, nU = pmd.rotate_stokes(body.radiance.Q[wvl,:], body.radiance.U[wvl,:],
+                                           body.geometry.ref_plane_to_ref_line_angle)
+
+                body.radiance.Q[wvl,:] = nQ
+                body.radiance.U[wvl,:] = nU
+
+                body.radiance.I_ref[wvl,:] = distance_scale * size_scale * body.radiance.I[wvl,:]
+                body.radiance.Q_ref[wvl,:] = distance_scale * size_scale * body.radiance.Q[wvl,:]
+                body.radiance.U_ref[wvl,:] = distance_scale * size_scale * body.radiance.U[wvl,:]
+                body.radiance.V_ref[wvl,:] = distance_scale * size_scale * body.radiance.V[wvl,:]
+
+                I[wvl,:] = I[wvl,:] + body.radiance.I_ref[wvl,:]
+                Q[wvl,:] = Q[wvl,:] + body.radiance.Q_ref[wvl,:]
+                U[wvl,:] = U[wvl,:] + body.radiance.U_ref[wvl,:]
+                V[wvl,:] = V[wvl,:] + body.radiance.V_ref[wvl,:]
 
 	return I, Q, U, V,
 
 
 def integration(body, path_input = './dap_database/', nmug = 20, nmug_mie = 20, nmat=4, nsubr=50):
     """
-==================================================================
-EXOPY function: integration()
-Delft University of Technology
-------------------------------------------------------------------
-Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
-Date: 2016-2017
-------------------------------------------------------------------
+    ==================================================================
+    EXOPY function: integration()
+    Delft University of Technology
+    ------------------------------------------------------------------
+    Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+    Date: 2016-2017
+    ------------------------------------------------------------------
 
-Dependences:
+    Dependences:
 
-DESCRIPTION
-------------------------------------------------------------------
-Function computing the Stokes elements at each pixel and time 
-epoch and integrating them along the bodies' disks.
+    DESCRIPTION
+    ------------------------------------------------------------------
+    Function computing the Stokes elements at each pixel and time
+    epoch and integrating them along the bodies' disks.
 
-INPUTS
-------------------------------------------------------------------
- - body: Planet or moon type of body object [-] ('body' object)
- - path_input: Path to the Fourier files storage folder [-] 
-	       ('body' object)
- - nmug: number of Gauss points for DAP calculations [-] (int)
- - nmug_mie: number of Gauss points for MIE calculations [-] (int)
- - nmat: number of Stokes elements to compute [-] (int)
- - nsubr: number of subintervals for the distribution [-] (int)
+    INPUTS
+    ------------------------------------------------------------------
+    - body: Planet or moon type of body object [-] ('body' object)
+    - path_input: Path to the Fourier files storage folder [-]
+            ('body' object)
+    - nmug: number of Gauss points for DAP calculations [-] (int)
+    - nmug_mie: number of Gauss points for MIE calculations [-] (int)
+    - nmat: number of Stokes elements to compute [-] (int)
+    - nsubr: number of subintervals for the distribution [-] (int)
 
-OUTPUTS
-------------------------------------------------------------------
- - body: Planet or moon type of body object [-] ('body' object)
+    OUTPUTS
+    ------------------------------------------------------------------
+    - body: Planet or moon type of body object [-] ('body' object)
 
 
     """
@@ -185,11 +182,18 @@ OUTPUTS
 
             # If atmosphere not calculated yet
             if body.atmosphere.name[l] == '':
-		if hasattr(body.atmosphere, 'tag'):
-			if body.atmosphere.tag != '':
-                		pmd.compute_model(body.atmosphere, rename=True, output_name = body.atmosphere.tag, path_input = path_input, nmug=nmug, nmug_mie=nmug_mie, nmat=nmat, nsubr=nsubr)
-		else:
-                	pmd.compute_model(body.atmosphere, path_input = path_input, nmug=nmug, nmug_mie=nmug_mie, nmat=nmat, nsubr=nsubr)
+                if hasattr(body.atmosphere, 'tag'):
+                    if body.atmosphere.tag != '':
+                        pmd.compute_model(body.atmosphere, rename=True,
+                                          output_name=body.atmosphere.tag,
+                                          path_input=path_input, nmug=nmug,
+                                          nmug_mie=nmug_mie, nmat=nmat,
+                                          nsubr=nsubr)
+            else:
+                pmd.compute_model(body.atmosphere,
+                                  path_input=path_input, nmug=nmug,
+                                  nmug_mie=nmug_mie, nmat=nmat,
+                                  nsubr=nsubr)
 
             ######################################################################################
             #######################       PMD.READ_DAP_OUTPUT      ###############################
