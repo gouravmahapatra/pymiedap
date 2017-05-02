@@ -188,11 +188,11 @@ def integration(body, path_input = './dap_database/', nmug = 20, nmug_mie = 20, 
                                           path_input=path_input, nmug=nmug,
                                           nmug_mie=nmug_mie, nmat=nmat,
                                           nsubr=nsubr)
-            else:
-                pmd.compute_model(body.atmosphere,
-                                  path_input=path_input, nmug=nmug,
-                                  nmug_mie=nmug_mie, nmat=nmat,
-                                  nsubr=nsubr)
+                else:
+                    pmd.compute_model(body.atmosphere,
+                                    path_input=path_input, nmug=nmug,
+                                    nmug_mie=nmug_mie, nmat=nmat,
+                                    nsubr=nsubr)
 
             ######################################################################################
             #######################       PMD.READ_DAP_OUTPUT      ###############################
