@@ -12,7 +12,7 @@ Date: 2016-2017
 
 Dependences:
 
-Module containing a set of common functions which are accessed by 
+Module containing a set of common functions which are accessed by
 the rest of the modules.
 
 LIST OF CLASSES
@@ -20,22 +20,22 @@ LIST OF CLASSES
  - body: class for the creation of planet, moon and star objects
  - properties: contains information regarding bodies' properties
  - ephemeris: contains information regarding bodies' ephemeris
- - geometry: contains information regarding bodies' geometry wrt 
+ - geometry: contains information regarding bodies' geometry wrt
 	     the extrasolar planetary system
- - radiance: contains information regarding the bodies' reflected 
+ - radiance: contains information regarding the bodies' reflected
  	     starlight
  - orbital_elements: contains information regarding the orbital ele-
 	  	     ments of the bodies' orbits
- - flag: contains flag indicators of various aspects related to a 
+ - flag: contains flag indicators of various aspects related to a
 	 body
  - grid: contains information regarding the bodies' grid
  - ProgressBar: class for the creation of a progress bar
  - Arrow3D: class for the creation of 3D arrow objects
- 
+
 
 LIST OF FUNCTIONS
 ------------------------------------------------------------------
- - anim_to_html: Converts animation to HTML for compatibility with 
+ - anim_to_html: Converts animation to HTML for compatibility with
                  jupyter notebook.
  - display_animation: Displays animation in jupyter notebook
  - plot_xy: Predefined function for 2D plots.
@@ -86,47 +86,47 @@ VIDEO_TAG = """<video controls>
 
 class body():
     '''
-==================================================================
-EXOPY class: body
-Delft University of Technology
-------------------------------------------------------------------
-Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
-Date: 2016-2017
-------------------------------------------------------------------
+    ==================================================================
+    EXOPY class: body
+    Delft University of Technology
+    ------------------------------------------------------------------
+    Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+    Date: 2016-2017
+    ------------------------------------------------------------------
 
-DESCRIPTION
-------------------------------------------------------------------
-The class 'body' provides a framework for the storage of all the
-information regaring the planet, moon, or star type of bodies
+    DESCRIPTION
+    ------------------------------------------------------------------
+    The class 'body' provides a framework for the storage of all the
+    information regaring the planet, moon, or star type of bodies
 
-METHODS
-------------------------------------------------------------------
- - atmosphere: PYMIEDAP class for the definition and characteriza-
-	       tion of the body's surface and atmosphere.
- - ephemeris: class storing ephemeris information on the body's or-
-	      bit.
- - flag: class storing flag indicators.
- - geometry: class for the storage of geometry features of a body 
-	     along its orbit which do not depend on the pixel dis-
-	     cretization.
- - grid: class for the characterization of the pixel discratization
-	 of a body and the storage of geometry information which is
-	 pixel dependant.
- - name: string name associated with the body.
- - note: string note providing more information if neded.
- - orbital_elements: class for the characterization of the body's
-		     orbit through its Keplerian elements.
- - properties: class storing the natural properties of a body.
- - radiance: class storing the output Stokes elements.
- - reset: !!??
- - show: method displaying a list of all created bodies.
- - type: string type associated with the body.
+    METHODS
+    ------------------------------------------------------------------
+    - atmosphere: PYMIEDAP class for the definition and characteriza-
+            tion of the body's surface and atmosphere.
+    - ephemeris: class storing ephemeris information on the body's or-
+            bit.
+    - flag: class storing flag indicators.
+    - geometry: class for the storage of geometry features of a body
+            along its orbit which do not depend on the pixel dis-
+            cretization.
+    - grid: class for the characterization of the pixel discratization
+        of a body and the storage of geometry information which is
+        pixel dependant.
+    - name: string name associated with the body.
+    - note: string note providing more information if neded.
+    - orbital_elements: class for the characterization of the body's
+                orbit through its Keplerian elements.
+    - properties: class storing the natural properties of a body.
+    - radiance: class storing the output Stokes elements.
+    - reset: !!??
+    - show: method displaying a list of all created bodies.
+    - type: string type associated with the body.
 
     '''
     __track       = [['#', 'Variable name', 'Type of body']]
 
     def __repr__(self):
-	 
+
         import numpy as np
         text = ['\n']
         text.append('Body object:\n' )
@@ -143,7 +143,7 @@ METHODS
                 text.append('   Wavelength [nm]\tFourier file')
                 for i,w in enumerate(self.atmosphere.wvl_list):
                         text.append('       '+str(self.atmosphere.wvl_list[i])+'\t\t'+self.atmosphere.name[i])
-		
+
                 text.append(' ')
                 text[-1] = str(self.flag)
 
@@ -154,22 +154,21 @@ METHODS
                 else: aux1 = 0
                 text[-1] = str(self.orbital_elements)[0:-112-aux-aux1]
 
-                '''
-                text.append('\n   Period: ' + str(self.ephemeris.period) + ' s  (' + str(self.ephemeris.period/31557600) + ' years)')
-                text.append('   Semi-major axis (a): '    + str(self.orbital_elements.a) + ' m')
-                text.append('   Eccentricity (e):    '    + str(self.orbital_elements.e))
-                text.append('   Inclination (i):     '    + str(self.orbital_elements.i) + ' deg')
-                text.append('   Argument of periapsis (omega): '  + str(self.orbital_elements.omega) + ' deg')
-                text.append('   Right ascension of the ascending node (Omega): '  + str(self.orbital_elements.Omega) + ' deg')
-                text.append('   Time from periapsis passage (t0): '  + str(self.orbital_elements.t0) + 's')
-                '''
+                #text.append('\n   Period: ' + str(self.ephemeris.period) + ' s  (' + str(self.ephemeris.period/31557600) + ' years)')
+                #text.append('   Semi-major axis (a): '    + str(self.orbital_elements.a) + ' m')
+                #text.append('   Eccentricity (e):    '    + str(self.orbital_elements.e))
+                #text.append('   Inclination (i):     '    + str(self.orbital_elements.i) + ' deg')
+                #text.append('   Argument of periapsis (omega): '  + str(self.orbital_elements.omega) + ' deg')
+                #text.append('   Right ascension of the ascending node (Omega): '  + str(self.orbital_elements.Omega) + ' deg')
+                #text.append('   Time from periapsis passage (t0): '  + str(self.orbital_elements.t0) + 's')
+
                 text.append('\n   Grid type:\t'     + str(self.grid.type))
                 text.append('   Grid points:\t'     + str(self.grid.N_points))
                 text.append('   Grid eq. points: '  + str(self.grid.Nsq))
-		
+
                 text.append('\nRelation of properties at time index \'i\' available through body(i).')
-		
-		
+
+
         return '\n'.join(text)
 
     def __call__(self, index = 0):
@@ -189,7 +188,7 @@ METHODS
                 text.append('   Wavelength [nm]\tFourier file')
                 for i,w in enumerate(self.atmosphere.wvl_list):
                         text.append('       '+str(self.atmosphere.wvl_list[i])+'\t\t'+self.atmosphere.name[i])
-		
+
         print('\n'.join(text))
 
         self.flag(index)
@@ -263,23 +262,23 @@ METHODS
 
 class properties():
     '''
-==================================================================
-EXOPY class: body.properties
-Delft University of Technology
-------------------------------------------------------------------
-Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
-Date: 2016-2017
-------------------------------------------------------------------
+    ==================================================================
+    EXOPY class: body.properties
+    Delft University of Technology
+    ------------------------------------------------------------------
+    Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+    Date: 2016-2017
+    ------------------------------------------------------------------
 
-DESCRIPTION
-------------------------------------------------------------------
-The class 'properties' stores all relevant information regarding 
-the natural properties of a body.
+    DESCRIPTION
+    ------------------------------------------------------------------
+    The class 'properties' stores all relevant information regarding
+    the natural properties of a body.
 
-METHODS
-------------------------------------------------------------------
- - m: mass of the body [kg] (float)
- - R: radius of the body [m] (float)
+    METHODS
+    ------------------------------------------------------------------
+    - m: mass of the body [kg] (float)
+    - R: radius of the body [m] (float)
 
 
     '''
@@ -302,45 +301,45 @@ METHODS
         text.append('Relation of body properties:\n' )
         text.append('   Mass: m = ' + str(self.m) + ' kg' )
         text.append('   Radius: R = ' + str(self.R) + ' m')
-	
+
         print('\n'.join(text))
 
 
 class ephemeris():
     '''
-==================================================================
-EXOPY class: body.ephemeris
-Delft University of Technology
-------------------------------------------------------------------
-Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
-Date: 2016-2017
-------------------------------------------------------------------
+    ==================================================================
+    EXOPY class: body.ephemeris
+    Delft University of Technology
+    ------------------------------------------------------------------
+    Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+    Date: 2016-2017
+    ------------------------------------------------------------------
 
-DESCRIPTION
-------------------------------------------------------------------
-The class 'ephemeris' stores all relevant information regarding 
-the ephemeris of a body.
+    DESCRIPTION
+    ------------------------------------------------------------------
+    The class 'ephemeris' stores all relevant information regarding
+    the ephemeris of a body.
 
-METHODS
-------------------------------------------------------------------
- - period: period of the body's orbit [s] (float)
- - position2D_ij: 2D position vector of body i wrt body j [m] 
-                  (numpy array) *
- - position3D_ij: 3D position vector of body i wrt body j [m] 
-                  (numpy array) *
- - position3D_s: 3D position vector wrt star [m] (numpy array)
- - position3D_s_ob: 3D position vector wrt star in observer's ref. 
-		    frame [m] (numpy array)
- - r_b: distance to planet-moon system barycentre [m] (numpy array)
- - r_m: distance to moon [m] (numpy array)
- - r_s: distance to planet [m] (numpy array)
- - time: Array of computed time epochs [s] (numpy array)
+    METHODS
+    ------------------------------------------------------------------
+    - period: period of the body's orbit [s] (float)
+    - position2D_ij: 2D position vector of body i wrt body j [m]
+                    (numpy array) *
+    - position3D_ij: 3D position vector of body i wrt body j [m]
+                    (numpy array) *
+    - position3D_s: 3D position vector wrt star [m] (numpy array)
+    - position3D_s_ob: 3D position vector wrt star in observer's ref.
+                frame [m] (numpy array)
+    - r_b: distance to planet-moon system barycentre [m] (numpy array)
+    - r_m: distance to moon [m] (numpy array)
+    - r_s: distance to planet [m] (numpy array)
+    - time: Array of computed time epochs [s] (numpy array)
 
-* i,j = p, m, b, s
-  with p=planet, m=moon, b=planet-moon barycentre, s=star
+    * i,j = p, m, b, s
+    with p=planet, m=moon, b=planet-moon barycentre, s=star
 
-A relation of ephemeris values at time epoch 'i' can be retrieved
-by body.ephemeris(i).
+    A relation of ephemeris values at time epoch 'i' can be retrieved
+    by body.ephemeris(i).
 
     '''
 
@@ -466,37 +465,37 @@ by body.ephemeris(i).
 
 class geometry():
     '''
-==================================================================
-EXOPY class: body.geometry
-Delft University of Technology
-------------------------------------------------------------------
-Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
-Date: 2016-2017
-------------------------------------------------------------------
+    ==================================================================
+    EXOPY class: body.geometry
+    Delft University of Technology
+    ------------------------------------------------------------------
+    Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+    Date: 2016-2017
+    ------------------------------------------------------------------
 
-DESCRIPTION
-------------------------------------------------------------------
-The class 'geometry' stores all relevant information regarding the
-geometry of a body in the extrasolar planetary system which do not
-depend on the pixel discretization of the disk.
+    DESCRIPTION
+    ------------------------------------------------------------------
+    The class 'geometry' stores all relevant information regarding the
+    geometry of a body in the extrasolar planetary system which do not
+    depend on the pixel discretization of the disk.
 
-METHODS
-------------------------------------------------------------------
- - phase_angle: angle between the star, planet, and observer [rad]
-	        (numpy array)
- - ref_line_angle: shift angle to centre of reference body [rad] 
-		   (numpy array)
- - ref_plane_angle: shift angle to reference angle for radiance 
-		    calc. [rad] (numpy array)
- - ref_plane_to_ref_line_angle: difference between the ref. line 
-				and plane angles (numpy array)
- - solar_azimuth_angle: azimuth angle of star as seen from the body
-			in observer reference frame [rad] 
-			(numpy array)
- - alpha: supplementary angle to phase angle [rad] (numpy array)
+    METHODS
+    ------------------------------------------------------------------
+    - phase_angle: angle between the star, planet, and observer [rad]
+                (numpy array)
+    - ref_line_angle: shift angle to centre of reference body [rad]
+            (numpy array)
+    - ref_plane_angle: shift angle to reference angle for radiance
+                calc. [rad] (numpy array)
+    - ref_plane_to_ref_line_angle: difference between the ref. line
+                    and plane angles (numpy array)
+    - solar_azimuth_angle: azimuth angle of star as seen from the body
+                in observer reference frame [rad]
+                (numpy array)
+    - alpha: supplementary angle to phase angle [rad] (numpy array)
 
-A relation of ephemeris values at time epoch 'i' can be retrieved
-by body.geometry(i).
+    A relation of ephemeris values at time epoch 'i' can be retrieved
+    by body.geometry(i).
 
     '''
 
@@ -536,7 +535,7 @@ by body.geometry(i).
                 raise ValueError('Input value for input \'unit\' must be \'rad\' (default) or \'deg\'.')
 
         text = ['\n']
-	
+
         if self.__type != 'star':
 
                 if np.ndim(self.phase_angle)== 1:
@@ -575,45 +574,45 @@ by body.geometry(i).
 
 class radiance():
     '''
-==================================================================
-EXOPY class: body.radiance
-Delft University of Technology
-------------------------------------------------------------------
-Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
-Date: 2016-2017
-------------------------------------------------------------------
+    ==================================================================
+    EXOPY class: body.radiance
+    Delft University of Technology
+    ------------------------------------------------------------------
+    Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+    Date: 2016-2017
+    ------------------------------------------------------------------
 
-DESCRIPTION
-------------------------------------------------------------------
-The class 'radiance' stores all relevant information regarding the
-body's reflected starlight as produced by the PYMIEDAP code. Pixel
-by pixel contributions to the total flux are stored under the 
-'grid' category.
+    DESCRIPTION
+    ------------------------------------------------------------------
+    The class 'radiance' stores all relevant information regarding the
+    body's reflected starlight as produced by the PYMIEDAP code. Pixel
+    by pixel contributions to the total flux are stored under the
+    'grid' category.
 
-METHODS
-------------------------------------------------------------------
- - I: First Stokes element: reflected starlight flux [normalized]
-      (numpy array)
- - U: Second Stokes element: linear polarization of reflected 
-      starlight [normalized] (numpy array)
- - V: Third Stokes element: circular polarization of reflected 
-      starlight [normalized] (numpy array)
- - Q: Fourth Stokes element: circular polarization of reflected 
-      starlight [normalized] (numpy array)
- - I_ref: First Stokes element wrt reference plane: reflected 
-	  starlight flux [normalized] (numpy array)
- - U_ref: Second Stokes element wrt reference plane: linear pola-
-	  rization of reflected 
-          starlight [normalized] (numpy array)
- - V_ref: Third Stokes element wrt reference plane: circular pola-
-	  rization of reflected starlight [normalized] 
-	  (numpy array)
- - Q_ref: Fourth Stokes element wrt reference plane: circular po-
-	  larization of reflected starlight [normalized] 
-	  (numpy array)
+    METHODS
+    ------------------------------------------------------------------
+    - I: First Stokes element: reflected starlight flux [normalized]
+        (numpy array)
+    - U: Second Stokes element: linear polarization of reflected
+        starlight [normalized] (numpy array)
+    - V: Third Stokes element: circular polarization of reflected
+        starlight [normalized] (numpy array)
+    - Q: Fourth Stokes element: circular polarization of reflected
+        starlight [normalized] (numpy array)
+    - I_ref: First Stokes element wrt reference plane: reflected
+        starlight flux [normalized] (numpy array)
+    - U_ref: Second Stokes element wrt reference plane: linear pola-
+        rization of reflected
+            starlight [normalized] (numpy array)
+    - V_ref: Third Stokes element wrt reference plane: circular pola-
+        rization of reflected starlight [normalized]
+        (numpy array)
+    - Q_ref: Fourth Stokes element wrt reference plane: circular po-
+        larization of reflected starlight [normalized]
+        (numpy array)
 
-A relation of radiance values at time epoch 'i' can be retrieved
-by body.radiance(i).
+    A relation of radiance values at time epoch 'i' can be retrieved
+    by body.radiance(i).
 
     '''
 
@@ -652,7 +651,7 @@ by body.radiance(i).
     def __call__(self, index = 0, wvl = 0):
         import numpy as np
         text = ['\n']
-	
+
         if self.__type != 'star':
 
             if np.ndim(self.I)== 2:
@@ -692,62 +691,62 @@ by body.radiance(i).
 
 class orbital_elements():
     '''
-==================================================================
-EXOPY class: body.orbital_elements
-Delft University of Technology
-------------------------------------------------------------------
-Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
-Date: 2016-2017
-------------------------------------------------------------------
+    ==================================================================
+    EXOPY class: body.orbital_elements
+    Delft University of Technology
+    ------------------------------------------------------------------
+    Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+    Date: 2016-2017
+    ------------------------------------------------------------------
 
-DESCRIPTION
-------------------------------------------------------------------
-The class 'orbital elements' stores all input/output orbital ele-
-ments involved in the computation of the bodies' orbits.
+    DESCRIPTION
+    ------------------------------------------------------------------
+    The class 'orbital elements' stores all input/output orbital ele-
+    ments involved in the computation of the bodies' orbits.
 
-METHODS
-------------------------------------------------------------------
- - a_b: semi-major axis of the planet-moon system barycentre's or-
-        bit around the star [m] (float)
- - e_b: eccentricity of the planet-moon system barycentre's orbit 
-        around the star [-] (float)
- - i_b: inclination of the planet-moon system barycentre's orbit 
-        around the star [deg] (float)
- - Omega_b: Right Ascension of the Ascending Node of the planet-
-            moon system barycentre's orbit around the star [deg]
-            (float)
- - omega_b: Argument of periapsis of the planet-moon system bary-
-            centre's orbit around the star [deg] (float)
- - t0_b: time since last periapsis passage of the planet-moon sys-
-         tem barycentre's orbit around the star [s] (float)
- - E_bs: Eccentric anomaly of the planet-moon system barycentre's
-         orbit around the star [rad] (numpy array)
- - M_bs: Mean anomaly of the planet-moon system barycentre's
-         orbit around the star [rad] (numpy array)
- - nu_bs: True anomaly of the planet-moon system barycentre's
-         orbit around the star [rad] (numpy array) 
- - a: semi-major axis of the moon's orbit around the planet-moon 
-      system barycentre [m] (float)
- - e: eccentricity of the moon's orbit around the planet-moon 
-      system barycentre [-] (float)
- - i: inclination of the moon's orbit around the planet-moon 
-      system barycentre [deg] (float)
- - Omega: Right Ascension of the Ascending Node of the moon's orbit
-          around the planet-moon system barycentre [deg] (float)
- - omega: Argument of periapsis of the moon's orbit around the planet
-          -moon system barycentre [deg] (float)
- - t0: time since last periapsis passage of the moon's orbit around 
-       the planet-moon system barycentre [s] (float)
- - E_mb: Eccentric anomaly of the moon's orbit around the planet
-          -moon system barycentre [rad] (numpy array)
- - M_mb: Mean anomaly of the moon's orbit around the planet
-          -moon system barycentre [rad] (numpy array)
- - nu_mb: True anomaly of the moon's orbit around the planet
-          -moon system barycentre [rad] (numpy array) 
-                
+    METHODS
+    ------------------------------------------------------------------
+    - a_b: semi-major axis of the planet-moon system barycentre's or-
+            bit around the star [m] (float)
+    - e_b: eccentricity of the planet-moon system barycentre's orbit
+            around the star [-] (float)
+    - i_b: inclination of the planet-moon system barycentre's orbit
+            around the star [deg] (float)
+    - Omega_b: Right Ascension of the Ascending Node of the planet-
+                moon system barycentre's orbit around the star [deg]
+                (float)
+    - omega_b: Argument of periapsis of the planet-moon system bary-
+                centre's orbit around the star [deg] (float)
+    - t0_b: time since last periapsis passage of the planet-moon sys-
+            tem barycentre's orbit around the star [s] (float)
+    - E_bs: Eccentric anomaly of the planet-moon system barycentre's
+            orbit around the star [rad] (numpy array)
+    - M_bs: Mean anomaly of the planet-moon system barycentre's
+            orbit around the star [rad] (numpy array)
+    - nu_bs: True anomaly of the planet-moon system barycentre's
+            orbit around the star [rad] (numpy array)
+    - a: semi-major axis of the moon's orbit around the planet-moon
+        system barycentre [m] (float)
+    - e: eccentricity of the moon's orbit around the planet-moon
+        system barycentre [-] (float)
+    - i: inclination of the moon's orbit around the planet-moon
+        system barycentre [deg] (float)
+    - Omega: Right Ascension of the Ascending Node of the moon's orbit
+            around the planet-moon system barycentre [deg] (float)
+    - omega: Argument of periapsis of the moon's orbit around the planet
+            -moon system barycentre [deg] (float)
+    - t0: time since last periapsis passage of the moon's orbit around
+        the planet-moon system barycentre [s] (float)
+    - E_mb: Eccentric anomaly of the moon's orbit around the planet
+            -moon system barycentre [rad] (numpy array)
+    - M_mb: Mean anomaly of the moon's orbit around the planet
+            -moon system barycentre [rad] (numpy array)
+    - nu_mb: True anomaly of the moon's orbit around the planet
+            -moon system barycentre [rad] (numpy array)
 
-A relation of orbital elements values at time epoch 'i' can be re-
-trieved by body.orbital_elements(i).
+
+    A relation of orbital elements values at time epoch 'i' can be re-
+    trieved by body.orbital_elements(i).
 
     '''
 
@@ -783,7 +782,7 @@ trieved by body.orbital_elements(i).
     def __call__(self, index = 0):
         import numpy as np
         text = ['\n']
-	
+
         if self.__type == 'planet':
                 if np.ndim(self.E_bs)== 1:
 
@@ -854,13 +853,13 @@ trieved by body.orbital_elements(i).
                 text.append('   --No data available--')
 
         print('\n'.join(text))
- 
+
 
 
     def __repr__(self):
         import numpy as np
         text = ['\n']
-	
+
         if self.__type == 'planet':
 
                 text.append('Relation of orbital elements:\n')
@@ -887,7 +886,7 @@ trieved by body.orbital_elements(i).
                 text.append('   Time from periapsis passage (t0): '  + str(self.t0)  + ' s')
                 text.append('   Eccentric anomaly (E_mb) = ' + str(np.shape(self.E_mb)) + ' rad' )
                 text.append('   Mean anomaly (M_mb)  = ' + str(np.shape(self.M_mb))  + ' rad' )
-                text.append('   True anomaly (nu_mb) = ' + str(np.shape(self.nu_mb)) + ' rad' )       
+                text.append('   True anomaly (nu_mb) = ' + str(np.shape(self.nu_mb)) + ' rad' )
         else:
 
                 text.append('Relation of body radiance variables:\n')
@@ -900,53 +899,54 @@ trieved by body.orbital_elements(i).
 
 class flag():
     '''
-==================================================================
-EXOPY class: body.flag
-Delft University of Technology
-------------------------------------------------------------------
-Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
-Date: 2016-2017
-------------------------------------------------------------------
+    ==================================================================
+    EXOPY class: body.flag
+    Delft University of Technology
+    ------------------------------------------------------------------
+    Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+    Date: 2016-2017
+    ------------------------------------------------------------------
 
-DESCRIPTION
-------------------------------------------------------------------
-The class 'flag' stores all relevant indicators on the computation
-status of the body object.
+    DESCRIPTION
+    ------------------------------------------------------------------
+    The class 'flag' stores all relevant indicators on the computation
+    status of the body object.
 
-METHODS
-------------------------------------------------------------------
- - eclipse_d: flag indicating the computation status of eclipse 
-	      shadow [True/False] (bool)
- - transit_d: flag indicating the computation status of transit 
-	      shadow [True/False] (bool)
- - phase_d: flag indicating the computation status of phase shadow
-	     [True/False] (bool)
- - radiance: flag indicating the computation status of reflected
-	     starlight [True/False] (bool)
- - combine: flag indicating the computation status of radiance sig- 
-	    nals combination [True/False] (bool)
- - orbit: flag indicating the computation status of the orbital 
-	  geometry of the body [True/False] (bool)
- - transit: flag indicating the occurrence of transit shadowing [-]
-	    (list)
- - antumbra: flag indicating the occurrence of antumbra shadowing
-	     [-] (list)
- - umbra: flag indicating the occurrence of umbra shadowing [-] 
-	  (bool)
- - penumbra: flag indicating the occurrence of penumbra shadowing
-  	     [-] (list)
+    METHODS
+    ------------------------------------------------------------------
+    - eclipse_d: flag indicating the computation status of eclipse
+            shadow [True/False] (bool)
+    - transit_d: flag indicating the computation status of transit
+            shadow [True/False] (bool)
+    - phase_d: flag indicating the computation status of phase shadow
+            [True/False] (bool)
+    - radiance: flag indicating the computation status of reflected
+            starlight [True/False] (bool)
+    - combine: flag indicating the computation status of radiance sig-
+            nals combination [True/False] (bool)
+    - orbit: flag indicating the computation status of the orbital
+        geometry of the body [True/False] (bool)
+    - transit: flag indicating the occurrence of transit shadowing [-]
+            (list)
+    - antumbra: flag indicating the occurrence of antumbra shadowing
+            [-] (list)
+    - umbra: flag indicating the occurrence of umbra shadowing [-]
+        (bool)
+    - penumbra: flag indicating the occurrence of penumbra shadowing
+            [-] (list)
 
 
-A relation of flag values at time epoch 'i' can be retrieved
-by body.flag(i).
+    A relation of flag values at time epoch 'i' can be retrieved
+    by body.flag(i).
 
     '''
+
     def __init__(self, Type):
 
         if  Type != 'star':
                 self.transit          = []
                 self.antumbra         = []
-       	        self.umbra            = []
+                self.umbra            = []
                 self.penumbra         = []
                 self.transit_d        = False
                 self.phase_d          = False
@@ -963,7 +963,7 @@ by body.flag(i).
         if self.__type != 'star':
 
                 text.append('   Orbit geometry calculated:\t'  + str(self.orbit))
-               	text.append('   Phase shadow calculated:\t'    + str(self.phase_d))
+                text.append('   Phase shadow calculated:\t'    + str(self.phase_d))
                 text.append('   Transits shadow calculated:\t' + str(self.transit_d))
                 text.append('   Eclipses shadow calculated:\t' + str(self.eclipse_d))
                 text.append('   Reflected light calculated:\t' + str(self.radiance))
@@ -1027,66 +1027,66 @@ by body.flag(i).
 
 class grid():
     '''
-==================================================================
-EXOPY cl 	ass: body.grid
-Delft University of Technology
-------------------------------------------------------------------
-Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
-Date: 2016-2017
-------------------------------------------------------------------
+    ==================================================================
+    EXOPY cl 	ass: body.grid
+    Delft University of Technology
+    ------------------------------------------------------------------
+    Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+    Date: 2016-2017
+    ------------------------------------------------------------------
 
-DESCRIPTION
-------------------------------------------------------------------
-The class 'grid' allows to define the disk discretization and sto-
-res all relevant information on the body grid, as well as radiance
-and geometry information wich varies pixel-to-pixel.
+    DESCRIPTION
+    ------------------------------------------------------------------
+    The class 'grid' allows to define the disk discretization and sto-
+    res all relevant information on the body grid, as well as radiance
+    and geometry information wich varies pixel-to-pixel.
 
-METHODS
-------------------------------------------------------------------
- - N_points: Total number of pixels in grid [-] (int)
- - Nsq: Number of pixels along the equator [-] (int)
- - area: Area of each pixel along the gris [-] (numpy array)
- - type: Type of discretization [-] (str)
- - nodes: 2D Cartesian coordinates of each pixel in grid reference
-	  frame [-] (numpy array)
- - nodes_xyz: 3D Cartesian coordinates of each pixel in grid refe-
-	      rence frame [-] (numpy array)
- - nodes_xyz_rot: Rotated 3D Cartesian coordinates of each pixe
-		  in grid reference frame [-] (numpy array)
- - I: First Stokes element: reflected starlight flux per pixel 
-     [normalized] (numpy array)
- - U: Second Stokes element: linear polarization of reflected 
-      starlight per pixel [normalized] (numpy array)
- - V: Third Stokes element: circular polarization of reflected 
-      starlight per pixel [normalized] (numpy array)
- - Q: Fourth Stokes element: circular polarization of reflected 
-      starlight per pixel [normalized] (numpy array)
- - faces: Cartesian points delimiting the vertices of each pixel
-	  [-] (numpy array)
- - azimuth: Azimuth angle of each pixel at each time epoch [rad]
-	    (numpy array)
- - beta: Beta angle of each pixel at each time epoch [rad] (numpy 
-	 array)
- - distance_nodes_ob: Distance from star to each pixel [m] (numpy 
-		      array)
- - illuminated_nodes: Array indicating the illumination status of
-		      each pixel at each time epoch [True/False]
-		      (numpy array)
- - observer_zenith_angle: Angle between the observer position, 
-			  the centre of the pixel and the zenith
-			  direction [rad] (numpy array)
- - solar_zenith_angle: Angle between the star and the zenith di-
-		       rection, with centre at the pixel centre
-		       for each time epoch [rad] (numpy array)
- - position_nodes_ob: 3D Cartesian coordinates of each pixel in 
-		      observer reference frame [m] (numpy array)
- - set_grid: Function for the definition of the grid.
- - shadow: Shadowing status of each pixel at each time expressed 
-	   from 0 to 1.
- - show_grid: Function for plotting an overview of the grid used.
+    METHODS
+    ------------------------------------------------------------------
+    - N_points: Total number of pixels in grid [-] (int)
+    - Nsq: Number of pixels along the equator [-] (int)
+    - area: Area of each pixel along the gris [-] (numpy array)
+    - type: Type of discretization [-] (str)
+    - nodes: 2D Cartesian coordinates of each pixel in grid reference
+        frame [-] (numpy array)
+    - nodes_xyz: 3D Cartesian coordinates of each pixel in grid refe-
+            rence frame [-] (numpy array)
+    - nodes_xyz_rot: Rotated 3D Cartesian coordinates of each pixe
+            in grid reference frame [-] (numpy array)
+    - I: First Stokes element: reflected starlight flux per pixel
+        [normalized] (numpy array)
+    - U: Second Stokes element: linear polarization of reflected
+        starlight per pixel [normalized] (numpy array)
+    - V: Third Stokes element: circular polarization of reflected
+        starlight per pixel [normalized] (numpy array)
+    - Q: Fourth Stokes element: circular polarization of reflected
+        starlight per pixel [normalized] (numpy array)
+    - faces: Cartesian points delimiting the vertices of each pixel
+        [-] (numpy array)
+    - azimuth: Azimuth angle of each pixel at each time epoch [rad]
+            (numpy array)
+    - beta: Beta angle of each pixel at each time epoch [rad] (numpy
+        array)
+    - distance_nodes_ob: Distance from star to each pixel [m] (numpy
+                array)
+    - illuminated_nodes: Array indicating the illumination status of
+                each pixel at each time epoch [True/False]
+                (numpy array)
+    - observer_zenith_angle: Angle between the observer position,
+                the centre of the pixel and the zenith
+                direction [rad] (numpy array)
+    - solar_zenith_angle: Angle between the star and the zenith di-
+                rection, with centre at the pixel centre
+                for each time epoch [rad] (numpy array)
+    - position_nodes_ob: 3D Cartesian coordinates of each pixel in
+                observer reference frame [m] (numpy array)
+    - set_grid: Function for the definition of the grid.
+    - shadow: Shadowing status of each pixel at each time expressed
+        from 0 to 1.
+    - show_grid: Function for plotting an overview of the grid used.
 
-A relation of grid values at time epoch 'i' can be retrieved
-by body.grid(i).
+    A relation of grid values at time epoch 'i' can be retrieved
+    by body.grid(i).
 
     '''
 
@@ -1094,7 +1094,7 @@ by body.grid(i).
 
         self.Nsq      = 100
         self.type     = 'Square'
-        self.I	      = None	
+        self.I	      = None
         self.Q	      = None
         self.U	      = None
         self.V	      = None
@@ -1112,7 +1112,7 @@ by body.grid(i).
     def __call__(self,index=0, wvl=0):
         import numpy as np
         text = ['\n']
-	
+
         if self.__type != 'star':
 
                 if np.ndim(self.illuminated_nodes) == 2:
@@ -1208,36 +1208,36 @@ by body.grid(i).
 
 
     def show_grid(self):
-    	'''
-==================================================================
-EXOPY class: body.grid.show_grid()
-Delft University of Technology
-------------------------------------------------------------------
-Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
-Date: 2016-2017
-------------------------------------------------------------------
+        '''
+        ==================================================================
+        EXOPY class: body.grid.show_grid()
+        Delft University of Technology
+        ------------------------------------------------------------------
+        Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+        Date: 2016-2017
+        ------------------------------------------------------------------
 
-DESCRIPTION
-------------------------------------------------------------------
-The function 'show_grid' allows the user to easily plot an over-
-view of the grid defined on a certain body.
+        DESCRIPTION
+        ------------------------------------------------------------------
+        The function 'show_grid' allows the user to easily plot an over-
+        view of the grid defined on a certain body.
 
-INPUT
-------------------------------------------------------------------
- - No inputs -
+        INPUT
+        ------------------------------------------------------------------
+        - No inputs -
 
-    	'''
+        '''
 
-    	fig , ax = plt.subplots()
-    	#plt.plot(self.nodes[:,0], self.nodes[:,1], 'or')
-    	for i in range(self.N_points):
-    	    	plt.plot(self.faces[i,0,:], self.faces[i,1,:], 'b-', linewidth = '1')
-    	circle1 = plt.Circle((0, 0), 0.5, color = 'k', fill=False, zorder=1)
-    	ax.add_artist(circle1)
-    	ax.set_aspect('equal', adjustable='box')
-    	ax.set_xlim([-0.55, 0.55])
-    	ax.set_ylim([-0.55, 0.6])
-    	ax.text(-0.45,  0.525,'Points: '+ str(self.N_points), fontsize= 15)
+        fig , ax = plt.subplots()
+        #plt.plot(self.nodes[:,0], self.nodes[:,1], 'or')
+        for i in range(self.N_points):
+            plt.plot(self.faces[i,0,:], self.faces[i,1,:], 'b-', linewidth = '1')
+            circle1 = plt.Circle((0, 0), 0.5, color = 'k', fill=False, zorder=1)
+            ax.add_artist(circle1)
+            ax.set_aspect('equal', adjustable='box')
+            ax.set_xlim([-0.55, 0.55])
+            ax.set_ylim([-0.55, 0.6])
+            ax.text(-0.45,  0.525,'Points: '+ str(self.N_points), fontsize= 15)
 
     #def show_shadow(self,t):
 
@@ -1264,70 +1264,70 @@ INPUT
 
     def set_grid(self, grid_type='square', Nlon=7, Nlat=7, cos1 = 80, cos2 = 60, diff = 0.009, Nsq = 7, Nang=15, Nrad=3, max_area=0.03, min_angle=30, circle_edges = 20, centre = False):
     	'''
-==================================================================
-EXOPY class: body.grid.set_grid()
-Delft University of Technology
-------------------------------------------------------------------
-Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
-Date: 2016-2017
-------------------------------------------------------------------
+        ==================================================================
+        EXOPY class: body.grid.set_grid()
+        Delft University of Technology
+        ------------------------------------------------------------------
+        Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+        Date: 2016-2017
+        ------------------------------------------------------------------
 
-DESCRIPTION
-------------------------------------------------------------------
-The function 'set_grid' allows the user to discretize the disk of
-the body.
+        DESCRIPTION
+        ------------------------------------------------------------------
+        The function 'set_grid' allows the user to discretize the disk of
+        the body.
 
-INPUT
-------------------------------------------------------------------
- - grid_type: Type of grid ('square', 'radial', 'triangular', 
-	      'sphere')
- - Nlon: 
- - Nlat: 
- - cos1:
- - cos2: 
- - diff:
- - Nsq: ['square'] Number of pixels along the equator [-] (int)
- - Nang: 
- - Nrad: 
- - max_area:
- - min_angle: 
- - circle_edges:
- - centre:
+        INPUT
+        ------------------------------------------------------------------
+        - grid_type: Type of grid ('square', 'radial', 'triangular',
+                'sphere')
+        - Nlon:
+        - Nlat:
+        - cos1:
+        - cos2:
+        - diff:
+        - Nsq: ['square'] Number of pixels along the equator [-] (int)
+        - Nang:
+        - Nrad:
+        - max_area:
+        - min_angle:
+        - circle_edges:
+        - centre:
 
-	TO BE COMPLETED
+            TO BE COMPLETED
 
     	'''
 
-    	if grid_type == 'triangular':
+        if grid_type == 'triangular':
             self.nodes, self.faces, self.area, self.N_points, self.nodes_xyz = grd.triangl(max_area, min_angle, circle_edges, centre)
             print('  Triangular grid created with Meshpy')
-    	elif grid_type == 'square':
+        elif grid_type == 'square':
             self.nodes, self.faces, self.area, self.N_points, self.nodes_xyz = grd.square(Nsq)
             self.Nsq  =  Nsq
             print('  Square grid created!')
-    	elif grid_type == 'radial':
+        elif grid_type == 'radial':
             self.nodes, self.faces, self.area, self.N_points = grd.radial(Nang, Nrad)
             print('  Radial grid created!')
-    	elif grid_type == 'sphere':
+        elif grid_type == 'sphere':
             self.nodes, self.faces, self.area, self.N_points = grd.sphere(Nlon, Nlat, cos1, cos2, diff)
             print('  Spherical grid created!')
-    	else:
+        else:
             sys.exit('ERROR: Grid type not recognized!')
 
 
 class ProgressBar(object):
     '''
-==================================================================
-EXOPY class: ProgressBar
-Delft University of Technology
-------------------------------------------------------------------
-Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
-Date: 2016-2017
-------------------------------------------------------------------
+    ==================================================================
+    EXOPY class: ProgressBar
+    Delft University of Technology
+    ------------------------------------------------------------------
+    Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+    Date: 2016-2017
+    ------------------------------------------------------------------
 
-DESCRIPTION
-------------------------------------------------------------------
-Provides a progress bar to be shown during computations.
+    DESCRIPTION
+    ------------------------------------------------------------------
+    Provides a progress bar to be shown during computations.
 
     '''
 
@@ -1370,23 +1370,23 @@ Provides a progress bar to be shown during computations.
 
 class Arrow3D(FancyArrowPatch):
     '''
-==================================================================
-EXOPY class: Arrow3D
-Delft University of Technology
-------------------------------------------------------------------
-Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
-Date: 2016-2017
-------------------------------------------------------------------
+    ==================================================================
+    EXOPY class: Arrow3D
+    Delft University of Technology
+    ------------------------------------------------------------------
+    Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+    Date: 2016-2017
+    ------------------------------------------------------------------
 
-DESCRIPTION
-------------------------------------------------------------------
-Class for the creation of three dimensional arrow objects, based
-on [4]
-  
-  [4] stackoverflow.com/questions/29188612/arrows-in-matplotlib-using-mplot3d
+    DESCRIPTION
+    ------------------------------------------------------------------
+    Class for the creation of three dimensional arrow objects, based
+    on [4]
+
+    [4] stackoverflow.com/questions/29188612/arrows-in-matplotlib-using-mplot3d
 
 
-    '''
+        '''
 
     def __init__(self, xs, ys, zs, *args, **kwargs):
         FancyArrowPatch.__init__(self, (0,0), (0,0), *args, **kwargs)
@@ -1410,28 +1410,28 @@ on [4]
 
 def anim_to_html(anim):
     '''
-==================================================================
-EXOPY function: anim_to_html
-Delft University of Technology
-------------------------------------------------------------------
-Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
-Date: 2016-2017
-------------------------------------------------------------------
+    ==================================================================
+    EXOPY function: anim_to_html
+    Delft University of Technology
+    ------------------------------------------------------------------
+    Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+    Date: 2016-2017
+    ------------------------------------------------------------------
 
-DESCRIPTION
-------------------------------------------------------------------
-Converts a python animation object to a HTML format compatible with
-Jupyter Notebook. Based on [1]
+    DESCRIPTION
+    ------------------------------------------------------------------
+    Converts a python animation object to a HTML format compatible with
+    Jupyter Notebook. Based on [1]
 
-  [1] jakevdp.github.io/blog/2013/05/12/embedding-matplotlib-animations/
+    [1] jakevdp.github.io/blog/2013/05/12/embedding-matplotlib-animations/
 
-INPUTS
-------------------------------------------------------------------
- - anim: Animation object.
+    INPUTS
+    ------------------------------------------------------------------
+    - anim: Animation object.
 
-OUTPUTS
-------------------------------------------------------------------
- - Encoded video animation.
+    OUTPUTS
+    ------------------------------------------------------------------
+    - Encoded video animation.
 
 
     '''
@@ -1447,27 +1447,27 @@ OUTPUTS
 
 def display_animation(anim):
     '''
-==================================================================
-EXOPY function: anim_to_html
-Delft University of Technology
-------------------------------------------------------------------
-Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
-Date: 2016-2017
-------------------------------------------------------------------
+    ==================================================================
+    EXOPY function: anim_to_html
+    Delft University of Technology
+    ------------------------------------------------------------------
+    Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+    Date: 2016-2017
+    ------------------------------------------------------------------
 
-DESCRIPTION
-------------------------------------------------------------------
-Displays an animation in Jupyter Notebook. Based on [1].
+    DESCRIPTION
+    ------------------------------------------------------------------
+    Displays an animation in Jupyter Notebook. Based on [1].
 
-  [1] jakevdp.github.io/blog/2013/05/12/embedding-matplotlib-animations/
+    [1] jakevdp.github.io/blog/2013/05/12/embedding-matplotlib-animations/
 
-INPUTS
-------------------------------------------------------------------
- - anim: Animation object.
+    INPUTS
+    ------------------------------------------------------------------
+    - anim: Animation object.
 
-OUTPUTS
-------------------------------------------------------------------
- - HTML video.
+    OUTPUTS
+    ------------------------------------------------------------------
+    - HTML video.
 
 
     '''
@@ -1480,39 +1480,39 @@ OUTPUTS
 
 def plot_xy(x, y1, y2 = None, info = ['x [-]', 'y [-]', ' ', None]):
     '''
-==================================================================
-EXOPY function: plot_xy
-Delft University of Technology
-------------------------------------------------------------------
-Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
-Date: 2016-2017
-------------------------------------------------------------------
+    ==================================================================
+    EXOPY function: plot_xy
+    Delft University of Technology
+    ------------------------------------------------------------------
+    Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+    Date: 2016-2017
+    ------------------------------------------------------------------
 
-DESCRIPTION
-------------------------------------------------------------------
-Predefined function for 2D plots, e.g. phase vs time.
+    DESCRIPTION
+    ------------------------------------------------------------------
+    Predefined function for 2D plots, e.g. phase vs time.
 
-INPUTS
-------------------------------------------------------------------
- - x: Horizontal coordinate.
- - y1: Vertical coordinate.
- - y2: Second vertical coordinate.
- - info :Information on lables
-	0. x-lable (str)
-	1. y-lable (str)
-	2. title   (str)
-	3. legend  [(str),(str)]
+    INPUTS
+    ------------------------------------------------------------------
+    - x: Horizontal coordinate.
+    - y1: Vertical coordinate.
+    - y2: Second vertical coordinate.
+    - info :Information on lables
+        0. x-lable (str)
+        1. y-lable (str)
+        2. title   (str)
+        3. legend  [(str),(str)]
 
-OUTPUTS
-------------------------------------------------------------------
- - Figure.
+    OUTPUTS
+    ------------------------------------------------------------------
+    - Figure.
 
     '''
 
     plt.figure()
     plt.plot(x,y1,linewidth=2, linestyle="-", label="Curve 1")
     if y2 is not None: # If a second curve is required...
-       	plt.plot(x,y2,linewidth=2, linestyle="-", label="Curve 2")
+        plt.plot(x,y2,linewidth=2, linestyle="-", label="Curve 2")
     plt.xlabel(info[0])
     plt.ylabel(info[1])
     plt.xlim([min(x),max(x)])
@@ -1531,33 +1531,33 @@ OUTPUTS
 
 def query_yes_no(question, default="no"):
     '''
-==================================================================
-EXOPY function: plot_xy
-Delft University of Technology
-------------------------------------------------------------------
-Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
-Date: 2016-2017
-------------------------------------------------------------------
+    ==================================================================
+    EXOPY function: plot_xy
+    Delft University of Technology
+    ------------------------------------------------------------------
+    Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+    Date: 2016-2017
+    ------------------------------------------------------------------
 
-DESCRIPTION
-------------------------------------------------------------------
-Asks a yes/no question via input() and return their answer, based 
-on [3]
+    DESCRIPTION
+    ------------------------------------------------------------------
+    Asks a yes/no question via input() and return their answer, based
+    on [3]
 
- [3] Recipe 577058 from activestate.com. Adapted to Python 3.
+    [3] Recipe 577058 from activestate.com. Adapted to Python 3.
 
-INPUTS
-------------------------------------------------------------------
- - question: String to be presented to the user [-] (str)
- - default: Presumed answer if user presses <Enter>. Values admi-
-	    tted: 'yes', 'no' (default), None (meaning an answer
-	    is required from the side of the user) [-] (str)
+    INPUTS
+    ------------------------------------------------------------------
+    - question: String to be presented to the user [-] (str)
+    - default: Presumed answer if user presses <Enter>. Values admi-
+            tted: 'yes', 'no' (default), None (meaning an answer
+            is required from the side of the user) [-] (str)
 
-OUTPUTS
-------------------------------------------------------------------
- - True or False for positive and negative answers accordingly.
+    OUTPUTS
+    ------------------------------------------------------------------
+    - True or False for positive and negative answers accordingly.
 
-    '''
+        '''
 
     valid = {"yes": True, "y": True, "ye": True,
              "no": False, "n": False}
@@ -1586,26 +1586,26 @@ OUTPUTS
 
 def grid_area(grid,t):
     '''
-==================================================================
-EXOPY function: grid_area
-Delft University of Technology
-------------------------------------------------------------------
-Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
-Date: 2016-2017
-------------------------------------------------------------------
+    ==================================================================
+    EXOPY function: grid_area
+    Delft University of Technology
+    ------------------------------------------------------------------
+    Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+    Date: 2016-2017
+    ------------------------------------------------------------------
 
-DESCRIPTION
-------------------------------------------------------------------
--- TBC --
+    DESCRIPTION
+    ------------------------------------------------------------------
+    -- TBC --
 
-INPUTS
-------------------------------------------------------------------
- - grid: Grid type of object [-] (grid class)
- - t: time epoch index [-] (int)
+    INPUTS
+    ------------------------------------------------------------------
+    - grid: Grid type of object [-] (grid class)
+    - t: time epoch index [-] (int)
 
-OUTPUTS
-------------------------------------------------------------------
- - area: -- TBC --
+    OUTPUTS
+    ------------------------------------------------------------------
+    - area: -- TBC --
 
     '''
 
@@ -1620,27 +1620,27 @@ OUTPUTS
 
 def symp(x, deg = False):
     '''
-==================================================================
-EXOPY function: symp
-Delft University of Technology
-------------------------------------------------------------------
-Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
-Date: 2016-2017
-------------------------------------------------------------------
+    ==================================================================
+    EXOPY function: symp
+    Delft University of Technology
+    ------------------------------------------------------------------
+    Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+    Date: 2016-2017
+    ------------------------------------------------------------------
 
-DESCRIPTION
-------------------------------------------------------------------
-Converts an input angle to the range 0, 2pi.
+    DESCRIPTION
+    ------------------------------------------------------------------
+    Converts an input angle to the range 0, 2pi.
 
-INPUTS
-------------------------------------------------------------------
- - x: Input angle [rad/deg] (float)
- - deg: True if x given in degrees, False if x given in radians
- 	[True/False] (bool)
+    INPUTS
+    ------------------------------------------------------------------
+    - x: Input angle [rad/deg] (float)
+    - deg: True if x given in degrees, False if x given in radians
+        [True/False] (bool)
 
-OUTPUTS
-------------------------------------------------------------------
- - x: Converted angle
+    OUTPUTS
+    ------------------------------------------------------------------
+    - x: Converted angle
 
     '''
 
@@ -1753,7 +1753,3 @@ def PolyArea(x,y): # Shoelace formula
     return 0.5*np.abs(np.einsum('tN,tN->t', x, np.roll(y,1,axis=1))-np.einsum('tN,tN->t', y, np.roll(x,1,axis=1)))
 
 
-
-
-
-'''
