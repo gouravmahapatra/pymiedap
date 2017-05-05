@@ -380,6 +380,7 @@ REFERENCES
     planet.ephemeris.position3D_s = position3D_ps
     planet.ephemeris.position3D_pm= position3D_pm
     planet.ephemeris.period       = 2*math.pi/(n_mb)
+    planet.ephemeris.period_bs    = 2*math.pi/(n_bs)
 
     star.ephemeris.time           = time
     star.orbital_elements.nu_bs   = f_bs
