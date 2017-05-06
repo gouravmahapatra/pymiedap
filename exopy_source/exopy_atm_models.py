@@ -69,7 +69,7 @@ def Earth(alb=0.3, g=9.81, pc=0.7, reff=1.0, nr=1.33, wvlmin=0.4, wvlmax=0.41, d
     clear.layers.gastop.press = pc
     clear.surface[0,0] = alb
 
-    clear.tag = path_input + 'clear_{:03.1f}_{:3.2f}_{:2.1f}'.format(g,alb,reff)
+    clear.tag = 'clear_{:03.1f}_{:3.2f}_{:2.1f}'.format(g,alb,reff)
 
     check = _np.ones_like(clear.wvl_list)
     for i,wvl in enumerate(clear.wvl_list):
