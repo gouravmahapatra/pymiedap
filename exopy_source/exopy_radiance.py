@@ -59,15 +59,19 @@ def combine(bodies, reference):
     array)
     - V: Fourth stokes vector: circular polarization [normalized]
     (numpy array)
+    - P: Degree of linear polarization [%] (numpy array)
+    - Chi: Angle of polarization [deg] (numpy array)
 
     """
 
     print('\n    ... combining radiance results\n')
 
-    I = np.zeros_like(reference.radiance.I)
-    Q = np.zeros_like(I)
-    U = np.zeros_like(I)
-    V = np.zeros_like(I)
+    I   = np.zeros_like(reference.radiance.I)
+    Q   = np.zeros_like(I)
+    U   = np.zeros_like(I)
+    V   = np.zeros_like(I)
+    P   = np.zeros_like(I)
+    Chi = np.zeros_like(I)
 
     #ones  = np.ones_like(reference.ephemeris.time)
     #zeros = np.zeros_like(reference.ephemeris.time)
@@ -102,8 +106,11 @@ def combine(bodies, reference):
             Q[wvl,:] = Q[wvl,:] + body.radiance.Q_ref[wvl,:]
             U[wvl,:] = U[wvl,:] + body.radiance.U_ref[wvl,:]
             V[wvl,:] = V[wvl,:] + body.radiance.V_ref[wvl,:]
+            
+        P[wvl,:]   = np.sqrt(Q[wvl,:]**2 + U[wvl,:]**2)/I[wvl,:]*100
+        Chi[wvl,:] = 0.5*np.rad2deg(np.arctan(U[wvl,:]/Q[wvl,:])) 
 
-    return I, Q, U, V,
+    return I, Q, U, V, P, Chi
 
 
 def integration(body, path_input = './dap_database/', nmug = 20, nmug_mie = 20, nmat=4, nsubr=50):
@@ -139,13 +146,16 @@ def integration(body, path_input = './dap_database/', nmug = 20, nmug_mie = 20, 
 
 
     """
-
+    import time as t
+    
     ngeosMAX=200000
 
     print('\n    ... integrating radiance on ' + body.type + ' ' + body.name + ' disk \n')
 
     #files = dict(np.genfromtxt('exopy/scenes.dat', dtype='str'))
 
+    t0 = t.time()
+    
     time = body.ephemeris.time
     wvl_list = np.array(body.atmosphere.wvl_list)
     nwvl = len(wvl_list)
@@ -220,11 +230,14 @@ def integration(body, path_input = './dap_database/', nmug = 20, nmug_mie = 20, 
             Qp[l,i] = np.nansum(IQUV[1,:])
             Up[l,i] = np.nansum(IQUV[2,:])
             Vp[l,i] = np.nansum(IQUV[3,:])
-
-        body.radiance.I = Ip
-        body.radiance.Q = Qp
-        body.radiance.U = Up
-        body.radiance.V = Vp
+            
+    body.radiance.I   = Ip
+    body.radiance.Q   = Qp
+    body.radiance.U   = Up
+    body.radiance.V   = Vp
+    body.radiance.P   = np.sqrt(Qp**2 + Up**2)/Ip*100
+    body.radiance.Chi = 0.5*np.rad2deg(np.arctan(Up/Qp))  
+        
+    body.radiance.t = t.time() - t0
 
     return body,
-

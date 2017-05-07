@@ -2,7 +2,7 @@ from .. import pymiedap as _pmd
 import numpy as _np
 import os as _os
 
-def Earth(alb=0.3, g=9.81, pc=0.7, reff=1.0, nr=1.33, wvlmin=0.4, wvlmax=0.41, dwvl=0.2, path_input='./dap_database/'):
+def Earth(alb=0.3, g=9.81, pc=0.7, reff=1.0, nr=1.33, wvlmin=0.4, wvlmax=0.41, dwvl=0.2, path_input='./dap_database/', tag = None):
 
    # Cloudy model
 
@@ -28,7 +28,10 @@ def Earth(alb=0.3, g=9.81, pc=0.7, reff=1.0, nr=1.33, wvlmin=0.4, wvlmax=0.41, d
     cloudy.layers.gastop.level = 3
     cloudy.surface[0,0] = alb
     
-    cloudy.tag = 'cloudy_{:03.1f}_{:3.2f}_{:2.1f}'.format(g,alb,reff)
+    if tag is not None:
+        cloudy.tag = tag
+    else:
+        cloudy.tag = 'cloudy_{:03.1f}_{:3.2f}_{:2.1f}'.format(g,alb,reff)
 
     check = _np.ones_like(cloudy.wvl_list)
     for i,wvl in enumerate(cloudy.wvl_list):
@@ -68,8 +71,11 @@ def Earth(alb=0.3, g=9.81, pc=0.7, reff=1.0, nr=1.33, wvlmin=0.4, wvlmax=0.41, d
     clear.layers.gastop.level = 3
     clear.layers.gastop.press = pc
     clear.surface[0,0] = alb
-
-    clear.tag = 'clear_{:03.1f}_{:3.2f}_{:2.1f}'.format(g,alb,reff)
+    
+    if tag is not None:
+        clear.tag = tag
+    else:
+        clear.tag = 'clear_{:03.1f}_{:3.2f}_{:2.1f}'.format(g,alb,reff)
 
     check = _np.ones_like(clear.wvl_list)
     for i,wvl in enumerate(clear.wvl_list):
@@ -90,7 +96,7 @@ def Earth(alb=0.3, g=9.81, pc=0.7, reff=1.0, nr=1.33, wvlmin=0.4, wvlmax=0.41, d
 
     return cloudy, clear
 
-def Moon(alb=0.1, g=1, pc=0.7, reff=1.0, nr=1.33, wvlmin=0.4, wvlmax=0.41, dwvl=0.2, path_input = './dap_database/'):
+def Moon(alb=0.1, g=1, pc=0.7, reff=1.0, nr=1.33, wvlmin=0.4, wvlmax=0.41, dwvl=0.2, path_input = './dap_database/', tag = None):
 
    # Lambertian model
 
@@ -124,7 +130,10 @@ def Moon(alb=0.1, g=1, pc=0.7, reff=1.0, nr=1.33, wvlmin=0.4, wvlmax=0.41, dwvl=
     lamb.surface[0,0] = alb
 
     
-    lamb.tag = 'lamb_{:05.3f}_{:4.3f}'.format(g,alb)
+    if tag is not None:
+        lamb.tag = tag
+    else:
+        lamb.tag = 'lamb_{:05.3f}_{:4.3f}'.format(g,alb)
 
     check = _np.ones_like(lamb.wvl_list)
     for i,wvl in enumerate(lamb.wvl_list):

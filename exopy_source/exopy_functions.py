@@ -627,6 +627,8 @@ class radiance():
             self.U_ref 	= None
             self.V_ref 	= None
             self.Q_ref 	= None
+            self.P		= None
+            self.Chi 		= None
         self.__type = Type
 
 
@@ -643,6 +645,8 @@ class radiance():
             text.append('   U_ref = ' + str(np.shape(self.U_ref)) + ' array [normalized]' )
             text.append('   V_ref = ' + str(np.shape(self.V_ref)) + ' array [normalized]' )
             text.append('   Q_ref = ' + str(np.shape(self.Q_ref)) + ' array [normalized]' )
+            text.append('   P     = ' + str(np.shape(self.P    )) + ' array [%]'  )
+            text.append('   Chi   = ' + str(np.shape(self.Chi  )) + ' array [deg]')
         else:
             text.append('   --No data available--')
         return '\n'.join(text)
@@ -669,6 +673,8 @@ class radiance():
                     text.append('   U_ref = ' + str(self.U_ref[wvl,index]) + ' [-]' )
                     text.append('   V_ref = ' + str(self.V_ref[wvl,index]) + ' [-]' )
                     text.append('   Q_ref = ' + str(self.Q_ref[wvl,index]) + ' [-]' )
+                    text.append('   p     = ' + str(self.P    [wvl,index]) + ' [%]' )
+                    text.append('   Chi   = ' + str(self.Chi  [wvl,index]) + ' [deg]' )
 
             else:
 
@@ -677,11 +683,13 @@ class radiance():
                 text.append('   U = ' + str(self.U) + ' [-]' )
                 text.append('   V = ' + str(self.V) + ' [-]' )
                 text.append('   Q = ' + str(self.Q) + ' [-]' )
-                text.append('   I_ref = ' + str(self.I_ref) + ' [-]' )
-                text.append('   U_ref = ' + str(self.U_ref) + ' [-]' )
-                text.append('   V_ref = ' + str(self.V_ref) + ' [-]' )
-                text.append('   Q_ref = ' + str(self.Q_ref) + ' [-]' )
-
+                text.append('   I_ref = ' + str(self.I_ref) + ' [-]'  )
+                text.append('   U_ref = ' + str(self.U_ref) + ' [-]'  )
+                text.append('   V_ref = ' + str(self.V_ref) + ' [-]'  )
+                text.append('   Q_ref = ' + str(self.Q_ref) + ' [-]'  )
+                text.append('   P     = ' + str(self.P    ) + ' [%]'  )
+                text.append('   Chi   = ' + str(self.Chi  ) + ' [deg]')
+                
         else:
            text.append('Relation of body radiance variables:\n')
            text.append('   --No data available--')

@@ -1079,9 +1079,9 @@ Function of the EXOPY tool, conducting the following operations:
     if flag_eclipses:    compute.eclipses([body1,body2], star)
     if flag_radiance:
         compute.int_radiance([body1, body2], path_input = path_input, nmug=nmug, nmug_mie = nmug_mie, nmat=nmat, nsubr=nsubr)
-        I,Q,U,V = compute.combine([body1, body2])
+        I,Q,U,V,P,Chi = compute.combine([body1, body2])
 
-    return I,Q,U,V
+    return I,Q,U,V,P,Chi
 
 
 

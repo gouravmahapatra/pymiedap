@@ -359,7 +359,7 @@ def combine(bodies):
 
     for body in bodies:
         if body.name == _cfg.ref_body:
-            I,Q,U,V = _comb(bodies,body)
+            I,Q,U,V,P,Chi = _comb(bodies,body)
             break
 
-    return I,Q,U,V
+    return I,Q,U,V,P,Chi
