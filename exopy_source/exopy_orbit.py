@@ -160,7 +160,8 @@ REFERENCES
     i_mb     = moon.orbital_elements.i         # Moon orbit inclination [deg]
     Omega_mb = moon.orbital_elements.Omega     # Moon RAAN [deg]
     omega_mb = moon.orbital_elements.omega     # Argument of moon periapsis [deg]
-    t0_m     = moon.orbital_elements.t0	       # Lunar time of last per. passage [s]
+    t0_m     = moon.orbital_elements.t0	    # Lunar time of last per. passage [s]
+    f0_m     = moon.orbital_elements.f0_m
 
     a_bs     = planet.orbital_elements.a_b     # Barycenter-star semim.axis [m]
     e_bs     = planet.orbital_elements.e_b     # Barycenter eccentricity [-]
@@ -168,6 +169,7 @@ REFERENCES
     Omega_bs = planet.orbital_elements.Omega_b # Barycenter RAAN [deg]
     omega_bs = planet.orbital_elements.omega_b # Argument of bar. periapsis [deg]
     t0_b     = planet.orbital_elements.t0_b    # Bar. time of last per. passage [s]
+    f0_b     = planet.orbital_elements.f0_b
 
     #==============================================================================
     #
@@ -182,6 +184,17 @@ REFERENCES
 
     n_mb   = (mu_m/(a_mb*(m_p+m_m)/m_p)**3)**0.5 # Moon-bar. mean motion [1/s]
     n_bs   = (mu_b/a_bs**3)**0.5   # Barycenter-star mean motion [1/s]
+
+    if t0_b is None and t0_m is None:
+        
+        E0m  = 2* np.atan( np.sqrt((1-e_mb)/(1+e_mb)) * np.tan(f0_m/2) )
+        E0b  = 2* np.atan( np.sqrt((1-e_bs)/(1+e_bs)) * np.tan(f0_b/2) )
+
+        M0m  = E0m - e_mb*np.sin(E0m)
+        M0b  = E0b - e_bs*np.sin(E0b)
+        
+        t0_m = -M0m/n_mb
+        t0_b = -M0b/n_bs
 
     M_mb   = n_mb * (time - t0_m)  # Moon-barycenter mean anomaly [rad]
     M_bs   = n_bs * (time - t0_b)  # Barycenter-star mean anomaly [rad]
