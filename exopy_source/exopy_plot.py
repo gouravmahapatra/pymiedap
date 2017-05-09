@@ -34,6 +34,12 @@ from exopy_functions import grid_area as _grid_area
 import time as _time
 import exopy_config as _cfg
 
+def settings():
+    _matplotlib.rcParams.update({'font.size': 14,
+                                 'legend.fontsize': 12,
+                                 'legend.labelspacing': 0.2,
+                                 'legend.markerscale': 0.2})
+
 
 def IQ2(bodies, t = 0, wvl=0, phase = False, save = False):
     from matplotlib.patches import Rectangle
