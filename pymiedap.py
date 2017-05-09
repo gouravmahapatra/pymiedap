@@ -1034,7 +1034,7 @@ def dap_code(model, rename=False, output_name='modelA',
 
     # Reading basic properties of the model
     asurf = model.asurf
-    surfmat = surface_check(model,nmug, nmat=nmat)
+    surfmat = surface_check(model,nmug, nmat=nmat, nmuMAX=nmuMAX)
     nlays = len(vars(model.layers))  # number of atmospheric layers
     nwvl = len(model.wvl_list)
 
@@ -2336,23 +2336,21 @@ def mask_planet(alpha=15, npix=20, cusp=False, thresh_lat=50., patchy=True,
     return grid_lit, grid_out, grid_full, nb_cloud, asym
 
 
-def fourier_matrix(nmu=20, surf_mat=np.diag([1,0,0,0]), nmat=4):
+def fourier_matrix(nmug=20, surf_mat=np.diag([1,0,0,0]), nmat=4, nmuMAX=201):
     """ A function to Fourier develop a scattering matrix for a surface
     """
 
-    nphi = 42
-    nmuMAX = 201
-
-    xs, w = dap.gauleg(201,nmu,0.,1.)
-    # adding extra nadir direction
-    #nmu = nmu+1
-    xs[nmu] = 1.0
-    w[nmu] = 1.0
+    # Getting the Gauss points
+    xs, w = dap.gauleg(201,nmug,0.,1.)
     smf = np.sqrt(2*xs*w)
+    # adding extra nadir direction
+    xs[nmug] = 1.0
+    w[nmug] = 1.0
+    smf[nmug] = 1.0
+    nmu = nmug+1
 
-    mu = xs
-    mup = xs
-    phi = np.linspace(0,2*np.pi,nphi)
+    #mu = xs
+    #mup = xs
     L = np.zeros((nmat,nmat,nmu,nmu), order='F')
 
     L[0:,0:,:,:] = surf_mat[:,:,np.newaxis,np.newaxis]
@@ -2381,12 +2379,12 @@ def fourier_matrix(nmu=20, surf_mat=np.diag([1,0,0,0]), nmat=4):
     return xs,smf,Lfin
 
 
-def surface_check(model,nmug, nmat=4):
+def surface_check(model,nmug, nmat=4, nmuMAX=201):
     """ A function to check what type of surface is defined by the user, and
     act accordingly for the DAP code"""
 
     if type(model.surface)==np.ndarray:
-        mus, smf, Lfin = fourier_matrix(nmu=nmug, surf_mat=model.surface, nmat=nmat)
+        mus, smf, Lfin = fourier_matrix(nmug=nmug, surf_mat=model.surface, nmat=nmat, nmuMAX=nmuMAX)
     elif model.surface==str:
         print('read fourier file for surface')
 
