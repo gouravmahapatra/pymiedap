@@ -2336,7 +2336,7 @@ def mask_planet(alpha=15, npix=20, cusp=False, thresh_lat=50., patchy=True,
     return grid_lit, grid_out, grid_full, nb_cloud, asym
 
 
-def fourier_matrix(nmug=20, surf_mat=np.diag([1,0,0,0]), nmat=4, nmuMAX=201):
+def fourier_matrix(nmug=20, surf_mat=np.diag([1,0,0,0]), nmat=4, nmuMAX=201, nmatMAX=4):
     """ A function to Fourier develop a scattering matrix for a surface
     """
 
@@ -2353,7 +2353,9 @@ def fourier_matrix(nmug=20, surf_mat=np.diag([1,0,0,0]), nmat=4, nmuMAX=201):
     #mup = xs
     L = np.zeros((nmat,nmat,nmu,nmu), order='F')
 
-    L[0:,0:,:,:] = surf_mat[:,:,np.newaxis,np.newaxis]
+    # if nmat<4, we take the corresponding submatrix of the input surface
+    # matrix
+    L[0:,0:,:,:] = surf_mat[:nmat,:nmat,np.newaxis,np.newaxis]
     #Bmp = np.zeros((nmat,nmat,nphi,nm))
     #Bmm = np.zeros((nmat,nmat,nphi,nm))
 
@@ -2369,12 +2371,12 @@ def fourier_matrix(nmug=20, surf_mat=np.diag([1,0,0,0]), nmat=4, nmuMAX=201):
     #L2 = scpinteg.simps(Lm,phi,axis=4)
     #L2 = L2/(phi[-1]-phi[0])
 
-    Lfin = np.zeros((4*nmuMAX,4*nmuMAX),order='F')
+    Lfin = np.zeros((nmatMAX*nmuMAX,nmatMAX*nmuMAX),order='F')
     for k in np.arange(nmat):
         for l in np.arange(nmat):
             for i in np.arange(nmu):
                 for j in np.arange(nmu):
-                    Lfin[4*i+l,4*j+k] = smf[i]*L[l,k,i,j]*smf[j]
+                    Lfin[nmat*i+l,nmat*j+k] = smf[i]*L[l,k,i,j]*smf[j]
 
     return xs,smf,Lfin
 
