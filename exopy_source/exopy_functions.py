@@ -236,6 +236,7 @@ class body():
         self.grid             = grid(Type)
         self.radiance         = radiance(Type)
         self.atmosphere       = pmd.Model()
+        self.settings         = settings()
 
     def show(self):
         print('\nList of bodies:\n')
@@ -260,6 +261,35 @@ class body():
             print('\nReset aborted.\n')
 
 
+
+class settings():
+    
+    def __repr__(self):
+        text = ['\n']
+        text.append('Relation of body settings:\n' )
+        text.append('   nmug_mie = ' + str(self.nmug_mie) )
+        text.append('   nmug = ' + str(self.nmug) )
+        text.append('   nmat = ' + str(self.nmat) )
+        text.append('   nsubr = '+ str(self.nsubr) )
+        return '\n'.join(text)
+
+    def __init__(self):
+
+        self.nmug_mie   = 40
+        self.nmug       = 40
+        self.nmat       = 4
+        self.nsubr      = 50
+
+    def __call__(self):
+        text = ['\n']
+        text.append('Relation of body properties:\n' )
+        text.append('   nmug_mie = ' + str(self.nmug_mie) )
+        text.append('   nmug = ' + str(self.nmug) )
+        text.append('   nmat = ' + str(self.nmat) )
+        text.append('   nsubr = '+ str(self.nsubr) )
+        print('\n'.join(text))
+        
+        
 class properties():
     '''
     ==================================================================

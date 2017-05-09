@@ -300,10 +300,6 @@ def int_radiance(bodies, path_input = './dap_database/', nmug = 20, nmug_mie = 2
         (list)
     - path_input: Path to the Fourier files storage folder [-]
             ('body' object)
-    - nmug: number of Gauss points for DAP calculations [-] (int)
-    - nmug_mie: number of Gauss points for MIE calculations [-] (int)
-    - nmat: number of Stokes elements to compute [-] (int)
-    - nsubr: number of subintervals for the distribution [-] (int)
 
     OUTPUTS
     ------------------------------------------------------------------
@@ -319,7 +315,9 @@ def int_radiance(bodies, path_input = './dap_database/', nmug = 20, nmug_mie = 2
     '''
 
     for body in bodies:
-        body = _integ(body, path_input = path_input, nmug = nmug, nmug_mie = nmug_mie, nmat=nmat, nsubr=nsubr)
+        body = _integ(body, path_input = path_input, nmug = body.settings.nmug,
+                      nmug_mie = body.settings.nmug_mie, nmat=body.settings.nmat,
+                      nsubr=body.settings.nsubr)
 
     return bodies
 

@@ -1013,7 +1013,7 @@ def test_integration(body, scene='clear', plot = 'no'):
 
 
 
-def run_simulation(body1, body2 ,star,dt, tf, flag_transits=True, flag_eclipses=True, flag_radiance=True, path_input = '../dap_database/', nmug=20, nmug_mie=20, nmat=4, nsubr=50):
+def run_simulation(body1, body2 ,star,dt, tf, flag_transits=True, flag_eclipses=True, flag_radiance=True, path_input = '../dap_database/'):
     '''
 ==================================================================
 EXOPY function: exopy.run_simulation
@@ -1034,10 +1034,6 @@ INPUTS
  - flag_eclipses: turns ON/OFF the computation of eclipses [True/False] (bool)
  - flag_radiance: turns ON/OFF the computation of reflected radiance [True/False] (bool)
  - path_input: location of the Fourier files database [-] (str)
- - nmug: number of Gauss points for DAP calculations [-] (int)
- - nmug_mie: number of Gauss points for MIE calculations [-] (int)
- - nmat: number of Stokes elements to compute [-] (int)
- - nsubr: number of subintervals for the distribution [-] (int)
 
 OUTPUTS
 ------------------------------------------------------------------
@@ -1078,7 +1074,7 @@ Function of the EXOPY tool, conducting the following operations:
     if flag_transits:    compute.transits([body1, body2, star])
     if flag_eclipses:    compute.eclipses([body1,body2], star)
     if flag_radiance:
-        compute.int_radiance([body1, body2], path_input = path_input, nmug=nmug, nmug_mie = nmug_mie, nmat=nmat, nsubr=nsubr)
+        compute.int_radiance([body1, body2], path_input = path_input)
         I,Q,U,V,P,Chi = compute.combine([body1, body2])
 
     return I,Q,U,V,P,Chi
