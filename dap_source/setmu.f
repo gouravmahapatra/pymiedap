@@ -34,12 +34,12 @@ Cf2py intent(out) nmu,xmu,smf
 *----------------------------------------------------------------------
       nmu= nmug+1
       xmu(nmu)= 1.D0
-      smf(nmu)= 1.D0
+      wmu(nmu)= 0.5D0
 
 *----------------------------------------------------------------------
 *     Change the Gaussian weights into supermatrix weights:
 *----------------------------------------------------------------------
-      DO i=1,nmug
+      DO i=1,nmu
          smf(i) = DSQRT(2.D0*wmu(i)*xmu(i))
       ENDDO
 
