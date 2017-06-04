@@ -364,6 +364,36 @@ REFERENCES
     r_ms = np.linalg.norm(position3D_ms, axis = 0)     # [meters]
     r_ps = np.linalg.norm(position3D_ps, axis = 0)     # [meters]
 
+
+    # The angle between planet and moon with vertex at the star is calculated
+    # to have an indication of the proximityof eclipse events.
+
+    b2b_angle = np.rad2deg(np.arccos(np.round(np.diagonal(np.dot(
+                position3D_ps.T,position3D_ms))/np.linalg.norm(
+                position3D_ps, axis = 0)/np.linalg.norm(
+                position3D_ms,axis=0),6)))
+
+
+    # The angle between the star and the third body with vertex at the body 
+    # under observation is calculated to have an indication of the proximity 
+    # of eclipse events.
+
+    aux1 = position3D_ps
+    aux2 = position3D_ms - position3D_ps
+
+    beta_p = np.rad2deg(np.arccos((np.diagonal(np.dot(
+                -aux1.T,aux2))/np.linalg.norm(
+                aux2, axis = 0)/np.linalg.norm(
+                aux1,axis=0))))
+                
+    aux1 = position3D_ms
+    aux2 = position3D_ps - position3D_ms
+
+    beta_m = np.rad2deg(np.arccos((np.diagonal(np.dot(
+                -aux1.T,aux2))/np.linalg.norm(
+                aux1, axis = 0)/np.linalg.norm(
+                aux2,axis=0))))
+    
     # Export results to body objects
 
     moon.ephemeris.time           = time
@@ -379,6 +409,8 @@ REFERENCES
     moon.ephemeris.position3D_mb  = position3D_mb
     moon.ephemeris.position3D_s   = position3D_ms
     moon.ephemeris.period         = 2*math.pi/(n_mb)
+    moon.geometry.b2b_angle       = b2b_angle
+    moon.geometry.beta            = beta_m
 
     planet.ephemeris.time         = time
     planet.orbital_elements.nu_pm = f_mb
@@ -395,6 +427,8 @@ REFERENCES
     planet.ephemeris.position3D_pm= position3D_pm
     planet.ephemeris.period       = 2*math.pi/(n_mb)
     planet.ephemeris.period_bs    = 2*math.pi/(n_bs)
+    planet.geometry.b2b_angle     = b2b_angle
+    planet.geometry.beta          = beta_p
 
     star.ephemeris.time           = time
     star.orbital_elements.nu_bs   = f_bs

@@ -720,11 +720,11 @@ celestial body.
         Moon.orbital_elements.t0     = 0         # [s]
 
         Planet.orbital_elements.a_b     = 1.5e11   # [m]
-        Planet.orbital_elements.e_b     = 0#0.0167 # [-]
-        Planet.orbital_elements.i_b     = 90#23.5  # [deg]
+        Planet.orbital_elements.e_b     = 0.#0.0167 # [-]
+        Planet.orbital_elements.i_b     = 90.#23.5  # [deg]
         Planet.orbital_elements.Omega_b = 0.0      # [deg]
         Planet.orbital_elements.omega_b = 270.0    # [deg]
-        Planet.orbital_elements.t0_b    = 0        # [s]
+        Planet.orbital_elements.t0_b    = 0.        # [s]
 
 
         bodies = [Moon, Planet, Star]
@@ -733,30 +733,30 @@ celestial body.
     if identifier == 'face-on':
 
         Planet= fun.body('Planet', 'planet')
-        Moon  = fun.body('Moon', 'moon')
-        Star = fun.body('Star', 'star')
+        Moon  = fun.body('Moon'  , 'moon'  )
+        Star = fun.body('Star'   , 'star'  )
 
-        Planet.properties.m = 5.972e24  # [kg]
-        Moon.properties.m  = 7.342e22   # [kg]
-        Star.properties.m   = 2e30      # [kg]
+        Planet.properties.m = 5.972e24   # [kg]
+        Moon.properties.m   = 7.342e22   # [kg]
+        Star.properties.m   = 2e30       # [kg]
 
-        Planet.properties.R = 6.371008e6  # [m]
-        Moon.properties.R  = 1.7374e6     # [m]
-        Star.properties.R   = 6.957e8     # [m]
+        Planet.properties.R = 6.371008e6   # [m]
+        Moon.properties.R   = 1.7374e6     # [m]
+        Star.properties.R   = 6.957e8      # [m]
 
         Moon.orbital_elements.a      = 3.844e8*5.9723e24/(5.972e24+7.342e22) # [m]
         Moon.orbital_elements.e      = 0#0.0549  # 0.077 # [-]
-        Moon.orbital_elements.i      = 0      # [deg]
-        Moon.orbital_elements.Omega  = 0      # [deg]
-        Moon.orbital_elements.omega  = 90     # [deg]
-        Moon.orbital_elements.t0     = 0      # [s]
+        Moon.orbital_elements.i      = 0         # [deg]
+        Moon.orbital_elements.Omega  = 0         # [deg]
+        Moon.orbital_elements.omega  = 0         # [deg]
+        Moon.orbital_elements.t0     = 0         # [s]
 
-        Planet.orbital_elements.a_b     = 1.5e11  # [m]
-        Planet.orbital_elements.e_b     = 0#0.0167  # [-]
-        Planet.orbital_elements.i_b     = 0#23.5    # [deg]
-        Planet.orbital_elements.Omega_b = 0.0     # [deg]
-        Planet.orbital_elements.omega_b = 0.0     # [deg]
-        Planet.orbital_elements.t0_b    = 0       # [s]
+        Planet.orbital_elements.a_b     = 1.5e11     # [m]
+        Planet.orbital_elements.e_b     = 0.#0.0167  # [-]
+        Planet.orbital_elements.i_b     = 0.#23.5    # [deg]
+        Planet.orbital_elements.Omega_b = 0.0        # [deg]
+        Planet.orbital_elements.omega_b = 0.0        # [deg]
+        Planet.orbital_elements.t0_b    = 0.         # [s]
 
 
         bodies = [Moon, Planet, Star]
@@ -1076,6 +1076,13 @@ Function of the EXOPY tool, conducting the following operations:
     if flag_radiance:
         compute.int_radiance([body1, body2], path_input = path_input)
         I,Q,U,V,P,Chi = compute.combine([body1, body2])
+    else:
+        I = None
+        Q = None
+        U = None
+        V = None
+        P = None
+        Chi = None
 
     return I,Q,U,V,P,Chi
 
