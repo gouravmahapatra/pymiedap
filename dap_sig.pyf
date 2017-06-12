@@ -82,7 +82,7 @@ python module module_dap ! in
             double precision intent(out) :: b0
             integer intent(out) :: ndoubl
         end subroutine bstart
-        subroutine double_bn(rm,tm,ebmu,nmu,nmat) ! in :module_dap:./dap_source/double.f
+        subroutine double(rm,tm,ebmu,nmu,nmat) ! in :module_dap:./dap_source/double.f
             double precision dimension(804,804),intent(in,out) :: rm
             double precision dimension(804,804),intent(in,out) :: tm
             double precision dimension(201),intent(in,out) :: ebmu
@@ -151,15 +151,6 @@ python module module_dap ! in
             integer :: nmat
             integer :: nmu
         end subroutine ldiapr
-        subroutine matint(matrix,phi,nmat,nmu,nphi,nm,matexp) ! in :module_dap:./dap_source/matint.f
-            double precision dimension(nmat,nmat,nmu,nmu,nphi),intent(in) :: matrix
-            double precision dimension(nphi),intent(in),depend(nphi) :: phi
-            integer, optional,intent(in),check(shape(matrix,0)==nmat),depend(matrix) :: nmat=shape(matrix,0)
-            integer, optional,intent(in),check(shape(matrix,2)==nmu),depend(matrix) :: nmu=shape(matrix,2)
-            integer, optional,intent(in),check(shape(matrix,4)==nphi),depend(matrix) :: nphi=shape(matrix,4)
-            integer intent(in) :: nm
-            double precision dimension(nmat,nmat,nmu,nmu,200),intent(out),depend(nmat,nmat,nmu,nmu) :: matexp
-        end subroutine matint
         subroutine newfou(m,rmbot,smf,iunfou,nmat,nmu,m0,nlays,nextm) ! in :module_dap:./dap_source/newfou.f
             integer intent(in) :: m
             double precision dimension(804,804),intent(in) :: rmbot

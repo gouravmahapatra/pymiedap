@@ -39,21 +39,6 @@ python module module_mie ! in
             double precision dimension(ndim),intent(out),depend(ndim) :: x
             double precision dimension(ndim),intent(out),depend(ndim) :: w
         end subroutine gauleg
-        subroutine getin(wavfile,delta,cutoff,thmin,thmax,step,nsubr,ngaur,idis,par1,par2,par3,specie) ! in :module_mie:./mie_source/getin.f
-            character*16 :: wavfile
-            double precision :: delta
-            double precision :: cutoff
-            double precision :: thmin
-            double precision :: thmax
-            double precision :: step
-            integer :: nsubr
-            integer :: ngaur
-            integer :: idis
-            double precision :: par1
-            double precision :: par2
-            double precision :: par3
-            character*1 :: specie
-        end subroutine getin
         subroutine pitau(u,nmax,pi,tau) ! in :module_mie:./mie_source/pitau.f
             double precision intent(in) :: u
             integer intent(in) :: nmax
