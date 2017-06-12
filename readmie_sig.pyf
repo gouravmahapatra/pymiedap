@@ -3,20 +3,20 @@
 
 python module module_readmie ! in 
     interface  ! in :module_readmie
-        subroutine readmieoutput(namein,nameout,thetas,fs) ! in :module_readmie:readmie_source/read_mie_output.f
+        subroutine readmieoutput(namein,nameout,thetas,fs) ! in :module_readmie:./readmie_source/read_mie_output.f
             character*20 intent(in) :: namein
             character*20 intent(in) :: nameout
             double precision dimension(901),intent(out) :: thetas
             double precision dimension(6,901),intent(out) :: fs
         end subroutine readmieoutput
-        subroutine readsc(iunit,alfbet,ndl,lmax,ssa) ! in :module_readmie:readmie_source/read_mie_output.f
+        subroutine readsc(iunit,alfbet,ndl,lmax,ssa) ! in :module_readmie:./readmie_source/read_mie_output.f
             integer :: iunit
             double precision dimension(4,4,ndl + 1) :: alfbet
             integer, optional,check((shape(alfbet,2)-1)==ndl),depend(alfbet) :: ndl=(shape(alfbet,2)-1)
             integer :: lmax
             double precision :: ssa
         end subroutine readsc
-        subroutine expand(ncoef,coefs,scangle,f) ! in :module_readmie:readmie_source/read_mie_output.f
+        subroutine expand(ncoef,coefs,scangle,f) ! in :module_readmie:./readmie_source/read_mie_output.f
             integer :: ncoef
             double precision dimension(4,4,1001) :: coefs
             double precision :: scangle
