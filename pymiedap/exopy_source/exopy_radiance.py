@@ -24,9 +24,7 @@
 #
 #
 
-import numpy as np
-from .. import pymiedap as pmd
-from .. import module_geos as geos
+import time as t
 
 def combine(bodies, reference):
     """
@@ -106,9 +104,9 @@ def combine(bodies, reference):
             Q[wvl,:] = Q[wvl,:] + body.radiance.Q_ref[wvl,:]
             U[wvl,:] = U[wvl,:] + body.radiance.U_ref[wvl,:]
             V[wvl,:] = V[wvl,:] + body.radiance.V_ref[wvl,:]
-            
+
         P[wvl,:]   = np.sqrt(Q[wvl,:]**2 + U[wvl,:]**2)/I[wvl,:]*100
-        Chi[wvl,:] = 0.5*np.rad2deg(np.arctan(U[wvl,:]/Q[wvl,:])) 
+        Chi[wvl,:] = 0.5*np.rad2deg(np.arctan(U[wvl,:]/Q[wvl,:]))
 
     return I, Q, U, V, P, Chi
 
@@ -146,8 +144,7 @@ def integration(body, path_input = './dap_database/', nmug = 20, nmug_mie = 20, 
 
 
     """
-    import time as t
-    
+
     ngeosMAX=200000
 
     print('\n    ... integrating radiance on ' + body.type + ' ' + body.name + ' disk \n')
@@ -155,7 +152,7 @@ def integration(body, path_input = './dap_database/', nmug = 20, nmug_mie = 20, 
     #files = dict(np.genfromtxt('exopy/scenes.dat', dtype='str'))
 
     t0 = t.time()
-    
+
     time = body.ephemeris.time
     wvl_list = np.array(body.atmosphere.wvl_list)
     nwvl = len(wvl_list)
@@ -230,14 +227,14 @@ def integration(body, path_input = './dap_database/', nmug = 20, nmug_mie = 20, 
             Qp[l,i] = np.nansum(IQUV[1,:])
             Up[l,i] = np.nansum(IQUV[2,:])
             Vp[l,i] = np.nansum(IQUV[3,:])
-            
+
     body.radiance.I   = Ip
     body.radiance.Q   = Qp
     body.radiance.U   = Up
     body.radiance.V   = Vp
     body.radiance.P   = np.sqrt(Qp**2 + Up**2)/Ip*100
-    body.radiance.Chi = 0.5*np.rad2deg(np.arctan(Up/Qp))  
-        
+    body.radiance.Chi = 0.5*np.rad2deg(np.arctan(Up/Qp))
+
     body.radiance.t = t.time() - t0
 
     return body,

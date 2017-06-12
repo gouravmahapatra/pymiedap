@@ -8,19 +8,19 @@ Delft University of Technology
 Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
 Date: 2016-2017
 --------------------------------------- .  '  *     _..._       .  . '
-                _______                   .  *    .' .::::.  * -+-  
+                _______                   .  *    .' .::::.  * -+-
        ___o |==|__(o(__D              .    * .   :  ::::::::    '  *
      /\  \/       /|\                     * .    :  ::::::::  ' .  .
-    / /          / | \                 *   *  .  `. '::::::'     . 
+    / /          / | \                 *   *  .  `. '::::::'     .
     ` `         /  |  \                  '   *     `-.::''
 
-Dependences: numpy, 
+Dependences: numpy,
 exopy_plot, exopy_config, exopy_compute
 
 DESCRIPTION
 ------------------------------------------------------------------
 This code is dedicated to defining an extrasolar planetary system
-comprised of one planet and one moon hosted by a central star and 
+comprised of one planet and one moon hosted by a central star and
 computing theflux and polarization state of the reflected starlight
 with the help of the PYMIEDAP code [reference].
 
@@ -30,15 +30,15 @@ In particular, the following actions can be conducted:
    moon around the hosting star.
  * Determination of the planet and moon shadowed region as a func-
    tion of phase angle and observer position.
- * Determination of shadows due to transits, i.e. one body putting 
-   before a targeted body and the observer. 
+ * Determination of shadows due to transits, i.e. one body putting
+   before a targeted body and the observer.
  * Determination of shadows due to eclipses, i.e. one body putting
    before a targeted body and the star.
- * Computation of the individual reflected signals of the bodies 
+ * Computation of the individual reflected signals of the bodies
    and combination of the results into a standalone output signal.
 
 The different tools provided by exopy are given by the instances:
- 
+
  * new_body: Used to create objects of type 'body', i.e. a planet,
    moon, or star.
  * new_system: Used to load a pre-defined planetary system.
@@ -59,6 +59,8 @@ tion of the various functions and in:
 # IMPORT MODULES
 # ==============
 
+import pymiedap as pmd
+import numpy as np
 import exopy_source.exopy_plot as plot
 import exopy_source.exopy_config as cfg
 import exopy_source.exopy_compute as compute
@@ -81,7 +83,7 @@ if __name__ == "__main__":
 
 def save_pickle(bodies, tf, dt, I, Q, U, V, exopy, directory = None,
                 name = None, description = None):
-    ''' 
+    '''
     ==================================================================
     EXOPY function: exopy.save_pickle
     Delft University of Technology
@@ -89,16 +91,16 @@ def save_pickle(bodies, tf, dt, I, Q, U, V, exopy, directory = None,
     Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
     Date: 2016-2017
     ------------------------------------------------------------------
-    
+
     INPUTS
     ------------------------------------------------------------------
      - bodies: list of body type of objects [-] (list)
-     - tf: final time to be computed [s] (float)  
+     - tf: final time to be computed [s] (float)
      - dt: time step [s] (float)
      - I: First stokes vector: flux [normalized] (numpy array)
-     - Q: Second stokes vector: linear polarization [normalized] 
+     - Q: Second stokes vector: linear polarization [normalized]
        (numpy array)
-     - U: Third stokes vector: linear polarization [normalized] 
+     - U: Third stokes vector: linear polarization [normalized]
        (numpy array)
      - V: Fourth stokes vector: circular polarization [normalized]
        (numpy array)
@@ -106,23 +108,23 @@ def save_pickle(bodies, tf, dt, I, Q, U, V, exopy, directory = None,
      - directoy: path towards ouput folder [-] (str)
      - name: output file name [-] (str)
      - description: notes on stored data [-] (str)
-    
+
     OUTPUTS
     ------------------------------------------------------------------
      - pickle file: output .pickle file [-] (.pickle file)
-    
+
     DESCRIPTION
     ------------------------------------------------------------------
-    Function creating and storing a .pickle file containing all 
+    Function creating and storing a .pickle file containing all
     information on the current simulation.
 
-    ''' 
-    
+    '''
+
     import os
     import pickle
     import os.path
 
-    
+
     if directory is None or name is None:
         print(' ')
         print('Current directory: '+os.getcwd()+'/')
@@ -138,11 +140,11 @@ def save_pickle(bodies, tf, dt, I, Q, U, V, exopy, directory = None,
             print i
         print('')
         name = raw_input('Name of the file: ')
-    
+
     if description is None:
         print('')
         description = raw_input('Simulation description: ')
-    
+
     save_data = [
         bodies,
         tf,
@@ -160,23 +162,23 @@ def save_pickle(bodies, tf, dt, I, Q, U, V, exopy, directory = None,
         exopy.cfg.plot_color,
         exopy.cfg.N,
         description ]
-    
+
     with open(os.getcwd()+'/'+directory+'/'+name+'.pickle', 'wb') as f:
          pickle.dump(save_data, f)
-    
+
     f = open(os.getcwd()+'/'+directory+'/'+name+'.txt', 'w+')
     f.write('Description of the simulation: \n')
     f.write(description)
     f.write('\n')
     f.close
-    
+
     print('\nData has been saved.')
-    
+
 #    del save_data, files, dirs, directory, name
 
 
 def load_pickle(directory = None, name = None):
-    ''' 
+    '''
     ==================================================================
     EXOPY function: exopy.load_pickle
     Delft University of Technology
@@ -184,39 +186,39 @@ def load_pickle(directory = None, name = None):
     Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
     Date: 2016-2017
     ------------------------------------------------------------------
-    
+
     INPUTS
     ------------------------------------------------------------------
      - directoy: path towards ouput folder [-] (str)
-     - name: output file name [-] (str) 
-    
+     - name: output file name [-] (str)
+
     OUTPUTS
     ------------------------------------------------------------------
      - bodies: list of body type of objects [-] (list)
-     - tf: final time to be computed [s] (float)  
+     - tf: final time to be computed [s] (float)
      - dt: time step [s] (float)
      - I: first stokes vector: flux [normalized] (numpy array)
-     - Q: second stokes vector: linear polarization [normalized] 
+     - Q: second stokes vector: linear polarization [normalized]
        (numpy array)
-     - U: third stokes vector: linear polarization [normalized] 
+     - U: third stokes vector: linear polarization [normalized]
        (numpy array)
      - V: fourth stokes vector: circular polarization [normalized]
        (numpy array)
      - cfg: EXOPy configuration object [-] (exopy.cfg object)
      - description: notes on stored data [-] (str)
-    
+
     DESCRIPTION
     ------------------------------------------------------------------
-    Function loading a .pickle file containing all information on a 
+    Function loading a .pickle file containing all information on a
     previous simulation.
 
-    ''' 
-    
+    '''
+
     import os
     import pickle
     import os.path
-    
-    
+
+
     if directory is None:
         print(' ')
         print('Current directory: '+os.getcwd()+'/')
@@ -225,7 +227,7 @@ def load_pickle(directory = None, name = None):
             print i
         print(' ')
         directory = raw_input('Load directory: ')
-        
+
     if name is None:
         print(' ')
         print('List of existing files:')
@@ -234,12 +236,12 @@ def load_pickle(directory = None, name = None):
             print i
         print('')
         name = raw_input('Name of the file: ')
-            
+
     with open(os.getcwd()+'/'+directory+'/'+name+'.pickle', 'rb') as f:
          load_data = pickle.load(f)
-    
+
     conf = cfg
-    
+
     bodies          = load_data[0]
     tf              = load_data[1]
     dt              = load_data[2]
@@ -259,13 +261,13 @@ def load_pickle(directory = None, name = None):
 
     print('\nData has been loaded.')
 
-    return bodies, tf, dt, I, Q, U, V, cfg, description, 
-    
-    
-    
+    return bodies, tf, dt, I, Q, U, V, cfg, description,
+
+
+
 def print_txt(bodies, tf, dt, I, Q, U, V, exopy, directory = None,
               name = None, description = None):
-    ''' 
+    '''
     ==================================================================
     EXOPY function: exopy.print_txt
     Delft University of Technology
@@ -273,16 +275,16 @@ def print_txt(bodies, tf, dt, I, Q, U, V, exopy, directory = None,
     Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
     Date: 2016-2017
     ------------------------------------------------------------------
-    
+
     INPUTS
     ------------------------------------------------------------------
      - bodies: list of body type of objects [-] (list)
      - tf: final time to be computed [s] (float)
      - dt: time step [s] (float)
      - I: First stokes vector: flux [normalized] (numpy array)
-     - Q: Second stokes vector: linear polarization [normalized] 
+     - Q: Second stokes vector: linear polarization [normalized]
        (numpy array)
-     - U: Third stokes vector: linear polarization [normalized] 
+     - U: Third stokes vector: linear polarization [normalized]
        (numpy array)
      - V: Fourth stokes vector: circular polarization [normalized]
        (numpy array)
@@ -290,23 +292,23 @@ def print_txt(bodies, tf, dt, I, Q, U, V, exopy, directory = None,
      - directoy: path towards ouput folder [-] (str)
      - name: output file name [-] (str)
      - description: notes on stored data [-] (str)
-    
+
     OUTPUTS
     ------------------------------------------------------------------
      - text file: output .txt file [-] (.txt file)
-    
+
     DESCRIPTION
     ------------------------------------------------------------------
-    Function creating and storing a .txt file containing all 
+    Function creating and storing a .txt file containing all
     information on the current simulation.
 
-    ''' 
-    
+    '''
+
     import os
     import os.path
     import numpy as np
     import time
-    
+
     if directory is None or name is None:
         print(' ')
         print('Current directory: '+os.getcwd()+'/')
@@ -322,99 +324,99 @@ def print_txt(bodies, tf, dt, I, Q, U, V, exopy, directory = None,
         	print i
         print('')
         name = raw_input('Name of the file: ')
-    
+
     if description is None:
         print('')
         description = raw_input('Simulation description: ')
-    
+
     file = open(os.getcwd()+'/'+directory+'/'+name+'.txt', 'w+')
-    
-    
+
+
     file.write('-- EXOPY OUTPUT DATA -- ' + time.strftime('%H:%M:%S') + ' -- ' + time.strftime('%d\%m\%Y') + ' --\n\n')
-    
+
     file.write('Description:     \t' + description + '\n')
     file.write('Flag eclipses:   \t' + str(bodies[0].flag.eclipse_d) + '\nFlag transits:      \t' + str(bodies[0].flag.transit_d) + '\n')
     file.write('Reference line: \t' + exopy.cfg.ref_line + '\nReference body: \t' + exopy.cfg.ref_body + '\n')
     file.write('Computed epochs: \t' + str(len(bodies[0].ephemeris.time)) + '\n')
     file.write('Number of wavelengths: \t' + str(len(bodies[0].atmosphere.wvl_list)) + '\n\n')
-    
+
     file.write('-- ORBITAL ELEMENTS --\n\n')
-    
+
     file.write('           \t a[m]                  \t e[-]     \t i[deg] \t omega[deg] \t Omega[deg] \t t0[s]         \t Period[s]\n')
     file.write('Barycentre \t %-.10e \t %-.5e \t %-06.3f \t %-07.3f \t %-6.3f \t %-10.1f \t %-10.1f\n'   % (bodies[0].orbital_elements.a_b, bodies[0].orbital_elements.e_b, bodies[0].orbital_elements.i_b, bodies[0].orbital_elements.omega_b, bodies[0].orbital_elements.Omega_b, bodies[0].orbital_elements.t0_b, bodies[0].ephemeris.period_bs))
     file.write('Moon       \t %-.10e \t %-.5e \t %-06.3f \t %-07.3f \t %-6.3f \t %-10.1f \t %-10.1f\n\n' % (bodies[1].orbital_elements.a  , bodies[1].orbital_elements.e  , bodies[1].orbital_elements.i  , bodies[1].orbital_elements.omega  , bodies[1].orbital_elements.Omega  , bodies[1].orbital_elements.t0  , bodies[1].ephemeris.period   ))
-    
+
     file.write('-- PROPERTIES OF BODIES --\n\n')
-    
+
     file.write('           \t Radius[m]      \t Mass[kg]         \t Neq  \t Npoints  \t Fourier coeff.\n')
     file.write('Planet     \t %-.10e \t %-.10e \t %-3d \t %-6d \t %s \n'   % (bodies[0].properties.R, bodies[0].properties.m, bodies[0].grid.Nsq, bodies[0].grid.N_points, bodies[0].atmosphere.name[0]))
     file.write('Moon       \t %-.10e \t %-.10e \t %-3d \t %-6d \t %s \n'   % (bodies[1].properties.R, bodies[1].properties.m, bodies[1].grid.Nsq, bodies[1].grid.N_points, bodies[1].atmosphere.name[0]))
     file.write('Star       \t %-.10e \t %-.10e \t - \t - \t\t - \n\n' % (bodies[2].properties.R, bodies[2].properties.m))
-    
-    
+
+
     file.write('-- ATMOSPHERES --\n\n')
-    
+
     file.write('               == Planet ==\n\n')
     file.write('mma [AMU] \t dpol [-] \t albedo [-] \t no. layers\n')
     file.write('%-8d \t %f   \t %f \t %d\n\n'  % (bodies[0].atmosphere.mma, bodies[0].atmosphere.dpol, bodies[0].atmosphere.surface[0,0], len(vars(bodies[0].atmosphere.layers).items())))
     file.write('Layer \t\t Type  \t Level \t P [bar] \t rayscat \t wvl [nm] \t tau [-] \t tau_gas [-]  \n')
-    
+
     n_wvl = np.size(bodies[0].atmosphere.wvl_list)
     for layer_name, layer in vars(bodies[0].atmosphere.layers).items():
         if hasattr(layer,'mixed_aerosols') == True:
              file.write('%-10s \t %s \t %d \t %-0.2e \t %-7s \t %-06.4f \t %-06.3f \t %-06.3f \n' % (str(layer_name), layer.mixed_aerosols.typ, layer.level, layer.press, str(layer.rayscat), bodies[0].atmosphere.wvl_list[0], layer.tau[0], layer.tau_g[0]))
     	else:
          file.write('%-10s \t %s \t %d \t %0.2e \t %-7s \t %6.4f \t %06.3f \t %06.3f \n' % (str(layer_name), layer.aerosols.typ, layer.level, layer.press, str(layer.rayscat), bodies[0].atmosphere.wvl_list[0], layer.tau[0], layer.tau_g[0]))
-    
+
     	for i in range(n_wvl-1):
          file.write('\t\t\t\t\t\t\t\t %6.4f \t %06.3f \t %06.3f \n' % (bodies[0].atmosphere.wvl_list[i+1], layer.tau[i+1], layer.tau_g[i+1]))
-    
+
     file.write('               == Moon ==\n\n')
     file.write('mma [AMU] \t dpol [-] \t albedo [-] \t no. layers\n')
     file.write('%-8d \t %f   \t %f \t %d\n\n'  % (bodies[1].atmosphere.mma, bodies[1].atmosphere.dpol, bodies[1].atmosphere.surface[0,0], len(vars(bodies[1].atmosphere.layers).items())))
     file.write('Layer  \t\t Type  \t Level \t P [bar] \t rayscat \t wvl [nm] \t tau [-] \t tau_gas [-] \n')
-    
+
     n_wvl = np.size(bodies[1].atmosphere.wvl_list)
     for layer_name, layer in vars(bodies[1].atmosphere.layers).items():
         if hasattr(layer,'mixed_aerosols') == True:
             file.write('%-10s \t %s \t %d \t %0.2e \t %-7s \t %6.4f \t %06.3f \t %06.3f \n' % (str(layer_name), layer.mixed_aerosols.typ, layer.level, layer.press, str(layer.rayscat), bodies[1].atmosphere.wvl_list[0], layer.tau[0], layer.tau_g[0]))
         else:
             file.write('%-10s \t %s \t %d \t %0.2e \t %-7s \t %6.4f \t %06.3f \t %06.3f \n' % (str(layer_name), layer.aerosols.typ, layer.level, layer.press, str(layer.rayscat), bodies[1].atmosphere.wvl_list[0], layer.tau[0], layer.tau_g[0]))
-    
+
         for i in range(n_wvl-1):
             file.write('\t\t\t\t\t\t\t\t %6.4f \t %06.3f \t %06.3f \n' % (bodies[1].atmosphere.wvl_list[i+1], layer.tau[i+1], layer.tau_g[i+1]))
-    
-    
+
+
     file.write('\n-- POLARIZED SIGNAL --\n\n')
-    
+
     file.write('Time [s] \t F_system [normalized] \t Q_system [normalized] \t U_system [normalized] \t V_system [normalized] \t P[%]        \t Chi[deg] \n\n')
     for i,t in enumerate(bodies[0].ephemeris.time):
         P   = np.sqrt(Q[0,i]**2 + U[0,i]**2)/I[0,i]*100
-        Chi = 0.5*np.rad2deg(np.arctan(U[0,i]/Q[0,i])) 
+        Chi = 0.5*np.rad2deg(np.arctan(U[0,i]/Q[0,i]))
         file.write('%10.1f \t %.10e \t %.10e \t %.10e \t %.10e \t %9.6f \t %.5e \n' % (bodies[0].ephemeris.time[i], I[0,i], Q[0,i], U[0,i], V[0,i], P, Chi ))
     file.write('\n\n')
-    
+
     file.write('Time [s]\tAlpha [deg]\tP-S dist. [m]\tF_planet [-]\tQ_planet [-]\tU_planet [-]\tV_planet [-]\n\n')
     for i,t in enumerate(bodies[0].ephemeris.time):
         file.write('%10.0f\t%6.3f\t\t%.9e\t%.9e\t%.9e\t%.9e\t%.9e\n' % (bodies[0].ephemeris.time[i], np.rad2deg(bodies[0].geometry.phase_angle[i]), bodies[0].ephemeris.r_s[i], bodies[0].radiance.I[0,i], bodies[0].radiance.Q[0,i], bodies[0].radiance.U[0,i], bodies[0].radiance.V[0,i]))
     file.write('\n\n')
-    
+
     file.write('Time [s]\tAlpha [deg]\tM-S dist. [m]\tF_moon [norm]\tQ_moon [-]\tU_moon [-]\tV_moon [-]\n\n')
     for i,t in enumerate(bodies[1].ephemeris.time):
         file.write('%10.0f\t%6.3f\t\t%.9e\t%.9e\t%.9e\t%.9e\t%.9e\n' % (bodies[1].ephemeris.time[i], np.rad2deg(bodies[1].geometry.phase_angle[i]), bodies[1].ephemeris.r_s[i], bodies[1].radiance.I[0,i], bodies[1].radiance.Q[0,i], bodies[1].radiance.U[0,i], bodies[1].radiance.V[0,i]))
-    
-    
+
+
     file.write('\n\n -- END OF FILE --')
-    
+
     file.close()
-    
-#    del name, dirs, directory, files, i, t, description, n_wvl, layer, layer_name, P, Chi, 
-    
+
+#    del name, dirs, directory, files, i, t, description, n_wvl, layer, layer_name, P, Chi,
+
     print('\nData has been printed.')
-    
-    
+
+
 def read_txt(directory = None, name = None):
-    ''' 
+    '''
     ==================================================================
     EXOPY function: exopy.read_txt
     Delft University of Technology
@@ -422,35 +424,35 @@ def read_txt(directory = None, name = None):
     Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
     Date: 2016-2017
     ------------------------------------------------------------------
-    
+
     INPUTS
     ------------------------------------------------------------------
      - directoy: path towards ouput folder [-] (str)
-     - name: output file name [-] (str) 
-    
+     - name: output file name [-] (str)
+
     OUTPUTS
     ------------------------------------------------------------------
-     - data: object containing information on loaded simulation [-] 
+     - data: object containing information on loaded simulation [-]
        (exopy.read_txt.reading_class class)
-    
+
     DESCRIPTION
     ------------------------------------------------------------------
-    Function loading a .txt file containing all information on a 
+    Function loading a .txt file containing all information on a
     previous simulation.
 
-    '''     
-    
+    '''
+
     import os
     import os.path
     import numpy as np
-    
-    ref1 = 8 
-    ref2 = ref1 + 5 
-    ref3 = ref2 + 6 
+
+    ref1 = 8
+    ref2 = ref1 + 5
+    ref3 = ref2 + 6
     ref4 = ref3 + 8 + 14 + 1
-    ref5 = ref4 + 4 
-    ref6 = ref5 + 4 
-    
+    ref5 = ref4 + 4
+    ref6 = ref5 + 4
+
     if directory is None:
         print(' ')
         print('Current directory: '+os.getcwd()+'/')
@@ -459,7 +461,7 @@ def read_txt(directory = None, name = None):
                 print i
         print(' ')
         directory = raw_input('Load directory: ')
-        
+
     if name is None:
         print(' ')
         print('List of existing files:')
@@ -468,14 +470,14 @@ def read_txt(directory = None, name = None):
                 print i
         print('')
         name = raw_input('Name of the file: ')
-        
+
     file = open(os.getcwd() + '/' + directory + '/' + name +'.txt').read()
     lines = file.split('\n')
     totalline = len(lines)
-    
+
     Nepochs = int(lines[ref1-1].split('\t')[1])
     Nwvl    = int(lines[ref1].split('\t')[1])
-    
+
     class reading_class:
         def __init__(self,Nepochs):
             self.Rp         = 0
@@ -523,9 +525,9 @@ def read_txt(directory = None, name = None):
             self.Q_m        = np.zeros(Nepochs)
             self.U_m        = np.zeros(Nepochs)
             self.V_m        = np.zeros(Nepochs)
-    
+
     data = reading_class(Nepochs)
-    
+
     aux             = lines[ref2].split('\t')
     data.a_b        = float(aux[1])
     data.e_b        = float(aux[2])
@@ -534,7 +536,7 @@ def read_txt(directory = None, name = None):
     data.Omega_b    = float(aux[5])
     data.t0_b       = float(aux[6])
     data.Period_b   = float(aux[7])
-    
+
     aux             = lines[ref2+1].split('\t')
     data.a_m        = float(aux[1])
     data.e_m        = float(aux[2])
@@ -543,29 +545,29 @@ def read_txt(directory = None, name = None):
     data.Omega_m    = float(aux[5])
     data.t0_m       = float(aux[6])
     data.Period_m   = float(aux[7])
-    
+
     aux             = lines[ref3].split('\t')
     data.Rp         = float(aux[1])
     data.Mp         = float(aux[2])
     data.Neq_p      = int(aux[3])
     data.Npoints_p  = int(aux[4])
     data.atm_name_p = aux[5]
-    
+
     aux             = lines[ref3+1].split('\t')
     data.Rm         = float(aux[1])
     data.Mm         = float(aux[2])
     data.Neq_m      = int(aux[3])
     data.Npoints_m  = int(aux[4])
     data.atm_name_m = aux[5]
-    
+
     aux     = lines[ref3+2].split('\t')
     data.Rs = float(aux[1])
     data.Ms = float(aux[2])
-    
+
     layers_planet = int(lines[ref3+9].split('\t')[3])
     layers_moon   = int(lines[ref3+16-1+layers_planet*Nwvl].split('\t')[3])
     extra         = layers_planet*Nwvl + layers_moon*Nwvl
-    
+
     for i in range(Nepochs):
         aux             = lines[ref4 + i + extra].split('\t')
         data.time[i]    = float(aux[0])
@@ -575,7 +577,7 @@ def read_txt(directory = None, name = None):
         data.V[i]       = float(aux[4])
         data.P[i]       = float(aux[5])
         data.Chi[i]     = float(aux[6])
-    
+
     for i in range(Nepochs):
         aux             = lines[Nepochs + ref5 + i + extra].split('\t')
         data.alpha_p[i] = float(aux[1])
@@ -584,7 +586,7 @@ def read_txt(directory = None, name = None):
         data.Q_p[i]     = float(aux[5])
         data.U_p[i]     = float(aux[6])
         data.V_p[i]     = float(aux[7])
-    
+
     for i in range(Nepochs):
         aux             = lines[2*Nepochs + ref6 + i + extra].split('\t')
         data.alpha_m[i] = float(aux[1])
@@ -593,11 +595,11 @@ def read_txt(directory = None, name = None):
         data.Q_m[i]     = float(aux[5])
         data.U_m[i]     = float(aux[6])
         data.V_m[i]     = float(aux[7])
-    
+
 
     return data
-    
-    
+
+
 
 def new_body(names, types):
     '''
@@ -622,10 +624,10 @@ OUTPUTS
 DESCRIPTION
 ------------------------------------------------------------------
 Function of the EXOPY tool, creating a set of new 'body' objects
-which serve as binding element for all information related to a 
+which serve as binding element for all information related to a
 celestial body.
 
-    ''' 
+    '''
 
     import exopy_source.exopy_functions as fun
     import numpy as np
@@ -661,10 +663,10 @@ OUTPUTS
 DESCRIPTION
 ------------------------------------------------------------------
 Function of the EXOPY tool, creating a set of new 'body' objects
-which serve as binding element for all information related to a 
+which serve as binding element for all information related to a
 celestial body.
 
-    ''' 
+    '''
     import exopy_source.exopy_functions as fun
 
     if identifier == 'transit':
@@ -1043,9 +1045,9 @@ OUTPUTS
  - I: First stokes vector: flux [normalized] (numpy array)
  - Q: Second stokes vector: linear polarization [normalized] (numpy
       array)
- - U: Third stokes vector: linear polarization [normalized] (numpy 
+ - U: Third stokes vector: linear polarization [normalized] (numpy
       array)
- - V: Fourth stokes vector: circular polarization [normalized] 
+ - V: Fourth stokes vector: circular polarization [normalized]
       (numpy array)
 
 DESCRIPTION
@@ -1054,7 +1056,7 @@ Function of the EXOPY tool, conducting the following operations:
 
  1. Computes the orbits of the extrasolar planetary system through
     the compute.orbit subfunction.
- 2. Computes the geometries involved in the motion of the bodies 
+ 2. Computes the geometries involved in the motion of the bodies
     at each time epoch.
  3. Computes the shadowed region of the bodies as a function of the
     phase angle and the observer's position
@@ -1064,7 +1066,7 @@ Function of the EXOPY tool, conducting the following operations:
  7. Combines the signal of the different bodies into a single one.
 
 
-    ''' 
+    '''
     if body1.type == 'moon':
         compute.orbit(body1, body2, star, dt, tf);
     elif body2.type == 'moon':
