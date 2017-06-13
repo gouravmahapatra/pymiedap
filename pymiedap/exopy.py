@@ -1,59 +1,59 @@
 # -*- coding: utf-8 -*-
 
-"""
-==================================================================
-EXOplanets & EXOmoons PYthon (EXOPY)
-Delft University of Technology
-------------------------------------------------------------------
-Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
-Date: 2016-2017
---------------------------------------- .  '  *     _..._       .  . '
-                _______                   .  *    .' .::::.  * -+-
-       ___o |==|__(o(__D              .    * .   :  ::::::::    '  *
-     /\  \/       /|\                     * .    :  ::::::::  ' .  .
-    / /          / | \                 *   *  .  `. '::::::'     .
-    ` `         /  |  \                  '   *     `-.::''
-
-Dependences: numpy,
-exopy_plot, exopy_config, exopy_compute
-
-DESCRIPTION
-------------------------------------------------------------------
-This code is dedicated to defining an extrasolar planetary system
-comprised of one planet and one moon hosted by a central star and
-computing theflux and polarization state of the reflected starlight
-with the help of the PYMIEDAP code [reference].
-
-In particular, the following actions can be conducted:
-
- * Computation of the three-dimensional orbits of the panet and
-   moon around the hosting star.
- * Determination of the planet and moon shadowed region as a func-
-   tion of phase angle and observer position.
- * Determination of shadows due to transits, i.e. one body putting
-   before a targeted body and the observer.
- * Determination of shadows due to eclipses, i.e. one body putting
-   before a targeted body and the star.
- * Computation of the individual reflected signals of the bodies
-   and combination of the results into a standalone output signal.
-
-The different tools provided by exopy are given by the instances:
-
- * new_body: Used to create objects of type 'body', i.e. a planet,
-   moon, or star.
- * new_system: Used to load a pre-defined planetary system.
- * run_simulation: Used to run a set of pre-defined simulation ins-
-   tructions.
- * compute: Used to run any of the different computation modules
-   available in EXOPY.
- * cfg: Used to specify a series of generic simulation settings.
-
-Detailed instructions on how to use the EXOPY code and any of its
-modules as well as example scripts are provided in the documenta-
-tion of the various functions and in:
-  ../exopy_source/EXOPY_how_to_use.html
-
-"""
+#"""
+#==================================================================
+#EXOplanets & EXOmoons PYthon (EXOPY)
+#Delft University of Technology
+#------------------------------------------------------------------
+#Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+#Date: 2016-2017
+#--------------------------------------- .  '  *     _..._       .  . '
+#                _______                   .  *    .' .::::.  * -+-
+#       ___o |==|__(o(__D              .    * .   :  ::::::::    '  *
+#     /\  \/       /|\                     * .    :  ::::::::  ' .  .
+#    / /          / | \                 *   *  .  `. '::::::'     .
+#    ` `         /  |  \                  '   *     `-.::''
+#
+#Dependences: numpy,
+#exopy_plot, exopy_config, exopy_compute
+#
+#DESCRIPTION
+#------------------------------------------------------------------
+#This code is dedicated to defining an extrasolar planetary system
+#comprised of one planet and one moon hosted by a central star and
+#computing theflux and polarization state of the reflected starlight
+#with the help of the PYMIEDAP code [reference].
+#
+#In particular, the following actions can be conducted:
+#
+# * Computation of the three-dimensional orbits of the panet and
+#   moon around the hosting star.
+# * Determination of the planet and moon shadowed region as a func-
+#   tion of phase angle and observer position.
+# * Determination of shadows due to transits, i.e. one body putting
+#   before a targeted body and the observer.
+# * Determination of shadows due to eclipses, i.e. one body putting
+#   before a targeted body and the star.
+# * Computation of the individual reflected signals of the bodies
+#   and combination of the results into a standalone output signal.
+#
+#The different tools provided by exopy are given by the instances:
+#
+# * new_body: Used to create objects of type 'body', i.e. a planet,
+#   moon, or star.
+# * new_system: Used to load a pre-defined planetary system.
+# * run_simulation: Used to run a set of pre-defined simulation ins-
+#   tructions.
+# * compute: Used to run any of the different computation modules
+#   available in EXOPY.
+# * cfg: Used to specify a series of generic simulation settings.
+#
+#Detailed instructions on how to use the EXOPY code and any of its
+#modules as well as example scripts are provided in the documenta-
+#tion of the various functions and in:
+#  ../exopy_source/EXOPY_how_to_use.html
+#
+#"""
 
 # ==============
 # IMPORT MODULES
@@ -65,6 +65,7 @@ import exopy_source.exopy_plot as plot
 import exopy_source.exopy_config as cfg
 import exopy_source.exopy_compute as compute
 import exopy_source.exopy_atm_models as atm_models
+import exopy_source.exopy_functions as fun
 from matplotlib import rc as _rc
 _rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 ## for Palatino and other serif fonts use:
@@ -73,6 +74,10 @@ _rc('text', usetex=True)
 import matplotlib.pyplot as _plt
 _plt.rc('text', usetex=True)
 _plt.rc('font', family='serif')
+import os
+import pickle
+import os.path
+import time
 
 # ======================================
 # ======================================
@@ -120,9 +125,6 @@ def save_pickle(bodies, tf, dt, I, Q, U, V, exopy, directory = None,
 
     '''
 
-    import os
-    import pickle
-    import os.path
 
 
     if directory is None or name is None:
@@ -214,11 +216,6 @@ def load_pickle(directory = None, name = None):
 
     '''
 
-    import os
-    import pickle
-    import os.path
-
-
     if directory is None:
         print(' ')
         print('Current directory: '+os.getcwd()+'/')
@@ -304,10 +301,6 @@ def print_txt(bodies, tf, dt, I, Q, U, V, exopy, directory = None,
 
     '''
 
-    import os
-    import os.path
-    import numpy as np
-    import time
 
     if directory is None or name is None:
         print(' ')
@@ -441,10 +434,6 @@ def read_txt(directory = None, name = None):
     previous simulation.
 
     '''
-
-    import os
-    import os.path
-    import numpy as np
 
     ref1 = 8
     ref2 = ref1 + 5
@@ -629,8 +618,6 @@ celestial body.
 
     '''
 
-    import exopy_source.exopy_functions as fun
-    import numpy as np
 
     if type(names)==str:
         bodies = fun.body(names, types)
@@ -667,7 +654,6 @@ which serve as binding element for all information related to a
 celestial body.
 
     '''
-    import exopy_source.exopy_functions as fun
 
     if identifier == 'transit':
 
@@ -926,11 +912,7 @@ celestial body.
 
 def test_integration(body, scene='clear', plot = 'no'):
 
-	import time as t
-	import pymiedap.pymiedap as pmd
-	import numpy as np
 	import matplotlib.pyplot as plt
-
 
 	file1 = {'clear':'exopy/files/table_clear.dat','cloudy':'exopy/files/table_cloudy.dat','gas':'exopy/files/table_gas.dat'  }
 	file2 = {'clear':'exopy/files/clear_0.500.dat','cloudy':'exopy/files/cloudy_0.500.dat','gas':'exopy/files/fou_jup_100.dat'}
