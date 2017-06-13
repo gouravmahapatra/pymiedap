@@ -222,7 +222,7 @@ def load_pickle(directory = None, name = None):
         name = raw_input('Name of the file: ')
 
     with open(os.getcwd()+'/'+directory+'/'+name+'.pickle', 'rb') as f:
-         load_data = pickle.load(f)
+        load_data = pickle.load(f)
 
     conf = cfg
 
@@ -343,13 +343,13 @@ def print_txt(bodies, tf, dt, I, Q, U, V, exopy, directory = None,
 
     n_wvl = np.size(bodies[0].atmosphere.wvl_list)
     for layer_name, layer in vars(bodies[0].atmosphere.layers).items():
-        if hasattr(layer,'mixed_aerosols') == True:
-             file.write('%-10s \t %s \t %d \t %-0.2e \t %-7s \t %-06.4f \t %-06.3f \t %-06.3f \n' % (str(layer_name), layer.mixed_aerosols.typ, layer.level, layer.press, str(layer.rayscat), bodies[0].atmosphere.wvl_list[0], layer.tau[0], layer.tau_g[0]))
+        if hasattr(layer,'mixed_aerosols') is True:
+            file.write('%-10s \t %s \t %d \t %-0.2e \t %-7s \t %-06.4f \t %-06.3f \t %-06.3f \n' % (str(layer_name), layer.mixed_aerosols.typ, layer.level, layer.press, str(layer.rayscat), bodies[0].atmosphere.wvl_list[0], layer.tau[0], layer.tau_g[0]))
         else:
-         file.write('%-10s \t %s \t %d \t %0.2e \t %-7s \t %6.4f \t %06.3f \t %06.3f \n' % (str(layer_name), layer.aerosols.typ, layer.level, layer.press, str(layer.rayscat), bodies[0].atmosphere.wvl_list[0], layer.tau[0], layer.tau_g[0]))
+            file.write('%-10s \t %s \t %d \t %0.2e \t %-7s \t %6.4f \t %06.3f \t %06.3f \n' % (str(layer_name), layer.aerosols.typ, layer.level, layer.press, str(layer.rayscat), bodies[0].atmosphere.wvl_list[0], layer.tau[0], layer.tau_g[0]))
 
         for i in range(n_wvl-1):
-         file.write('\t\t\t\t\t\t\t\t %6.4f \t %06.3f \t %06.3f \n' % (bodies[0].atmosphere.wvl_list[i+1], layer.tau[i+1], layer.tau_g[i+1]))
+            file.write('\t\t\t\t\t\t\t\t %6.4f \t %06.3f \t %06.3f \n' % (bodies[0].atmosphere.wvl_list[i+1], layer.tau[i+1], layer.tau_g[i+1]))
 
     file.write('               == Moon ==\n\n')
     file.write('mma [AMU] \t dpol [-] \t albedo [-] \t no. layers\n')
@@ -899,29 +899,29 @@ def new_system(identifier):
 
 def test_integration(body, scene='clear', plot = 'no'):
 
-	import matplotlib.pyplot as plt
+    import matplotlib.pyplot as plt
 
-	file1 = {'clear':'exopy/files/table_clear.dat','cloudy':'exopy/files/table_cloudy.dat','gas':'exopy/files/table_gas.dat'  }
-	file2 = {'clear':'exopy/files/clear_0.500.dat','cloudy':'exopy/files/cloudy_0.500.dat','gas':'exopy/files/fou_jup_100.dat'}
+    file1 = {'clear':'exopy/files/table_clear.dat','cloudy':'exopy/files/table_cloudy.dat','gas':'exopy/files/table_gas.dat'  }
+    file2 = {'clear':'exopy/files/clear_0.500.dat','cloudy':'exopy/files/cloudy_0.500.dat','gas':'exopy/files/fou_jup_100.dat'}
 
-	t11 = t.time()
+    t11 = t.time()
 
-	time = body.ephemeris.time
+    time = body.ephemeris.time
 
-	Ip = np.zeros_like(time)
-	Qp = np.zeros_like(time)
-	Up = np.zeros_like(time)
+    Ip = np.zeros_like(time)
+    Qp = np.zeros_like(time)
+    Up = np.zeros_like(time)
 
-	output = np.zeros([4,len(body.ephemeris.time),body.grid.N_points])
+    output = np.zeros([4,len(body.ephemeris.time),body.grid.N_points])
 
-	area  = np.repeat(body.grid.area[:,np.newaxis],4,1).T
-	phase = np.degrees(body.geometry.phase_angle)
-	sza   = np.degrees(body.grid.solar_zenith_angle)
-	emission = np.degrees(body.grid.observer_zenith_angle)
-	beta  = np.degrees(body.grid.beta)
-	phi   = np.degrees(body.grid.azimuth)
+    area  = np.repeat(body.grid.area[:,np.newaxis],4,1).T
+    phase = np.degrees(body.geometry.phase_angle)
+    sza   = np.degrees(body.grid.solar_zenith_angle)
+    emission = np.degrees(body.grid.observer_zenith_angle)
+    beta  = np.degrees(body.grid.beta)
+    phi   = np.degrees(body.grid.azimuth)
 
-	for i,j in enumerate(time):
+    for i,j in enumerate(time):
         t1 = t.time()
         print(i+1, ' out of ', len(time))
         A = body.grid.shadow[i,:]>10E-10
@@ -940,7 +940,7 @@ def test_integration(body, scene='clear', plot = 'no'):
     #==========================================================================
     #==========================================================================
     #==========================================================================
-	if plot != 'no':
+    if plot != 'no':
 
         data = np.loadtxt(file1[scene])
 
@@ -964,7 +964,8 @@ def test_integration(body, scene='clear', plot = 'no'):
         ax1.plot(phase,np.interp(phase,phase_angle,I) ,'xb')
         ax1.plot(phase,np.interp(phase,phase_angle,U) ,'xr')
         ax1.plot(phase,np.interp(phase,phase_angle,Q) ,'xg')
-        ax1.legend(['Reference I','Reference Q','Reference U','Computed I','Computed Q','Computed U'])
+        ax1.legend(['Reference I','Reference Q','Reference U',
+                    'Computed I','Computed Q','Computed U'])
 
         ax2.plot(phase,Ip/np.interp(phase,phase_angle,I),'o-b')
         ax2.plot(phase,Qp/np.interp(phase,phase_angle,Q),'o-g')
