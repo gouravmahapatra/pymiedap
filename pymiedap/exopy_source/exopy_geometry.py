@@ -29,7 +29,7 @@
 import numpy as np
 import exopy_config as _cfg
 
-def geometry(body, ref_line_angle = None):
+def geometry(body, conf, ref_line_angle = None):
     '''
     ==================================================================
     EXOPY function: geometry()
@@ -69,8 +69,8 @@ def geometry(body, ref_line_angle = None):
         body.ephemeris.position3D_s_ob = body.ephemeris.position3D_s
     else:
 
-        el = _cfg.el
-        az = _cfg.az
+        el = conf.el
+        az = conf.az
 
         time = body.ephemeris.time
 
@@ -145,7 +145,7 @@ def geometry(body, ref_line_angle = None):
         body.geometry.solar_azimuth_angle = np.mod(np.arctan2(body.ephemeris.position3D_s_ob[1,:],body.ephemeris.position3D_s_ob[0,:]),2*np.pi)*key
 
         # Grid geometry
-        if _cfg.case in ['d', 'cd', 'dc']:
+        if conf.case in ['d', 'cd', 'dc']:
 
             rotation = np.array([[-1, 0, 0], [ 0,-1, 0], [ 0, 0, 1]])
 

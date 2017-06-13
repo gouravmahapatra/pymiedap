@@ -83,7 +83,7 @@ def orbit(moon, planet, star, delta_t, final_t):
     return moon, planet, star
 
 
-def geometry(bodies):
+def geometry(bodies, conf):
     '''
     ==================================================================
     EXOPY function: exopy.compute.geometry
@@ -112,37 +112,37 @@ def geometry(bodies):
 
     import sys
 
-    if _cfg.ref_line == None:
+    if conf.ref_line == None:
 
         if type(bodies) != list:
-            bodies = _geom(bodies)
+            bodies = _geom(bodies, conf)
         else:
             for i in range(len(bodies)):
-                bodies[i] = _geom(bodies[i])
+                bodies[i] = _geom(bodies[i], conf)
 
     else:
 
         if type(bodies) != list:
-            if _cfg.ref_line != bodies.name:
+            if conf.ref_line != bodies.name:
                 sys.exit('Error: value for ref_line does not match the name of any input body')
 
-            bodies = _geom(bodies, ref_line_angle = 'fix')
+            bodies = _geom(bodies, conf, ref_line_angle = 'fix')
         else:
             names = []
             for body in bodies: names.append(body.name)
 
-            if _cfg.ref_line not in names:
+            if conf.ref_line not in names:
                 sys.exit('Error: value for ref_line does not match the name of any input body')
-            else: index = names.index(_cfg.ref_line)
-            bodies[index] = _geom(bodies[index], ref_line_angle = 'fix')
+            else: index = names.index(conf.ref_line)
+            bodies[index] = _geom(bodies[index], conf, ref_line_angle = 'fix')
             for i in range(len(bodies)):
                 if i == index: continue
-                bodies[i] = _geom(bodies[i], ref_line_angle = bodies[index].geometry.ref_line_angle)
+                bodies[i] = _geom(bodies[i], conf, ref_line_angle = bodies[index].geometry.ref_line_angle)
 
     return bodies
 
 
-def phases(bodies, star):
+def phases(bodies, star, conf):
     '''
     ==================================================================
     EXOPY function: exopy.compute.phases
@@ -173,10 +173,10 @@ def phases(bodies, star):
     import sys
 
     if type(bodies) != list:
-        bodies = _phase(bodies, star)
+        bodies = _phase(bodies, star, conf)
     else:
         for i in range(len(bodies)):
-            bodies[i] = _phase(bodies[i], star)
+            bodies[i] = _phase(bodies[i], star, conf)
     #
     #    else:
     #
@@ -200,7 +200,7 @@ def phases(bodies, star):
     return bodies
 
 
-def transits(bodies):
+def transits(bodies, conf):
     '''
     ==================================================================
     EXOPY function: exopy.compute.transits
@@ -236,13 +236,13 @@ def transits(bodies):
 
         names.append(body.name)
 
-    if _cfg.ref_line == None:
+    if conf.ref_line == None:
         ref_line_angle = np.zeros_like(bodies[0].ephemeris.time)
     else:
 
-        if _cfg.ref_line not in names:
+        if conf.ref_line not in names:
             sys.exit('Error: value for ref_line does not match the name of any input body')
-        else: index = names.index(_cfg.ref_line)
+        else: index = names.index(conf.ref_line)
 
         ref_line_angle = bodies[index].geometry.ref_line_angle
 
@@ -322,7 +322,7 @@ def int_radiance(bodies, path_input = './dap_database/', nmug = 20, nmug_mie = 2
     return bodies
 
 
-def combine(bodies):
+def combine(bodies, conf):
     '''
     ==================================================================
     EXOPY function: exopy.compute.combine
@@ -356,7 +356,7 @@ def combine(bodies):
     '''
 
     for body in bodies:
-        if body.name == _cfg.ref_body:
+        if body.name == conf.ref_body:
             I,Q,U,V,P,Chi = _comb(bodies,body)
             break
 

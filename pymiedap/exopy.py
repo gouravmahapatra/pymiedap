@@ -86,7 +86,7 @@ if __name__ == "__main__":
     print(__doc__)
 
 
-def save_pickle(bodies, tf, dt, I, Q, U, V, exopy, directory = None,
+def save_pickle(bodies, tf, dt, I, Q, U, V, conf, directory = None,
                 name = None, description = None):
     '''
     ==================================================================
@@ -147,9 +147,9 @@ def save_pickle(bodies, tf, dt, I, Q, U, V, exopy, directory = None,
         print('')
         description = raw_input('Simulation description: ')
 
-    save_data = [bodies, tf, dt, I, Q, U, V, exopy.cfg.az, exopy.cfg.el,
-                 exopy.cfg.approach, exopy.cfg.case, exopy.cfg.ref_body,
-                 exopy.cfg.ref_line, exopy.cfg.plot_color, exopy.cfg.N,
+    save_data = [bodies, tf, dt, I, Q, U, V, conf.az, conf.el,
+                 conf.approach, conf.case, conf.ref_body,
+                 conf.ref_line, conf.plot_color, conf.N,
                  description ]
 
     with open(os.getcwd()+'/'+directory+'/'+name+'.pickle', 'wb') as f:
@@ -224,7 +224,7 @@ def load_pickle(directory = None, name = None):
     with open(os.getcwd()+'/'+directory+'/'+name+'.pickle', 'rb') as f:
         load_data = pickle.load(f)
 
-    conf = cfg
+    conf = cfg.Settings()
 
     bodies          = load_data[0]
     tf              = load_data[1]
@@ -245,7 +245,7 @@ def load_pickle(directory = None, name = None):
 
     print('\nData has been loaded.')
 
-    return bodies, tf, dt, I, Q, U, V, cfg, description,
+    return bodies, tf, dt, I, Q, U, V, conf, description,
 
 
 
@@ -1038,17 +1038,19 @@ def run_simulation(body1, body2 ,star,dt, tf, flag_transits=True, flag_eclipses=
 
     '''
 
+    conf = cfg.Settings()
+
     if body1.type == 'moon':
         compute.orbit(body1, body2, star, dt, tf);
     elif body2.type == 'moon':
         compute.orbit(body2, body1, star, dt, tf);
-    compute.geometry([body1, body2, star])
-    compute.phases([body1,body2], star)
-    if flag_transits:    compute.transits([body1, body2, star])
-    if flag_eclipses:    compute.eclipses([body1,body2], star)
+    compute.geometry([body1, body2, star], conf)
+    compute.phases([body1,body2], star, conf)
+    if flag_transits:    compute.transits([body1, body2, star], conf)
+    if flag_eclipses:    compute.eclipses([body1,body2], star, conf)
     if flag_radiance:
         compute.int_radiance([body1, body2], path_input = path_input)
-        I,Q,U,V,P,Chi = compute.combine([body1, body2])
+        I,Q,U,V,P,Chi = compute.combine([body1, body2], conf)
     else:
         I = None
         Q = None

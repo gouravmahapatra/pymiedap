@@ -75,8 +75,8 @@ def eclipse(bodies, star = None):
     T = len(time)
     t_count = np.array(range(len(time)))
 
-    N = _cfg.N
-    compute = _cfg.case
+    N = conf.N
+    compute = conf.case
 
     # Create list for radii, re-initialize flags, and initialize points lists
     #    R = [bodies[i].properties.R for i in range(len(bodies))]

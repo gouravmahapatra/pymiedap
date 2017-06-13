@@ -17,7 +17,7 @@ shadow of a body.
 
 LIST OF FUNCTIONS
 ------------------------------------------------------------------
- - phase: Function computing the darkenned pixels according to the 
+ - phase: Function computing the darkenned pixels according to the
 	  phase angle.
 
 
@@ -29,7 +29,7 @@ import exopy_config as _cfg
 
 
 
-def phase(body, star):
+def phase(body, star, conf):
     """
 ==================================================================
 EXOPY function: phase()
@@ -60,8 +60,8 @@ OUTPUTS
 
     print('\n    ... phase of ' + body.type + ' ' + body.name + '\n')
 
-    approach = _cfg.approach
-    N        = _cfg.N
+    approach = conf.approach
+    N        = conf.N
 
     time = body.ephemeris.time
     T = len(time)

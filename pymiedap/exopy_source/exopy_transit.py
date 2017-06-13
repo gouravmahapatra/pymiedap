@@ -30,7 +30,7 @@ import numpy as np
 #from exopy_functions import PolyArea
 
 
-def transits(bodies, ref_line_angle = None):
+def transits(bodies, conf, ref_line_angle = None):
     """
     ==================================================================
     EXOPY function: eclipse()
@@ -80,7 +80,7 @@ def transits(bodies, ref_line_angle = None):
     T = len(time)
     t_count = np.array(range(len(time)))
 
-    N       = _cfg.N
+    N       = conf.N
 
     if ref_line_angle is None: ref_line_angle = np.zeros_like(time)
 
