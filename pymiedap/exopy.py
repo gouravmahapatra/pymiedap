@@ -147,23 +147,10 @@ def save_pickle(bodies, tf, dt, I, Q, U, V, exopy, directory = None,
         print('')
         description = raw_input('Simulation description: ')
 
-    save_data = [
-        bodies,
-        tf,
-        dt,
-        I,
-        Q,
-        U,
-        V,
-        exopy.cfg.az,
-        exopy.cfg.el,
-        exopy.cfg.approach,
-        exopy.cfg.case,
-        exopy.cfg.ref_body,
-        exopy.cfg.ref_line,
-        exopy.cfg.plot_color,
-        exopy.cfg.N,
-        description ]
+    save_data = [bodies, tf, dt, I, Q, U, V, exopy.cfg.az, exopy.cfg.el,
+                 exopy.cfg.approach, exopy.cfg.case, exopy.cfg.ref_body,
+                 exopy.cfg.ref_line, exopy.cfg.plot_color, exopy.cfg.N,
+                 description ]
 
     with open(os.getcwd()+'/'+directory+'/'+name+'.pickle', 'wb') as f:
          pickle.dump(save_data, f)
@@ -307,14 +294,14 @@ def print_txt(bodies, tf, dt, I, Q, U, V, exopy, directory = None,
         print('Current directory: '+os.getcwd()+'/')
         dirs = [d for d in os.listdir(os.getcwd()) if os.path.isdir(os.path.join(os.getcwd(), d))]
         for i in dirs:
-        	print i
+            print i
         print(' ')
         directory = raw_input('Save directory: ')
         print(' ')
         print('List of existing files:')
         files = os.listdir(os.getcwd()+'/'+directory)
         for i in files:
-        	print i
+            print i
         print('')
         name = raw_input('Name of the file: ')
 
@@ -358,10 +345,10 @@ def print_txt(bodies, tf, dt, I, Q, U, V, exopy, directory = None,
     for layer_name, layer in vars(bodies[0].atmosphere.layers).items():
         if hasattr(layer,'mixed_aerosols') == True:
              file.write('%-10s \t %s \t %d \t %-0.2e \t %-7s \t %-06.4f \t %-06.3f \t %-06.3f \n' % (str(layer_name), layer.mixed_aerosols.typ, layer.level, layer.press, str(layer.rayscat), bodies[0].atmosphere.wvl_list[0], layer.tau[0], layer.tau_g[0]))
-    	else:
+        else:
          file.write('%-10s \t %s \t %d \t %0.2e \t %-7s \t %6.4f \t %06.3f \t %06.3f \n' % (str(layer_name), layer.aerosols.typ, layer.level, layer.press, str(layer.rayscat), bodies[0].atmosphere.wvl_list[0], layer.tau[0], layer.tau_g[0]))
 
-    	for i in range(n_wvl-1):
+        for i in range(n_wvl-1):
          file.write('\t\t\t\t\t\t\t\t %6.4f \t %06.3f \t %06.3f \n' % (bodies[0].atmosphere.wvl_list[i+1], layer.tau[i+1], layer.tau_g[i+1]))
 
     file.write('               == Moon ==\n\n')
@@ -592,29 +579,29 @@ def read_txt(directory = None, name = None):
 
 def new_body(names, types):
     '''
-==================================================================
-EXOPY function: exopy.new_body
-Delft University of Technology
-------------------------------------------------------------------
-Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
-Date: 2016-2017
-------------------------------------------------------------------
+    ==================================================================
+    EXOPY function: exopy.new_body
+    Delft University of Technology
+    ------------------------------------------------------------------
+    Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+    Date: 2016-2017
+    ------------------------------------------------------------------
 
-INPUTS
-------------------------------------------------------------------
- - names: names of the bodies to be created [-] (str/list)
- - types: types of the bodies to be created [-] (str/list)
-	  'planet', 'moon', 'star'
+    INPUTS
+    ------------------------------------------------------------------
+    - names: names of the bodies to be created [-] (str/list)
+    - types: types of the bodies to be created [-] (str/list)
+        'planet', 'moon', 'star'
 
-OUTPUTS
-------------------------------------------------------------------
- - bodies: created bodies [-] ('body' object/list)
+    OUTPUTS
+    ------------------------------------------------------------------
+    - bodies: created bodies [-] ('body' object/list)
 
-DESCRIPTION
-------------------------------------------------------------------
-Function of the EXOPY tool, creating a set of new 'body' objects
-which serve as binding element for all information related to a
-celestial body.
+    DESCRIPTION
+    ------------------------------------------------------------------
+    Function of the EXOPY tool, creating a set of new 'body' objects
+    which serve as binding element for all information related to a
+    celestial body.
 
     '''
 
@@ -631,27 +618,27 @@ celestial body.
 
 def new_system(identifier):
     '''
-==================================================================
-EXOPY function: exopy.new_system
-Delft University of Technology
-------------------------------------------------------------------
-Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
-Date: 2016-2017
-------------------------------------------------------------------
+    ==================================================================
+    EXOPY function: exopy.new_system
+    Delft University of Technology
+    ------------------------------------------------------------------
+    Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+    Date: 2016-2017
+    ------------------------------------------------------------------
 
-INPUTS
-------------------------------------------------------------------
- - identifier: names of the system to be loaded [-] (str)
+    INPUTS
+    ------------------------------------------------------------------
+    - identifier: names of the system to be loaded [-] (str)
 
-OUTPUTS
-------------------------------------------------------------------
- - bodies: List of created bodies [-] (list)
+    OUTPUTS
+    ------------------------------------------------------------------
+    - bodies: List of created bodies [-] (list)
 
-DESCRIPTION
-------------------------------------------------------------------
-Function of the EXOPY tool, creating a set of new 'body' objects
-which serve as binding element for all information related to a
-celestial body.
+    DESCRIPTION
+    ------------------------------------------------------------------
+    Function of the EXOPY tool, creating a set of new 'body' objects
+    which serve as binding element for all information related to a
+    celestial body.
 
     '''
 
@@ -935,16 +922,16 @@ def test_integration(body, scene='clear', plot = 'no'):
 	phi   = np.degrees(body.grid.azimuth)
 
 	for i,j in enumerate(time):
-        	t1 = t.time()
-        	print(i+1, ' out of ', len(time))
-        	A = body.grid.shadow[i,:]>10E-10
+        t1 = t.time()
+        print(i+1, ' out of ', len(time))
+        A = body.grid.shadow[i,:]>10E-10
 
-        	I,Q,U,V = pmd.read_dap_output(np.repeat(phase[i], sum(A)), sza[i,A], emission[A], file2[scene], beta=beta[i,A], phi=phi[i,A])
+        I,Q,U,V = pmd.read_dap_output(np.repeat(phase[i], sum(A)), sza[i,A], emission[A], file2[scene], beta=beta[i,A], phi=phi[i,A])
 
-        	output[0,i,A] = 4*np.cos(np.radians(sza[i,A]))*body.grid.shadow[i,A]*area[0,A]*I/np.pi
-        	output[1,i,A] = 4*np.cos(np.radians(sza[i,A]))*body.grid.shadow[i,A]*area[1,A]*Q/np.pi
-        	output[2,i,A] = 4*np.cos(np.radians(sza[i,A]))*body.grid.shadow[i,A]*area[2,A]*U/np.pi
-        	print(t.time()-t1)
+        output[0,i,A] = 4*np.cos(np.radians(sza[i,A]))*body.grid.shadow[i,A]*area[0,A]*I/np.pi
+        output[1,i,A] = 4*np.cos(np.radians(sza[i,A]))*body.grid.shadow[i,A]*area[1,A]*Q/np.pi
+        output[2,i,A] = 4*np.cos(np.radians(sza[i,A]))*body.grid.shadow[i,A]*area[2,A]*U/np.pi
+        print(t.time()-t1)
 
 	Ip = np.nansum(output[0,:],1)
 	Qp = np.nansum(output[1,:],1)
@@ -955,42 +942,42 @@ def test_integration(body, scene='clear', plot = 'no'):
     #==========================================================================
 	if plot != 'no':
 
-        	data = np.loadtxt(file1[scene])
+        data = np.loadtxt(file1[scene])
 
-        	phase_angle = data[:,0]
-        	I           = data[:,1]
-        	Q           = data[:,2]
-        	U           = data[:,3]
+        phase_angle = data[:,0]
+        I           = data[:,1]
+        Q           = data[:,2]
+        U           = data[:,3]
 
-     	  	del data,
+        del data,
 
-     	  	f, (ax1, ax2) = plt.subplots(1,2)
-        	ax1.plot(phase_angle,I,'b-')
-        	ax1.plot(phase_angle,Q,'g-')
-        	ax1.plot(phase_angle,U,'r-')
-        	ax1.set_xlabel('Phase angle [deg]')
+        f, (ax1, ax2) = plt.subplots(1,2)
+        ax1.plot(phase_angle,I,'b-')
+        ax1.plot(phase_angle,Q,'g-')
+        ax1.plot(phase_angle,U,'r-')
+        ax1.set_xlabel('Phase angle [deg]')
 
-        	ax1.plot(np.rad2deg(body.geometry.phase_angle), Ip,'o-b')
-        	ax1.plot(np.rad2deg(body.geometry.phase_angle), Qp,'og-')
-        	ax1.plot(np.rad2deg(body.geometry.phase_angle), Up,'o-r')
+        ax1.plot(np.rad2deg(body.geometry.phase_angle), Ip,'o-b')
+        ax1.plot(np.rad2deg(body.geometry.phase_angle), Qp,'og-')
+        ax1.plot(np.rad2deg(body.geometry.phase_angle), Up,'o-r')
 
-        	ax1.plot(phase,np.interp(phase,phase_angle,I) ,'xb')
-        	ax1.plot(phase,np.interp(phase,phase_angle,U) ,'xr')
-        	ax1.plot(phase,np.interp(phase,phase_angle,Q) ,'xg')
-        	ax1.legend(['Reference I','Reference Q','Reference U','Computed I','Computed Q','Computed U'])
+        ax1.plot(phase,np.interp(phase,phase_angle,I) ,'xb')
+        ax1.plot(phase,np.interp(phase,phase_angle,U) ,'xr')
+        ax1.plot(phase,np.interp(phase,phase_angle,Q) ,'xg')
+        ax1.legend(['Reference I','Reference Q','Reference U','Computed I','Computed Q','Computed U'])
 
-        	ax2.plot(phase,Ip/np.interp(phase,phase_angle,I),'o-b')
-        	ax2.plot(phase,Qp/np.interp(phase,phase_angle,Q),'o-g')
-        	ax2.plot(phase,Up/np.interp(phase,phase_angle,U),'o-r')
-        	ax2.set_xlabel('Phase angle [deg]')
-        	ax2.set_ylabel('Difference')
-        	ax2.legend(['$\Delta I$','$\Delta Q$','$\Delta U$'])
+        ax2.plot(phase,Ip/np.interp(phase,phase_angle,I),'o-b')
+        ax2.plot(phase,Qp/np.interp(phase,phase_angle,Q),'o-g')
+        ax2.plot(phase,Up/np.interp(phase,phase_angle,U),'o-r')
+        ax2.set_xlabel('Phase angle [deg]')
+        ax2.set_ylabel('Difference')
+        ax2.legend(['$\Delta I$','$\Delta Q$','$\Delta U$'])
 
-        	plt.tight_layout()
+        plt.tight_layout()
 
-        	t22 = t.time()
+        t22 = t.time()
 
-        	print(t22-t11)
+        print(t22-t11)
 
 
 	return [Ip, Qp, Up]
@@ -999,56 +986,57 @@ def test_integration(body, scene='clear', plot = 'no'):
 
 def run_simulation(body1, body2 ,star,dt, tf, flag_transits=True, flag_eclipses=True, flag_radiance=True, path_input = '../dap_database/'):
     '''
-==================================================================
-EXOPY function: exopy.run_simulation
-Delft University of Technology
-------------------------------------------------------------------
-Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
-Date: 2016-2017
-------------------------------------------------------------------
+    ==================================================================
+    EXOPY function: exopy.run_simulation
+    Delft University of Technology
+    ------------------------------------------------------------------
+    Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+    Date: 2016-2017
+    ------------------------------------------------------------------
 
-INPUTS
-------------------------------------------------------------------
- - body1: planet or moon object [-] ('body' object)
- - body2: planet or moon object [-] ('body' object)
- - star: star object [-] ('body' object)
- - dt: time interval between two consecutive computed epochs [s] (float)
- - tf: final computation time [s] (float)
- - flag_transits: turns ON/OFF the computation of transits [True/False] (bool)
- - flag_eclipses: turns ON/OFF the computation of eclipses [True/False] (bool)
- - flag_radiance: turns ON/OFF the computation of reflected radiance [True/False] (bool)
- - path_input: location of the Fourier files database [-] (str)
+    INPUTS
+    ------------------------------------------------------------------
+    - body1: planet or moon object [-] ('body' object)
+    - body2: planet or moon object [-] ('body' object)
+    - star: star object [-] ('body' object)
+    - dt: time interval between two consecutive computed epochs [s] (float)
+    - tf: final computation time [s] (float)
+    - flag_transits: turns ON/OFF the computation of transits [True/False] (bool)
+    - flag_eclipses: turns ON/OFF the computation of eclipses [True/False] (bool)
+    - flag_radiance: turns ON/OFF the computation of reflected radiance [True/False] (bool)
+    - path_input: location of the Fourier files database [-] (str)
 
-OUTPUTS
-------------------------------------------------------------------
- - body1: planet or moon object [-] ('body' object)
- - body2: planet or moon object [-] ('body' object)
- - star: star object [-] ('body' object)
- - I: First stokes vector: flux [normalized] (numpy array)
- - Q: Second stokes vector: linear polarization [normalized] (numpy
-      array)
- - U: Third stokes vector: linear polarization [normalized] (numpy
-      array)
- - V: Fourth stokes vector: circular polarization [normalized]
-      (numpy array)
+    OUTPUTS
+    ------------------------------------------------------------------
+    - body1: planet or moon object [-] ('body' object)
+    - body2: planet or moon object [-] ('body' object)
+    - star: star object [-] ('body' object)
+    - I: First stokes vector: flux [normalized] (numpy array)
+    - Q: Second stokes vector: linear polarization [normalized] (numpy
+        array)
+    - U: Third stokes vector: linear polarization [normalized] (numpy
+        array)
+    - V: Fourth stokes vector: circular polarization [normalized]
+        (numpy array)
 
-DESCRIPTION
-------------------------------------------------------------------
-Function of the EXOPY tool, conducting the following operations:
+    DESCRIPTION
+    ------------------------------------------------------------------
+    Function of the EXOPY tool, conducting the following operations:
 
- 1. Computes the orbits of the extrasolar planetary system through
-    the compute.orbit subfunction.
- 2. Computes the geometries involved in the motion of the bodies
-    at each time epoch.
- 3. Computes the shadowed region of the bodies as a function of the
-    phase angle and the observer's position
- 4. Computes the shadowed region of the bodies due to transits.
- 5. Computes the shadowed region of the bodies due to eclipses.
- 6. Computes the integrated reflected radiance of each body.
- 7. Combines the signal of the different bodies into a single one.
+    1. Computes the orbits of the extrasolar planetary system through
+        the compute.orbit subfunction.
+    2. Computes the geometries involved in the motion of the bodies
+        at each time epoch.
+    3. Computes the shadowed region of the bodies as a function of the
+        phase angle and the observer's position
+    4. Computes the shadowed region of the bodies due to transits.
+    5. Computes the shadowed region of the bodies due to eclipses.
+    6. Computes the integrated reflected radiance of each body.
+    7. Combines the signal of the different bodies into a single one.
 
 
     '''
+
     if body1.type == 'moon':
         compute.orbit(body1, body2, star, dt, tf);
     elif body2.type == 'moon':
