@@ -79,15 +79,21 @@ module_geos = Extension(name = 'module_geos',
                                  './geos_source/wrout.f',
                                  ])
 
+longdescp = '''Python Mie DAP package: radiative transfer model and tools to
+            simulate flux and polarization of planetary atmospheres.
+            Exopy also allows for simulation with complex orbits and Star-Planet-Moon systems'''
 
 setup(name='PyMieDAP',
       version='0.1',
       description='Python Mie DAP program',
       url='',
-      author='Loic Rossi, Daphne Stam',
+      author='Loic Rossi, Javier Berzosa Molina, Daphne Stam',
       author_email='l.c.g.rossi@tudelft.nl',
+      maintainer ='Loic Rossi',
+      maintainer_email='l.c.g.rossi@tudelft.nl',
       license='GPL/CeCILL',
       packages=['pymiedap','pymiedap.exopy_source'],
       ext_modules=[module_mie, module_readmie, module_mieshell, module_dap, module_geos],
       zip_safe=False,
+      long_description = longdescp,
       )
