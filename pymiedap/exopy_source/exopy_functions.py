@@ -1,57 +1,57 @@
 
 # -*- coding: utf-8 -*-
 
-"""
-==================================================================
-EXOPY module: exopy_functions.py
-Delft University of Technology
-------------------------------------------------------------------
-Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
-Date: 2016-2017
-------------------------------------------------------------------
-
-Dependences:
-
-Module containing a set of common functions which are accessed by
-the rest of the modules.
-
-LIST OF CLASSES
-------------------------------------------------------------------
- - body: class for the creation of planet, moon and star objects
- - properties: contains information regarding bodies' properties
- - ephemeris: contains information regarding bodies' ephemeris
- - geometry: contains information regarding bodies' geometry wrt
-	     the extrasolar planetary system
- - radiance: contains information regarding the bodies' reflected
- 	     starlight
- - orbital_elements: contains information regarding the orbital ele-
-	  	     ments of the bodies' orbits
- - flag: contains flag indicators of various aspects related to a
-	 body
- - grid: contains information regarding the bodies' grid
- - ProgressBar: class for the creation of a progress bar
- - Arrow3D: class for the creation of 3D arrow objects
-
-
-LIST OF FUNCTIONS
-------------------------------------------------------------------
- - anim_to_html: Converts animation to HTML for compatibility with
-                 jupyter notebook.
- - display_animation: Displays animation in jupyter notebook
- - plot_xy: Predefined function for 2D plots.
- - quesry_yes_no: Asks the user a yes/no question.
- - grid_area: -- TBC --
-
-REFERENCES
-------------------------------------------------------------------
-
-  [1] jakevdp.github.io/blog/2013/05/12/embedding-matplotlib-animations/
-  [2] en.wikipedia.org/wiki/Shoelace_formula#
-  [3] Recipe 577058 from activestate.com. Adapted to Python 3.
-  [4] stackoverflow.com/questions/29188612/arrows-in-matplotlib-using-mplot3d
-
-
-"""
+#"""
+#==================================================================
+#EXOPY module: exopy_functions.py
+#Delft University of Technology
+#------------------------------------------------------------------
+#Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+#Date: 2016-2017
+#------------------------------------------------------------------
+#
+#Dependences:
+#
+#Module containing a set of common functions which are accessed by
+#the rest of the modules.
+#
+#LIST OF CLASSES
+#------------------------------------------------------------------
+# - body: class for the creation of planet, moon and star objects
+# - properties: contains information regarding bodies' properties
+# - ephemeris: contains information regarding bodies' ephemeris
+# - geometry: contains information regarding bodies' geometry wrt
+#	     the extrasolar planetary system
+# - radiance: contains information regarding the bodies' reflected
+# 	     starlight
+# - orbital_elements: contains information regarding the orbital ele-
+#	  	     ments of the bodies' orbits
+# - flag: contains flag indicators of various aspects related to a
+#	 body
+# - grid: contains information regarding the bodies' grid
+# - ProgressBar: class for the creation of a progress bar
+# - Arrow3D: class for the creation of 3D arrow objects
+#
+#
+#LIST OF FUNCTIONS
+#------------------------------------------------------------------
+# - anim_to_html: Converts animation to HTML for compatibility with
+#                 jupyter notebook.
+# - display_animation: Displays animation in jupyter notebook
+# - plot_xy: Predefined function for 2D plots.
+# - quesry_yes_no: Asks the user a yes/no question.
+# - grid_area: -- TBC --
+#
+#REFERENCES
+#------------------------------------------------------------------
+#
+#  [1] jakevdp.github.io/blog/2013/05/12/embedding-matplotlib-animations/
+#  [2] en.wikipedia.org/wiki/Shoelace_formula#
+#  [3] Recipe 577058 from activestate.com. Adapted to Python 3.
+#  [4] stackoverflow.com/questions/29188612/arrows-in-matplotlib-using-mplot3d
+#
+#
+#"""
 
 # Required modules
 from __future__ import print_function
@@ -263,7 +263,7 @@ class body():
 
 
 class settings():
-    
+
     def __repr__(self):
         text = ['\n']
         text.append('Relation of body settings:\n' )
@@ -288,8 +288,8 @@ class settings():
         text.append('   nmat = ' + str(self.nmat) )
         text.append('   nsubr = '+ str(self.nsubr) )
         print('\n'.join(text))
-        
-        
+
+
 class properties():
     '''
     ==================================================================
@@ -719,10 +719,10 @@ class radiance():
                 text.append('   Q_ref = ' + str(self.Q_ref) + ' [-]'  )
                 text.append('   P     = ' + str(self.P    ) + ' [%]'  )
                 text.append('   Chi   = ' + str(self.Chi  ) + ' [deg]')
-                
+
         else:
-           text.append('Relation of body radiance variables:\n')
-           text.append('   --No data available--')
+            text.append('Relation of body radiance variables:\n')
+            text.append('   --No data available--')
 
         print('\n'.join(text))
 
@@ -1300,8 +1300,10 @@ class grid():
 
 
 
-    def set_grid(self, grid_type='square', Nlon=7, Nlat=7, cos1 = 80, cos2 = 60, diff = 0.009, Nsq = 7, Nang=15, Nrad=3, max_area=0.03, min_angle=30, circle_edges = 20, centre = False):
-    	'''
+    def set_grid(self, grid_type='square', Nlon=7, Nlat=7, cos1 = 80, cos2 =
+                 60, diff = 0.009, Nsq = 7, Nang=15, Nrad=3, max_area=0.03,
+                 min_angle=30, circle_edges = 20, centre = False):
+        '''
         ==================================================================
         EXOPY class: body.grid.set_grid()
         Delft University of Technology
@@ -1334,7 +1336,7 @@ class grid():
 
             TO BE COMPLETED
 
-    	'''
+        '''
 
         if grid_type == 'triangular':
             self.nodes, self.faces, self.area, self.N_points, self.nodes_xyz = grd.triangl(max_area, min_angle, circle_edges, centre)
