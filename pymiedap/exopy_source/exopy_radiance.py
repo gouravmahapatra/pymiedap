@@ -25,6 +25,8 @@
 #
 
 import time as t
+import numpy as np
+import pymiedap.pymiedap as pmd
 
 def combine(bodies, reference):
     """
