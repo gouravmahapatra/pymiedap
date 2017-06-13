@@ -27,7 +27,7 @@ def Earth(alb=0.3, g=9.81, pc=0.7, reff=1.0, nr=1.33, wvlmin=0.4, wvlmax=0.41, d
     cloudy.layers.gastop.press = pc
     cloudy.layers.gastop.level = 3
     cloudy.surface[0,0] = alb
-    
+
     if tag is not None:
         cloudy.tag = tag
     else:
@@ -35,18 +35,18 @@ def Earth(alb=0.3, g=9.81, pc=0.7, reff=1.0, nr=1.33, wvlmin=0.4, wvlmax=0.41, d
 
     check = _np.ones_like(cloudy.wvl_list)
     for i,wvl in enumerate(cloudy.wvl_list):
-	    filename = cloudy.tag + '_{:4.3f}.dat'.format(wvl)
+        filename = cloudy.tag + '_{:4.3f}.dat'.format(wvl)
 
-	    if _os.path.isfile(filename) and _os.access(filename, _os.R_OK):
-		check[i] = 1
-	    else:
-		check[i] = 0
+        if _os.path.isfile(filename) and _os.access(filename, _os.R_OK):
+            check[i] = 1
+        else:
+            check[i] = 0
 
     if check.prod() ==1:
-	    print('Files exist!')
-	    cloudy.name = ['']*_np.size(cloudy.wvl_list)
-	    for i, wvl in enumerate(cloudy.wvl_list):
-	    	cloudy.name[i] = _os.path.normpath(cloudy.tag + '_{:4.3f}.dat'.format(wvl))
+        print('Files exist!')
+        cloudy.name = ['']*_np.size(cloudy.wvl_list)
+        for i, wvl in enumerate(cloudy.wvl_list):
+            cloudy.name[i] = _os.path.normpath(cloudy.tag + '_{:4.3f}.dat'.format(wvl))
 
 
     # Clear sky model
@@ -71,7 +71,7 @@ def Earth(alb=0.3, g=9.81, pc=0.7, reff=1.0, nr=1.33, wvlmin=0.4, wvlmax=0.41, d
     clear.layers.gastop.level = 3
     clear.layers.gastop.press = pc
     clear.surface[0,0] = alb
-    
+
     if tag is not None:
         clear.tag = tag
     else:
@@ -79,18 +79,18 @@ def Earth(alb=0.3, g=9.81, pc=0.7, reff=1.0, nr=1.33, wvlmin=0.4, wvlmax=0.41, d
 
     check = _np.ones_like(clear.wvl_list)
     for i,wvl in enumerate(clear.wvl_list):
-	    filename = clear.tag + '_{:4.3f}.dat'.format(wvl)
+        filename = clear.tag + '_{:4.3f}.dat'.format(wvl)
 
-	    if _os.path.isfile(filename) and _os.access(filename, _os.R_OK):
-		check[i] = 1
-	    else:
-		check[i] = 0
+        if _os.path.isfile(filename) and _os.access(filename, _os.R_OK):
+            check[i] = 1
+        else:
+            check[i] = 0
 
     if check.prod() ==1:
-	    print('Files exist!')
-	    clear.name = ['']*_np.size(clear.wvl_list)
-	    for i, wvl in enumerate(clear.wvl_list):
-	    	clear.name[i] = _os.path.normpath(clear.tag + '_{:4.3f}.dat'.format(wvl))
+        print('Files exist!')
+        clear.name = ['']*_np.size(clear.wvl_list)
+        for i, wvl in enumerate(clear.wvl_list):
+            clear.name[i] = _os.path.normpath(clear.tag + '_{:4.3f}.dat'.format(wvl))
 
     del i, wvl, check, nwvl
 
@@ -129,7 +129,7 @@ def Moon(alb=0.1, g=1, pc=0.7, reff=1.0, nr=1.33, wvlmin=0.4, wvlmax=0.41, dwvl=
 
     lamb.surface[0,0] = alb
 
-    
+
     if tag is not None:
         lamb.tag = tag
     else:
@@ -137,18 +137,18 @@ def Moon(alb=0.1, g=1, pc=0.7, reff=1.0, nr=1.33, wvlmin=0.4, wvlmax=0.41, dwvl=
 
     check = _np.ones_like(lamb.wvl_list)
     for i,wvl in enumerate(lamb.wvl_list):
-	    filename = lamb.tag + '_{:4.3f}.dat'.format(wvl)
+        filename = lamb.tag + '_{:4.3f}.dat'.format(wvl)
 
-	    if _os.path.isfile(filename) and _os.access(filename, _os.R_OK):
-		check[i] = 1
-	    else:
-		check[i] = 0
+        if _os.path.isfile(filename) and _os.access(filename, _os.R_OK):
+            check[i] = 1
+        else:
+            check[i] = 0
 
     if check.prod() ==1:
-	    print('Files exist!')
-	    lamb.name = ['']*_np.size(lamb.wvl_list)
-	    for i, wvl in enumerate(lamb.wvl_list):
-	    	lamb.name[i] = _os.path.normpath(lamb.tag + '_{:4.3f}.dat'.format(wvl))
+        print('Files exist!')
+        lamb.name = ['']*_np.size(lamb.wvl_list)
+        for i, wvl in enumerate(lamb.wvl_list):
+            lamb.name[i] = _os.path.normpath(lamb.tag + '_{:4.3f}.dat'.format(wvl))
 
     del i, wvl, check, nwvl
 
