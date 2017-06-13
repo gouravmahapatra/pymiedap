@@ -246,12 +246,12 @@ def transits(bodies, conf):
 
         ref_line_angle = bodies[index].geometry.ref_line_angle
 
-    bodies = _transit(bodies, ref_line_angle)
+    bodies = _transit(bodies, conf, ref_line_angle=ref_line_angle)
 
     return bodies
 
 
-def eclipses(bodies, star):
+def eclipses(bodies, star, conf):
     '''
     ==================================================================
     EXOPY function: exopy.compute.transits
@@ -279,7 +279,7 @@ def eclipses(bodies, star):
 
     '''
 
-    bodies = _eclipse(bodies, star)
+    bodies = _eclipse(bodies, star, conf)
 
     return bodies
 

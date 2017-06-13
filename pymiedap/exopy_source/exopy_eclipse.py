@@ -28,7 +28,7 @@ import numpy as np
 import exopy_config as _cfg
 #from exopy_functions import PolyArea
 
-def eclipse(bodies, star = None):
+def eclipse(bodies, star, conf):
     """
     ==================================================================
     EXOPY function: eclipse()

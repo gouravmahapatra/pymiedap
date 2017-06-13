@@ -642,6 +642,8 @@ def new_system(identifier):
 
     '''
 
+    conf = cfg.Settings()
+
     if identifier == 'transit':
 
         Planet = fun.body('Planet', 'planet')
@@ -671,6 +673,8 @@ def new_system(identifier):
         Planet.orbital_elements.t0_b    = 0         # [s]
 
         bodies = [Moon, Planet , Star]
+        conf.ref_body = 'Planet'
+        conf.ref_line = 'Planet'
 
 
     if identifier == 'edge-on':
@@ -703,6 +707,8 @@ def new_system(identifier):
 
 
         bodies = [Moon, Planet, Star]
+        conf.ref_body = 'Planet'
+        conf.ref_line = 'Planet'
 
 
     if identifier == 'face-on':
@@ -735,6 +741,8 @@ def new_system(identifier):
 
 
         bodies = [Moon, Planet, Star]
+        conf.ref_body = 'Planet'
+        conf.ref_line = 'Planet'
 
 
 
@@ -768,6 +776,8 @@ def new_system(identifier):
 
 
         bodies = [Moon, Earth, Sun]
+        conf.ref_body = 'Planet'
+        conf.ref_line = 'Planet'
 
     if identifier == 'pool_ball':
 
@@ -799,6 +809,8 @@ def new_system(identifier):
         #  60*60*24*1e-9,60*60*24*3e-7)
 
         bodies = [Moon, Earth, Sun]
+        conf.ref_body = 'Earth'
+        conf.ref_line = 'Earth'
 
     if identifier == 'Moon_Earth_Sun_mod_eclipses_s_phase_meeting':
 
@@ -830,6 +842,8 @@ def new_system(identifier):
 
 
         bodies = [Moon, Earth, Sun]
+        conf.ref_body = 'Earth'
+        conf.ref_line = 'Earth'
 
     if identifier == 'Moon_Earth_Sun_mod_eclipses_s_meeting':
 
@@ -861,6 +875,8 @@ def new_system(identifier):
 
 
         bodies = [Moon, Earth, Sun]
+        conf.ref_body = 'Earth'
+        conf.ref_line = 'Earth'
 
     if identifier == 'Moon_Earth_Sun_mod_eclipses_ob_meeting':
 
@@ -892,9 +908,11 @@ def new_system(identifier):
 
 
         bodies = [Moon, Earth, Sun]
+        conf.ref_body = 'Earth'
+        conf.ref_line = 'Earth'
 
 
-    return bodies
+    return bodies, conf
 
 
 def test_integration(body, scene='clear', plot = 'no'):
@@ -985,7 +1003,7 @@ def test_integration(body, scene='clear', plot = 'no'):
 
 
 
-def run_simulation(body1, body2 ,star,dt, tf, flag_transits=True, flag_eclipses=True, flag_radiance=True, path_input = './dap_database/'):
+def run_simulation(body1, body2 ,star,dt, tf, conf, flag_transits=True, flag_eclipses=True, flag_radiance=True, path_input = './dap_database/'):
     '''
     ==================================================================
     EXOPY function: exopy.run_simulation
@@ -1038,7 +1056,6 @@ def run_simulation(body1, body2 ,star,dt, tf, flag_transits=True, flag_eclipses=
 
     '''
 
-    conf = cfg.Settings()
 
     if body1.type == 'moon':
         compute.orbit(body1, body2, star, dt, tf);
