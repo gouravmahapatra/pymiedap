@@ -985,7 +985,7 @@ def test_integration(body, scene='clear', plot = 'no'):
 
 
 
-def run_simulation(body1, body2 ,star,dt, tf, flag_transits=True, flag_eclipses=True, flag_radiance=True, path_input = '../dap_database/'):
+def run_simulation(body1, body2 ,star,dt, tf, flag_transits=True, flag_eclipses=True, flag_radiance=True, path_input = './dap_database/'):
     '''
     ==================================================================
     EXOPY function: exopy.run_simulation
