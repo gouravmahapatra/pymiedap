@@ -1,36 +1,36 @@
 # -*- coding: utf-8 -*-
-"""
-==================================================================
-EXOPY module: exopy_orbit.py
-Delft University of Technology
-------------------------------------------------------------------
-Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
-Date: 2016-2017
-------------------------------------------------------------------
-
-Dependences:
-
-DESCRIPTION
-------------------------------------------------------------------
-Script containing the functions required for the computation of 
-the orbits of the bodies under the assumption of a nested two 
-body problem.
-
-LIST OF FUNCTIONS
-------------------------------------------------------------------
- - kepler: Calculates the eccentric anomaly given a value of mean
-	   anomaly and eccentricity.
- - nested2bp: Computes the orbit of each body under the assumption
-	      of a nested two body problem.
- 
-REFERENCES
-------------------------------------------------------------------
-  [1] Kipping, D. M. (2011). luna: an algorithm for generating dynamic
-      planetary moon transits. Monthly Notices of the Royal Astronomical
-      Society, 416(1), 689-709.
-  [2] Wakker, K. F. (2015). Fundamentals of astrodynamics. TU Delft Library.
-
-"""
+#"""
+#==================================================================
+#EXOPY module: exopy_orbit.py
+#Delft University of Technology
+#------------------------------------------------------------------
+#Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+#Date: 2016-2017
+#------------------------------------------------------------------
+#
+#Dependences:
+#
+#DESCRIPTION
+#------------------------------------------------------------------
+#Script containing the functions required for the computation of
+#the orbits of the bodies under the assumption of a nested two
+#body problem.
+#
+#LIST OF FUNCTIONS
+#------------------------------------------------------------------
+# - kepler: Calculates the eccentric anomaly given a value of mean
+#	   anomaly and eccentricity.
+# - nested2bp: Computes the orbit of each body under the assumption
+#	      of a nested two body problem.
+#
+#REFERENCES
+#------------------------------------------------------------------
+#  [1] Kipping, D. M. (2011). luna: an algorithm for generating dynamic
+#      planetary moon transits. Monthly Notices of the Royal Astronomical
+#      Society, 416(1), 689-709.
+#  [2] Wakker, K. F. (2015). Fundamentals of astrodynamics. TU Delft Library.
+#
+#"""
 
 # Required modules
 import math, numpy as np
@@ -38,34 +38,34 @@ import exopy_functions as fun
 
 def kepler(M, e, method = 'Newton-Raphson'):
     """
-==================================================================
-EXOPY function: kepler()
-Delft University of Technology
-------------------------------------------------------------------
-Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
-Date: 2016-2017
-------------------------------------------------------------------
+    ==================================================================
+    EXOPY function: kepler()
+    Delft University of Technology
+    ------------------------------------------------------------------
+    Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+    Date: 2016-2017
+    ------------------------------------------------------------------
 
-Dependences:
+    Dependences:
 
-DESCRIPTION
-------------------------------------------------------------------
-Calculates the Eccentric anomaly given a value of Mean anomaly and
-eccentricity, based on [1].
+    DESCRIPTION
+    ------------------------------------------------------------------
+    Calculates the Eccentric anomaly given a value of Mean anomaly and
+    eccentricity, based on [1].
 
-INPUTS
-------------------------------------------------------------------
- - M: Mean anomaly [rad=0:2pi] (float)
- - e: Eccentricity [-] (float)
- - method: 'Newton-Raphson' or 'Merkley'
+    INPUTS
+    ------------------------------------------------------------------
+    - M: Mean anomaly [rad=0:2pi] (float)
+    - e: Eccentricity [-] (float)
+    - method: 'Newton-Raphson' or 'Merkley'
 
-OUTPUTS
-------------------------------------------------------------------
- - E: Eccentric anomaly [rad] (float)
+    OUTPUTS
+    ------------------------------------------------------------------
+    - E: Eccentric anomaly [rad] (float)
 
-REFERENCES
-------------------------------------------------------------------
-  [1] Wakker, K. F. (2015). Fundamentals of astrodynamics. TU Delft Library.
+    REFERENCES
+    ------------------------------------------------------------------
+    [1] Wakker, K. F. (2015). Fundamentals of astrodynamics. TU Delft Library.
 
     """
     if method == 'Merkley':
@@ -106,40 +106,40 @@ REFERENCES
 
 def nested2bp(moon, planet, star, dt, tf):
     """
-==================================================================
-EXOPY function: nested2bp()
-Delft University of Technology
-------------------------------------------------------------------
-Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
-Date: 2016-2017
-------------------------------------------------------------------
+    ==================================================================
+    EXOPY function: nested2bp()
+    Delft University of Technology
+    ------------------------------------------------------------------
+    Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+    Date: 2016-2017
+    ------------------------------------------------------------------
 
-Dependences:
+    Dependences:
 
-DESCRIPTION
-------------------------------------------------------------------
-Computes the orbit of each body under the assumption of a nested 
-two body problem, based on [1].
+    DESCRIPTION
+    ------------------------------------------------------------------
+    Computes the orbit of each body under the assumption of a nested
+    two body problem, based on [1].
 
-INPUTS
-------------------------------------------------------------------
- - moon: body object of type 'moon' [-] ('body' object)
- - planet: body object of type 'planet' [-] ('body' object)
- - star: body object of type 'star' [-] ('body' object)
- - dt: time step [s] (float)
- - tf: final time to be computed [s] (float)
+    INPUTS
+    ------------------------------------------------------------------
+    - moon: body object of type 'moon' [-] ('body' object)
+    - planet: body object of type 'planet' [-] ('body' object)
+    - star: body object of type 'star' [-] ('body' object)
+    - dt: time step [s] (float)
+    - tf: final time to be computed [s] (float)
 
-OUTPUTS
-------------------------------------------------------------------
- - moon: updated body object of type 'moon' [-] ('body' object)
- - planet: updated body object of type 'planet' [-] ('body' object)
- - star: updated body object of type 'star' [-] ('body' object)
+    OUTPUTS
+    ------------------------------------------------------------------
+    - moon: updated body object of type 'moon' [-] ('body' object)
+    - planet: updated body object of type 'planet' [-] ('body' object)
+    - star: updated body object of type 'star' [-] ('body' object)
 
-REFERENCES
-------------------------------------------------------------------
-  [1] Kipping, D. M. (2011). luna: an algorithm for generating 
-      dynamic planetary moon transits. Monthly Notices of the Royal
-      Astronomical Society, 416(1), 689-709.
+    REFERENCES
+    ------------------------------------------------------------------
+    [1] Kipping, D. M. (2011). luna: an algorithm for generating
+        dynamic planetary moon transits. Monthly Notices of the Royal
+        Astronomical Society, 416(1), 689-709.
 
 
     """
@@ -184,16 +184,16 @@ REFERENCES
     n_bs   = (mu_b/a_bs**3)**0.5   # Barycenter-star mean motion [1/s]
 
     if t0_b is None and t0_m is None:
-        
+
         f0_m     = moon.orbital_elements.f0_m
         f0_b     = planet.orbital_elements.f0_b
-        
+
         E0m  = 2* np.atan( np.sqrt((1-e_mb)/(1+e_mb)) * np.tan(f0_m/2) )
         E0b  = 2* np.atan( np.sqrt((1-e_bs)/(1+e_bs)) * np.tan(f0_b/2) )
 
         M0m  = E0m - e_mb*np.sin(E0m)
         M0b  = E0b - e_bs*np.sin(E0b)
-        
+
         t0_m = -M0m/n_mb
         t0_b = -M0b/n_bs
 
@@ -374,8 +374,8 @@ REFERENCES
                 position3D_ms,axis=0),6)))
 
 
-    # The angle between the star and the third body with vertex at the body 
-    # under observation is calculated to have an indication of the proximity 
+    # The angle between the star and the third body with vertex at the body
+    # under observation is calculated to have an indication of the proximity
     # of eclipse events.
 
     aux1 = position3D_ps
@@ -385,7 +385,7 @@ REFERENCES
                 -aux1.T,aux2))/np.linalg.norm(
                 aux2, axis = 0)/np.linalg.norm(
                 aux1,axis=0))))
-                
+
     aux1 = position3D_ms
     aux2 = position3D_ps - position3D_ms
 
@@ -393,7 +393,7 @@ REFERENCES
                 -aux1.T,aux2))/np.linalg.norm(
                 aux1, axis = 0)/np.linalg.norm(
                 aux2,axis=0))))
-    
+
     # Export results to body objects
 
     moon.ephemeris.time           = time

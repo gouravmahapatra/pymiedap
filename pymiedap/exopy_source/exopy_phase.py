@@ -31,29 +31,29 @@ import exopy_config as _cfg
 
 def phase(body, star, conf):
     """
-==================================================================
-EXOPY function: phase()
-Delft University of Technology
-------------------------------------------------------------------
-Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
-Date: 2016-2017
-------------------------------------------------------------------
+    ==================================================================
+    EXOPY function: phase()
+    Delft University of Technology
+    ------------------------------------------------------------------
+    Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+    Date: 2016-2017
+    ------------------------------------------------------------------
 
-Dependences:
+    Dependences:
 
-DESCRIPTION
-------------------------------------------------------------------
-Computes the darkenned pixels according to the phase angle for
-each time epoch.
+    DESCRIPTION
+    ------------------------------------------------------------------
+    Computes the darkenned pixels according to the phase angle for
+    each time epoch.
 
-INPUTS
-------------------------------------------------------------------
- - body: Planet or moon type of body object [-] ('body' object)
- - star: Star type of body object [-] ('body' object)
+    INPUTS
+    ------------------------------------------------------------------
+    - body: Planet or moon type of body object [-] ('body' object)
+    - star: Star type of body object [-] ('body' object)
 
-OUTPUTS
-------------------------------------------------------------------
- - body: Planet or moon type of body object [-] ('body' object)
+    OUTPUTS
+    ------------------------------------------------------------------
+    - body: Planet or moon type of body object [-] ('body' object)
 
 
     """
