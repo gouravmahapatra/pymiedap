@@ -1182,12 +1182,12 @@ def dap_code(model, rename=False, output_name='modelA',
         # Naming the model with check for Windows paths
         print('fou_{:4.3f}.dat'.format(wav))
         if rename is True:
-            output_file = path_output + output_name + '_{:4.7f}.dat'.format(wav)
+            output_file = path_output + output_name + '_{:4.3f}.dat'.format(wav)
             output_file = os.path.normpath(output_file)
             model.name[z] = output_file
             os.rename('fou_{:4.7f}.dat'.format(wav),output_file)
         else:
-            output_file = path_output + 'fou_{:4.7f}.dat'.format(wav)
+            output_file = path_output + 'fou_{:4.3f}.dat'.format(wav)
             output_file = os.path.normpath(output_file)
             model.name[z] = output_file
             os.rename('fou_{:4.7f}.dat'.format(wav),output_file)
