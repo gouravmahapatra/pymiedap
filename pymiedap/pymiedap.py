@@ -765,7 +765,7 @@ def mie_code(aerosols, wavelengths, output=False, delta=1e-8, cutoff=1e-8, thmin
     print('Beginning of Mie program')
 
     for i, wav in enumerate(wavelengths):
-        print('Wavelength {:06.3f}'.format(wav))
+        print('Wavelength {:06.7f}'.format(wav))
         nr = aerosols.nr[i]
         ni = aerosols.ni[i]
         m = nr - 1j * ni
@@ -1064,7 +1064,7 @@ def dap_code(model, rename=False, output_name='modelA',
         #get coefs for each wavelength
         taus = np.zeros(nlaysMAX, order='F')  # all values of tau at wvl z
 
-        print('Wavelength {:06.3f}'.format(wav))
+        print('Wavelength {:06.7f} microns'.format(wav))
 
         # Loop on layers
         l = 0  # layer number
@@ -1083,7 +1083,7 @@ def dap_code(model, rename=False, output_name='modelA',
                 coefin[:,:,:,l] = layer.mixed_aerosols.coefs[z,:,:,:]
                 ncoefin[l] = layer.mixed_aerosols.ncoefs[z]
 
-            print('{}.sc.{:06.3f}'.format(layer.mixed_aerosols.typ, wav))
+            print('{}.sc.{:06.7f}'.format(layer.mixed_aerosols.typ, wav))
             l = l + 1
 
         laylevel = laylevel[laylevel!=0]  # getting useful layers positions
@@ -1180,17 +1180,17 @@ def dap_code(model, rename=False, output_name='modelA',
         dap.adding(outputname,a,b,coefs,ncoefs,nlays,nmug,nmat,surfmat)
 
         # Naming the model with check for Windows paths
-        print('fou_{:4.3f}.dat'.format(wav))
+        print('fou_{:4.7f}.dat'.format(wav))
         if rename is True:
             output_file = path_output + output_name + '_{:4.7f}.dat'.format(wav)
             output_file = os.path.normpath(output_file)
             model.name[z] = output_file
-            os.rename('fou_{:4.7f}.dat'.format(wav),output_file)
+            os.rename('fou_{:4.3f}.dat'.format(wav),output_file)
         else:
             output_file = path_output + 'fou_{:4.7f}.dat'.format(wav)
             output_file = os.path.normpath(output_file)
             model.name[z] = output_file
-            os.rename('fou_{:4.7f}.dat'.format(wav),output_file)
+            os.rename('fou_{:4.3f}.dat'.format(wav),output_file)
         print('End of DAP program')
 
 
