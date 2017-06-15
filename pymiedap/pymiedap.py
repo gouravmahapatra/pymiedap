@@ -510,9 +510,11 @@ class Geom():
         if deg==1:
             delta_phi = np.degrees(np.arccos(c_delta_phi))
             azimuth = 180. - delta_phi
+            azimuth[azimuth<1e-5] = 0.
         else:
             delta_phi = np.arccos(c_delta_phi)
             azimuth = np.pi - delta_phi
+            azimuth[azimuth<1e-5] = 0.
 
         self.azimuth = azimuth
 
@@ -537,6 +539,8 @@ class Geom():
         denom = (sgn*np.sin(np.pi*EMI/180.)*np.sin(np.pi*PHA/180.))
         cb = num/denom
         cb[denom==0] = 0.
+        cb[cb>1.] = 1.
+        cb[cb<0.] = 0.
 
         self.beta = np.degrees(np.arccos(cb))
 
