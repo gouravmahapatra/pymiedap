@@ -683,6 +683,8 @@ def get_cosbeta(PHA,SZA,EMI,AZI):
     denom = (sgn*np.sin(np.pi*EMI/180.)*np.sin(np.pi*PHA/180.))
     cb = num/denom
     cb[denom==0] = 0.
+    cb[cb>1.] = 1.
+    cb[cb<0.] = 0.
 
     return cb
 
@@ -1640,6 +1642,7 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
         atm_model.geom.longitude = lonf
         atm_model.geom.x = xf
         atm_model.geom.y = yf
+        atm_model.npix = npix
 
 
         atm_model.I = If
@@ -1768,8 +1771,45 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
 
     mpl.ion()
 
-def plot_pixels(X,Y,Z, title='Polarization', cmap='YlOrRd',vmin=0,vmax=1, font_size=12, npix=20):
-    """ Function to nicely plot a resolved planet """
+def plot_pixels(model, wvl_idx=0, display='grid', stokes='Ps', iter_idx=0,
+                title='Polarization', cmap='YlOrRd',vmin=0,vmax=1,
+                font_size=12):
+    """ Function to nicely plot a resolved planet
+
+    Inputs:
+
+        model: a model object
+        wvl_idx: index of the wvl to be plotted
+        display: if 'grid', displays the planet as a sphere at a given phase
+            angle. If 'map' displays results as function of latitude/longitude
+        stokes: which Stokes element to plot. 'Ps' is for -Q/I.
+        title: title of the figure
+        cmap: a matplotlib colormap
+        vmin, vmax: range of values to plot
+        font_size: size of the font for the figure
+        npix: number of pixels. Has to match that of the simulation.
+    """
+    npix=model.npix
+
+    if display == 'grid':
+        X = model.geom.x[wvl_idx,iter_idx,:]
+        Y = model.geom.y[wvl_idx,iter_idx,:]
+    if display == 'map':
+        X = model.geom.longitude[wvl_idx,iter_idx,:]
+        Y = model.geom.latitude[wvl_idx,iter_idx,:]
+
+    if stokes=='I':
+        Z = model.I[wvl_idx,iter_idx,:]
+    if stokes=='Q':
+        Z = model.Q[wvl_idx,iter_idx,:]
+    if stokes=='U':
+        Z = model.U[wvl_idx,iter_idx,:]
+    if stokes=='V':
+        Z = model.V[wvl_idx,iter_idx,:]
+    if stokes=='Ps':
+        Z = model.P[wvl_idx,iter_idx,:]
+
+
     figsize = 850
     dpi = 90
 
@@ -1784,7 +1824,7 @@ def plot_pixels(X,Y,Z, title='Polarization', cmap='YlOrRd',vmin=0,vmax=1, font_s
                     vmin=vmin, vmax=vmax)
     fig.tight_layout(pad=1.2)
     cb = fig.colorbar(sc,pad=0.02, extend='both')
-    cb.set_label('Degree of linear polarization (%)',size=font_size)
+    cb.set_label(stokes,size=font_size)
     ax.set_xlim(-np.nanmax(X),np.nanmax(X))
     ax.set_ylim(-np.nanmax(Y),np.nanmax(Y))
     ax.set_aspect('equal')
@@ -2135,6 +2175,7 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
     atm_model.phase = phases
     atm_model.fcloud = vecfcloud
     atm_model.asym = vecasym
+    atm_model.npix = npix
 
 
 def mask_planet(alpha=15, npix=20, cusp=False, thresh_lat=50., patchy=True,
