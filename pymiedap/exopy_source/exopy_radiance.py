@@ -183,7 +183,7 @@ def integration(body, path_input = './dap_database/', nmug = 20, nmug_mie = 20, 
     for l,wvl in enumerate(wvl_list):
         for i,j in enumerate(time):
 
-            print i+1, ' out of ', len(time)
+            print(i+1, ' out of ', len(time))
             A = body.grid.shadow[i,:]>10E-10
 
             IQUV = np.zeros([4,body.grid.N_points])
