@@ -370,8 +370,7 @@ class Model(object):
         self.layers.layer35 = Layer(tau=tab_tau_c[35,:], tau_g=tab_tau_g[35,:], press=P[35], level=36, r_eff=r_c, v_eff=v_c, nr=n_c*np.ones(nwav), ni=1e-8*np.ones(nwav), typ='C')
         self.layers.layer36 = Layer(tau=tab_tau_c[36,:], tau_g=tab_tau_g[36,:], press=P[36], level=37, r_eff=r_c, v_eff=v_c, nr=n_c*np.ones(nwav), ni=1e-8*np.ones(nwav), typ='C')
 
-
-	return z_int, k_ext, tau_cloud, tab_tau_g
+        return z_int, k_ext, tau_cloud, tab_tau_g
 
 
     def set_taus(self):
