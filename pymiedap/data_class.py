@@ -1025,8 +1025,8 @@ def read_radiance(filename):
 
     fid.close()
 
-    print "nbl =", nbl
-    print "fnb =", fnb
+    print("nbl =", nbl)
+    print("fnb =", fnb)
 
     data = Data()
     data.w0 = wl_d0
@@ -1174,7 +1174,7 @@ def processing_orbits(orbit_n,orbit_a,orbit_max=200,list=False,
         if os.path.isfile(filename)==False:
             raise IOError('Error'+filename+' is not an existing file')
         else:
-            print filename
+            print(filename)
             data = Data()
 
             data = read_radiance(filename)  #read data
@@ -1196,7 +1196,7 @@ def processing_orbits(orbit_n,orbit_a,orbit_max=200,list=False,
 
         #check of vector shape
         if len(np.shape(orbit_n)) != 1 | len(np.shape(orbit_a)) !=1:
-            print "Error, wrong vector shape !"
+            print("Error, wrong vector shape !")
 
         counter=0
 
@@ -1215,9 +1215,9 @@ def processing_orbits(orbit_n,orbit_a,orbit_max=200,list=False,
                             + '_' + index + '_2012.txt')
 
             if os.path.isfile(filename)==False :
-                print 'absent file :'+filename
+                print('absent file :'+filename)
             elif os.path.isfile(filename_geo)==False:
-                print 'absent file :'+filename_geo
+                print('absent file :'+filename_geo)
             else:
                 data = read_radiance(filename)  #read data
                 data.adjust_radiance(lw_noise=lw_noise,
@@ -1253,9 +1253,9 @@ def processing_orbits(orbit_n,orbit_a,orbit_max=200,list=False,
                                 + index + '_2012.txt')
 
                 if os.path.isfile(filename)==False :
-                    print 'absent file :'+filename
+                    print('absent file :'+filename)
                 elif os.path.isfile(filename_geo)==False:
-                    print 'absent file :'+filename_geo
+                    print('absent file :'+filename_geo)
                 else:
                     data = read_radiance(filename)  #read data
                     data.adjust_radiance(lw_noise=lw_noise,
