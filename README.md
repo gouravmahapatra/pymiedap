@@ -1,17 +1,19 @@
 # PyMieDAP
 
 PyMieDAP (Python Mie Doubling Adding Program) is a package to make light
-scattering computations with Mie scattering and radiative
-transfer computations with full orders of scattering and taking into account
-the polarization of the light scattered.
+scattering computations with Mie scattering and radiative transfer computations
+with full orders of scattering and taking into account the polarization of the
+light scattered.
 
-Full planet modeling at any phase angle is possible.
-With the subpackage exopy, it is also possible to simulate systems with a star,
-a planet and a possible moon.
+Full planet modeling at any phase angle is possible.  With the subpackage
+exopy, it is also possible to simulate systems with a star, a planet and a
+possible moon.
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on how to deploy the project on a live system.
+These instructions will get you a copy of the project up and running on your
+local machine for development and testing purposes. See deployment for notes on
+how to deploy the project on a live system.
 
 ### Prerequisites
 
@@ -60,25 +62,19 @@ import pymiedap.exopy as exopy
 To know more about how to use PyMieDAP, you can refer to the notebook or to the
 script 'pymiedap_demo.py'.
 
-## Built With
-
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
-
 ## Contributing
 
-Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
-
-## Versioning
-
-We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/your/project/tags). 
+Please read
+[CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for
+details on our code of conduct, and the process for submitting pull requests to
+us.
 
 ## Authors
 
-* **Loïc Rossi** - TU Delft - *Initial work, Python and Fortran interface* - [PurpleBooth](https://github.com/PurpleBooth)
-* **Daphne Stam** - TU Delft - *Initial work, Fortran code* - [PurpleBooth](https://github.com/PurpleBooth)
-* **Javier Bersoza** - TU Delft - *Initial work, Exopy* - [PurpleBooth](https://github.com/PurpleBooth)
+* **Loïc Rossi** - TU Delft - *Initial work, Python and Fortran interface* -
+* [Gitlab](https://gitlab.com/loic.cg.rossi), [TU Delft](http://homepage.tudelft.nl/k6v71/)
+* **Daphne Stam** - TU Delft - *Initial work, Fortran code* -
+* **Javier Bersoza** - TU Delft - *Initial work, Exopy* - 
 
 ## License
 
@@ -93,8 +89,14 @@ appreciated if you cite us:
 ## References
 
 The method used for Mie and Doubling-Adding calculations can be found in the
-following references:
-* de Rooij and van der Stap, 1984
-* de Haan, 1987
-The geometry code is based on:
-* Stam et al. XXX
+following references.
+For the Mie scattering:
+* de Rooij, W. A. & van der Stap, C. C. A. H. _Expansion of Mie scattering
+matrices in generalized spherical functions_, A&A, 1984, 131, 237-248
+For the Doubling-Adding:
+* de Haan, J. F.; Bosma, P. B. & Hovenier, J. W. _The adding method for multiple
+ scattering calculations of polarized light_, A&A, 1987, 183, 371-391
+The geometry code is refered to in the following papers:
+* Fauchez, T.; Rossi, L. & Stam, D. M. _The O2 A-Band in the Fluxes and
+Polarization of Starlight Reflected by Earth-Like Exoplanets_, The Astrophysical
+Journal, 2017, 842, 41
