@@ -397,8 +397,8 @@ class Model(object):
         else:
             for w,wvl in enumerate(self.wvl_list):
                 filename = self.name[w].split('/')[-1]
-                filename = filename.split('_')[0]
-                filename = '_'.join(filename)
+                filename = filename.split('.')[:-1]
+                filename = '.'.join(filename)
                 filename += '.info'
                 fich = open(filename,'w')
 
