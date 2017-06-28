@@ -53,7 +53,6 @@ class Layer():
     tau_ray : optical thickness related to rayleigh scattering set by user (for each lambda)
     rayscat: if True, rayleigh scattering is computed. If false, tau_ray is used instead.
     press : pressure at the bottom of the layer
-    level : level of the layer with respect to the others from bottom to top (starts at 0)
     aerosols : an object containing the properties of a type of aerosols.
     col_dens: particular column density in particles per square micrometers
     Several of these aerosol objects can coexist in a layer, but they should have
@@ -61,7 +60,7 @@ class Layer():
     """
 
     def __init__(self, tau=[30, 30], tau_g=[0.,0.], press=30e-3, psd='2',
-                 level=0, mix_factor=0., bmsca=[0, 0], bmabs=[0,0],
+                 mix_factor=0., bmsca=[0, 0], bmabs=[0,0],
                  tau_ray=[0.,0.], rayscat=True,
                  basca=[0,0], baabs=[0,0]):
         """ Initializes the model object with default values
@@ -73,7 +72,6 @@ class Layer():
         self.tau_ray = tau_ray
         self.rayscat = rayscat
         self.press = press
-        self.level = level
         self.col_dens = 3.2
         self.bmsca = bmsca
         self.bmabs = bmabs
@@ -155,10 +153,10 @@ class Layers:
 
     def __init__(self):
 
-        self.gastop = Layer(tau=[0.0, 0.0], press=1e-5, level=4)
-        self.haze = Layer(press=10e-3, tau=[0.01, 0.01], level=3)
-        self.cloud = Layer(level=2, press=1., psd='3')
-        self.gasbelow = Layer(tau=[0.0, 0.0], press=100, level=1)
+        self.gastop = Layer(tau=[0.0, 0.0], press=1e-5)
+        self.haze = Layer(press=10e-3, tau=[0.01, 0.01])
+        self.cloud = Layer(press=1., psd='3')
+        self.gasbelow = Layer(tau=[0.0, 0.0], press=100)
 
 
 class Model(object):
@@ -245,14 +243,12 @@ class Model(object):
             if hasattr(layer,'mixed_aerosols')==True:
                 strout = (str(layer_name) +
                           ' Type:' + layer.mixed_aerosols.typ +
-                          ', level=' + str(layer.level) +
                           ', P=' + str(layer.press) +
                           ', tau=' + str(layer.tau) +
                           ', tau_gas=' + str(layer.tau_g) + '\n')
             else:
                 strout = (str(layer_name) +
                           ' Type:' + layer.aerosols.typ +
-                          ', level=' + str(layer.level) +
                           ', P=' + str(layer.press) +
                           ', tau=' + str(layer.tau) +
                           ', tau_gas=' + str(layer.tau_g) + '\n')
@@ -425,14 +421,12 @@ class Model(object):
                     if hasattr(layer,'mixed_aerosols')==True:
                         strout = (str(layer_name) +
                                 ' Type:' + layer.mixed_aerosols.typ +
-                                ', level=' + str(layer.level) +
                                 ', P=' + str(layer.press) +
                                 ', tau=' + str(layer.tau) +
                                 ', tau_gas=' + str(layer.tau_g) + '\n')
                     else:
                         strout = (str(layer_name) +
                                 ' Type:' + layer.aerosols.typ +
-                                ', level=' + str(layer.level) +
                                 ', P=' + str(layer.press) +
                                 ', tau=' + str(layer.tau) +
                                 ', tau_gas=' + str(layer.tau_g) + '\n')
@@ -1080,7 +1074,6 @@ def dap_code(model, rename=False, output_name='modelA',
             taus[l] = layer.tau[z]  #value of tau at wvl z in layer l
             taus_g[l] = layer.tau_g[z]  #value of tau_g at wvl z in layer l
             pres[l] = layer.press
-            laylevel[l] = layer.level  # vert position of layer
 
             # if the layer is transparent, then ignore the aerosols
             # coefficients
@@ -1091,8 +1084,8 @@ def dap_code(model, rename=False, output_name='modelA',
             print('{}.sc.{:06.7f}'.format(layer.mixed_aerosols.typ, wav))
             l = l + 1
 
-        laylevel = laylevel[laylevel!=0]  # getting useful layers positions
-        layorder = np.argsort(laylevel)  # putting layers in order
+        layorder = np.argsort(pres[:l]) # finding the order of pressures
+        layorder = layorder[::-1]  # putting layers in order (highest pres below)
 
         taus[:l] = taus[layorder]  # putting the taus in right order
         taus_g[:l] = taus_g[layorder]  # putting the taus_g in right order
@@ -1117,16 +1110,17 @@ def dap_code(model, rename=False, output_name='modelA',
 
         # Storing the effective scattering and absorption opacities
         for layer_name, layer in vars(model.layers).items():
-            lev = layer.level
+            # identify position of the current layer
+            lev = (pres==layer.press)
 
             # force user-define rayleigh opacity
             if layer.rayscat==False:
-                bmsca[lev-1] = layer.tau_ray[z]
+                bmsca[lev] = layer.tau_ray[z]
 
-            layer.bmsca[z] = bmsca[lev-1]
-            layer.bmabs[z] = bmabs[lev-1]
-            layer.basca[z] = basca[lev-1]
-            layer.baabs[z] = baabs[lev-1]
+            layer.bmsca[z] = bmsca[lev]
+            layer.bmabs[z] = bmabs[lev]
+            layer.basca[z] = basca[lev]
+            layer.baabs[z] = baabs[lev]
 
         #---------------------------------------------------------------------
         #     Open the Fourier coefficients output file:
