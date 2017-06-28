@@ -949,7 +949,7 @@ def mie_shell(aerosols, wavelengths, output=False, delta=1e-8, cutoff=1e-8, thmi
     aerosols.qsca = qscas
 
     print('End of Mie program')
-    return u,F, miec
+    #return u,F, miec
 
 
 def matrix_expansion(ncoefs, nangle, u, wg, F):
