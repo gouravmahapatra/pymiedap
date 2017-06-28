@@ -110,9 +110,9 @@ Cf2py intent(out) u, wg, F, miec, nangle
 *     Start integration over radius r with largest radius:
 *-----------------------------------------------------------------------
       DO 60 l=nsubr,1,-1
-         write(*,*) l
+C         write(*,*) l
          DO 50 i=ngaur,1,-1
-            write(*,*) i
+C            write(*,*) i
 
             sw= nwithr(i)*w(i)
             x = rtox*r(i)
