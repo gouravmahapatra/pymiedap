@@ -111,9 +111,9 @@ Cf2py intent(out) u, wg, F, miec, nangle
 *     Start integration over radius r with largest radius:
 *-----------------------------------------------------------------------
       DO 60 l=nsubr,1,-1
-         write(*,*) l
+C         write(*,*) l
          DO 50 i=ngaur,1,-1
-            write(*,*) i
+C            write(*,*) i
 
             sw= nwithr(i)*w(i)
             x = rtox*r(i) !x is for mantle
@@ -130,8 +130,8 @@ Cf2py intent(out) u, wg, F, miec, nangle
                STOP
             ENDIF
 
-            write (*,*) 'm1=',m1
-            write (*,*) 'm2=',m2
+C            write (*,*) 'm1=',m1
+C            write (*,*) 'm2=',m2
             CALL bhcoat(x,y,m1,m2,an,bn)
 
 *-----------------------------------------------------------------------

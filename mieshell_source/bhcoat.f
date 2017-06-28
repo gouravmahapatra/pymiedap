@@ -69,13 +69,13 @@ Cf2py intent(out) ANV, BNV
       Y=YY
       RFREL1=RRFRL1
       RFREL2=RRFRL2
-      write(*,*) 'X=',X
-      write(*,*) 'Y=',Y
-      write(*,*) 'RRFRL1',RRFRL1
-      write(*,*) 'REFRL2',RRFRL2
-      write(*,*) 'RFREL1',RFREL1
-      write(*,*) 'RFREL2',RFREL2
-!         -----------------------------------------------------------
+C      write(*,*) 'X=',X
+C      write(*,*) 'Y=',Y
+C      write(*,*) 'RRFRL1',RRFRL1
+C      write(*,*) 'REFRL2',RRFRL2
+C      write(*,*) 'RFREL1',RFREL1
+C      write(*,*) 'RFREL2',RFREL2
+C!         -----------------------------------------------------------
 !              del is the inner sphere convergence criterion
 !         -----------------------------------------------------------
       X1=RFREL1*X
@@ -84,7 +84,7 @@ Cf2py intent(out) ANV, BNV
       YSTOP=Y+4.*Y**0.3333+2.0
       !YSTOP = Y + 4.05D0*Y**(1.D0/3.D0) + 20
       REFREL=RFREL2/RFREL1
-      write(*,*) 'ReFREL',REFREL
+C      write(*,*) 'ReFREL',REFREL
       NSTOP=YSTOP
       CURS=NSTOP
 !         -----------------------------------------------------------
