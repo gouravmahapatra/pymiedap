@@ -1446,7 +1446,7 @@ def binned_average(x,y,xbins, errmean=True, weighted=True, sigmas=1.):
 
 
 def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rename=True,
-                  output_names=['modelA','modelB'], fixed_pattern=True,
+                  output_names=['modelA','modelB'], fixed_pattern=False,
                   input_pattern=None, cusp=False, thresh_lat=50., patchy=True,
                   xscale=0.1, yscale=0.01,
                   fclouds=[0.5,0.5], constant_fcloud=False, sscloud=False,
