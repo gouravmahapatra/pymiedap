@@ -1287,6 +1287,7 @@ def compute_model(atm_model, force=False,
     if atm_model.name[0] == '' or force is True:
         # Execute Mie on all aerosols types on all layers
         for lay, layer in vars(atm_model.layers).items():
+            print('In layer '+lay+':')
             #If there is already an aerosol mix, we overwrite it
             if hasattr(layer,'mixed_aerosols') is True:
                 del(layer.mixed_aerosols)
