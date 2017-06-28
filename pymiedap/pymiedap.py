@@ -38,7 +38,6 @@ import matplotlib
 #matplotlib.use('Agg')
 import matplotlib.pyplot as mpl
 #from lmfit import minimize, Parameters
-from matplotlib.backends.backend_pdf import PdfPages
 from PIL import Image
 
 # ---------
@@ -1533,12 +1532,6 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
     # Loop on wvl
     # -------------
     for j,w in enumerate(wvl):
-        ppI = PdfPages('I_phase_wvl{:1.3f}.pdf'.format(w))
-        ppPl = PdfPages('Pl_phase_wvl{:1.3f}.pdf'.format(w))
-        ppU = PdfPages('U_phase_wvl{:1.3f}.pdf'.format(w))
-        ppV = PdfPages('V_phase_wvl{:1.3f}.pdf'.format(w))
-        ppPt = PdfPages('Pt_phase_wvl{:1.3f}.pdf'.format(w))
-
 
         # Loop on phase angle
         # -------------------
@@ -1638,7 +1631,6 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
         atm_model.geom.y = yf
         atm_model.npix = npix
 
-
         atm_model.I = If
 
         # Compute adjusted radiance
@@ -1660,108 +1652,6 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
 
         figsize = 850
         dpi = 90
-
-           ## plot Pl
-           #fig = mpl.figure(figsize=(figsize/dpi,figsize/dpi), dpi=dpi)
-           #ax = fig.add_subplot(111, aspect=1)
-           #ax.set_title('Polarization at phase angle: {:3.2f}'.format(alph))
-           #circ = mpl.Circle((0,0),1,color='gray')
-           #ax.add_patch(circ)
-           #sc = ax.scatter(x, y, c=100*atm_model.P[j,A,:len(x)],lw=0,
-           #                marker='s',s=(0.6*figsize/npix2)**2,
-           #                cmap=mpl.cm.seismic, zorder=10,)
-           #                #vmin=-10, vmax=10)
-           #fig.tight_layout(pad=1.2)
-           #cb = fig.colorbar(sc,pad=0.02, extend='both')
-           #cb.set_label('Degree of linear polarization (%)',size=font_size)
-           #ax.set_ylim(-1,1)
-           #ax.set_xlim(-1,1)
-           ##fig.savefig('Pl_phase_{:01.3f}_{:3.2f}.png'.format(w,alph))
-           #ppPl.savefig(fig)
-           #mpl.close(fig)
-
-           ## plot U/I
-           #fig = mpl.figure(figsize=(figsize/dpi,figsize/dpi), dpi=dpi)
-           #ax = fig.add_subplot(111, aspect=1)
-           #ax.set_title('Polarization at phase angle: {:3.2f}'.format(alph))
-           #circ = mpl.Circle((0,0),1,color='gray')
-           #ax.add_patch(circ)
-           #sc = ax.scatter(x, y, c=100*(atm_model.U[j,A,:]/atm_model.I[j,A,:]),lw=0,
-           #                marker='s',s=(0.6*figsize/npix2)**2,
-           #                cmap=mpl.cm.seismic, zorder=10,
-           #                vmin=-5, vmax=5)
-           #fig.tight_layout(pad=1.2)
-           #cb = fig.colorbar(sc,pad=0.02, extend='both')
-           #cb.set_label('U/I (%)',size=font_size)
-           #ax.set_ylim(-1,1)
-           #ax.set_xlim(-1,1)
-           ##fig.savefig('U_phase_{:01.3f}_{:3.2f}.png'.format(w,alph))
-           #ppU.savefig(fig)
-           #mpl.close(fig)
-
-           ## plot I
-           #fig = mpl.figure(figsize=(figsize/dpi,figsize/dpi), dpi=dpi)
-           #ax = fig.add_subplot(111,aspect=1)
-           #ax.set_title('Intensity at phase angle: {:3.2f}'.format(alph))
-           #circ = mpl.Circle((0,0),1,color='gray')
-           #ax.add_patch(circ)
-           #sc = ax.scatter(x, y, c=atm_model.I[j,A,:],lw=0,marker='s',
-           #                s=(0.6*figsize/npix2)**2,
-           #                cmap=mpl.cm.YlOrRd, zorder=10,)
-           #                #vmin=0, vmax=1)
-           #fig.tight_layout(pad=1.2)
-           #cb = fig.colorbar(sc,pad=0.02, extend='both')
-           #cb.set_label('Intensity',size=font_size)
-           #ax.set_ylim(-1,1)
-           #ax.set_xlim(-1,1)
-           ##fig.savefig('I_phase_{:01.3f}_{:3.2f}.png'.format(w,alph))
-           #ppI.savefig(fig)
-           #mpl.close(fig)
-
-           ## plot V/I
-           #fig = mpl.figure(figsize=(figsize/dpi,figsize/dpi), dpi=dpi)
-           #ax = fig.add_subplot(111,aspect=1)
-           #ax.set_title('Circular polarization V/I at alpha= {:3.2f}'.format(alph))
-           #circ = mpl.Circle((0,0),1,color='gray')
-           #ax.add_patch(circ)
-           #sc = ax.scatter(x, y, c=100*(atm_model.V[j,A,:]/atm_model.I[j,A,:]),lw=0,marker='s',
-           #                s=(0.6*figsize/npix2)**2,
-           #                cmap=mpl.cm.seismic, zorder=10,
-           #                vmin=-0.1, vmax=0.1)
-           #fig.tight_layout(pad=1.2)
-           #cb = fig.colorbar(sc,pad=0.02, extend='both')
-           #cb.set_label('V/I (%)',size=font_size)
-           #ax.set_ylim(-1,1)
-           #ax.set_xlim(-1,1)
-           ##fig.savefig('V_phase_{:01.3f}_{:3.2f}.png'.format(w,alph))
-           #ppV.savefig(fig)
-           #mpl.close(fig)
-
-           ## plot Ptot
-           #Ptot = np.sqrt((atm_model.Q**2+atm_model.U**2+atm_model.V**2)/atm_model.I)
-           #fig = mpl.figure(figsize=(figsize/dpi,figsize/dpi), dpi=dpi)
-           #ax = fig.add_subplot(111, aspect=1)
-           #ax.set_title('Polarization at phase angle: {:3.2f}'.format(alph))
-           #circ = mpl.Circle((0,0),1,color='gray')
-           #ax.add_patch(circ)
-           #sc = ax.scatter(x, y, c=100*Ptot[j,A,:],lw=0,
-           #                marker='s',s=(0.6*figsize/npix2)**2,
-           #                cmap=mpl.cm.YlOrRd, zorder=10,)
-           #                #vmin=0, vmax=5)
-           #fig.tight_layout(pad=1.2)
-           #cb = fig.colorbar(sc,pad=0.02, extend='both')
-           #cb.set_label('Degree of linear polarization (%)',size=font_size)
-           #ax.set_ylim(-1,1)
-           #ax.set_xlim(-1,1)
-           ##fig.savefig('Pt_phase_{:01.3f}_{:3.2f}.png'.format(w,alph))
-           #ppPt.savefig(fig)
-           #mpl.close(fig)
-
-        ppI.close()
-        ppPl.close()
-        ppU.close()
-        ppV.close()
-        ppPt.close()
 
     mpl.ion()
 
