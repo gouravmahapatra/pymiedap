@@ -2322,10 +2322,10 @@ def surface_check(model,nmug, nmat=4, nmuMAX=201):
     return Lfin
 
 
-def orthographic_projection(center=np.array([0,0]), npix=20):
+def orthographic_projection(center=np.array([0,0]), npix=20, input_img='./earth_contour.png'):
     """ function to compute the orthographic proj given coordinates"""
 
-    img = Image.open('./earth_contour.png')
+    img = Image.open(input_img)
     img.thumbnail((4*npix,2*npix))
     maps = np.array(img)
     maps = maps/np.max(maps)
