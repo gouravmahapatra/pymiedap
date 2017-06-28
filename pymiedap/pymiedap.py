@@ -1770,7 +1770,8 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
 
     mpl.ion()
 
-def plot_pixels(model, wvl_idx=0, display='grid', stokes='Ps', iter_idx=0,
+
+def plot_pixels(model, wvl_idx=0, display='grid', stokes='Ps', phase_idx=0,
                 title='Polarization', cmap='YlOrRd',vmin=0,vmax=1,
                 font_size=12):
     """ Function to nicely plot a resolved planet
@@ -1779,6 +1780,7 @@ def plot_pixels(model, wvl_idx=0, display='grid', stokes='Ps', iter_idx=0,
 
         model: a model object
         wvl_idx: index of the wvl to be plotted
+        phase_idx: index of the phase to be plotted
         display: if 'grid', displays the planet as a sphere at a given phase
             angle. If 'map' displays results as function of latitude/longitude
         stokes: which Stokes element to plot. 'Ps' is for -Q/I.
@@ -1786,27 +1788,26 @@ def plot_pixels(model, wvl_idx=0, display='grid', stokes='Ps', iter_idx=0,
         cmap: a matplotlib colormap
         vmin, vmax: range of values to plot
         font_size: size of the font for the figure
-        npix: number of pixels. Has to match that of the simulation.
     """
     npix=model.npix
 
     if display == 'grid':
-        X = model.geom.x[wvl_idx,iter_idx,:]
-        Y = model.geom.y[wvl_idx,iter_idx,:]
+        X = model.geom.x[wvl_idx,phase_idx,:]
+        Y = model.geom.y[wvl_idx,phase_idx,:]
     if display == 'map':
-        X = model.geom.longitude[wvl_idx,iter_idx,:]
-        Y = model.geom.latitude[wvl_idx,iter_idx,:]
+        X = model.geom.longitude[wvl_idx,phase_idx,:]
+        Y = model.geom.latitude[wvl_idx,phase_idx,:]
 
     if stokes=='I':
-        Z = model.I[wvl_idx,iter_idx,:]
+        Z = model.I[wvl_idx,phase_idx,:]
     if stokes=='Q':
-        Z = model.Q[wvl_idx,iter_idx,:]
+        Z = model.Q[wvl_idx,phase_idx,:]
     if stokes=='U':
-        Z = model.U[wvl_idx,iter_idx,:]
+        Z = model.U[wvl_idx,phase_idx,:]
     if stokes=='V':
-        Z = model.V[wvl_idx,iter_idx,:]
+        Z = model.V[wvl_idx,phase_idx,:]
     if stokes=='Ps':
-        Z = model.P[wvl_idx,iter_idx,:]
+        Z = model.P[wvl_idx,phase_idx,:]
 
 
     figsize = 850
