@@ -59,10 +59,10 @@ class Layer():
     different names.
     """
 
-    def __init__(self, tau=[30, 30], tau_g=[0.,0.], press=30e-3, psd='2',
-                 mix_factor=0., bmsca=[0, 0], bmabs=[0,0],
-                 tau_ray=[0.,0.], rayscat=True,
-                 basca=[0,0], baabs=[0,0]):
+    def __init__(self, tau=[30], tau_g=[0.], press=30e-3, psd='2',
+                 mix_factor=0., bmsca=[0], bmabs=[0],
+                 tau_ray=[0.], rayscat=True,
+                 basca=[0], baabs=[0]):
         """ Initializes the model object with default values
         aerosols: a subclass to describe the properties of the aerosols
         """
@@ -153,10 +153,10 @@ class Layers:
 
     def __init__(self):
 
-        self.gastop = Layer(tau=[0.0, 0.0], press=1e-5)
-        self.haze = Layer(press=10e-3, tau=[0.01, 0.01])
+        self.gastop = Layer(tau=[0.0], press=1e-5)
+        self.haze = Layer(press=10e-3, tau=[0.01])
         self.cloud = Layer(press=1., psd='3')
-        self.gasbelow = Layer(tau=[0.0, 0.0], press=100)
+        self.gasbelow = Layer(tau=[0.0], press=100)
 
 
 class Model(object):
