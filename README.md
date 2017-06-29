@@ -59,26 +59,19 @@ import pymiedap.pymiedap as pmd
 import pymiedap.exopy as exopy
 ```
 
-To know more about how to use PyMieDAP, you can refer to the notebook or to the
-script 'pymiedap_demo.py'.
-
-## Contributing
-
-Please read
-[CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for
-details on our code of conduct, and the process for submitting pull requests to
-us.
+To know more about how to use PyMieDAP, you can refer to the notebook
+`pymiedap_tutorial.ipynb`.
 
 ## Authors
 
 * **Loïc Rossi** - TU Delft - *Initial work, Python and Fortran interface* -
-* [Gitlab](https://gitlab.com/loic.cg.rossi), [TU Delft](http://homepage.tudelft.nl/k6v71/)
+    [Gitlab](https://gitlab.com/loic.cg.rossi), [TU Delft](http://homepage.tudelft.nl/k6v71/)
 * **Daphne Stam** - TU Delft - *Initial work, Fortran code* -
 * **Javier Bersoza** - TU Delft - *Initial work, Exopy* - 
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the CeCILL-B License - see the [LICENSE.md](LICENSE.md) file for details
 
 ## Acknowledgments
 
