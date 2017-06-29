@@ -559,7 +559,7 @@ class Aerosols():
     coefs: array containing the expansion corefficients from the single
         scattering. For the combined aerosols and for each wvl.
     """
-    def __init__(self, r_eff=1.05, v_eff=0.07, rcoremant=0.1, nr=[1.42, 1.41],
+    def __init__(self, r_eff=1.05, v_eff=0.07, par3=1., rcoremant=0.1, nr=[1.42, 1.41],
                  ni=[1e-8, 1e-8], qext=[0.1, 0.1], sext=[0.1,0.1],
                  ni_core=[1e-8, 1e-8], nr_core=[1.42, 1.41],
                  qsca=[0.1, 0.1], ssca=[0.1,0.1],
@@ -567,6 +567,7 @@ class Aerosols():
         """ Initializes the aerosols object with default values"""
         self.r_eff = r_eff
         self.v_eff = v_eff
+        self.par3 = par3
         self.nr = nr
         self.ni = ni
         self.nr_core = nr_core
@@ -733,7 +734,6 @@ def mie_code(aerosols, wavelengths, output=False, delta=1e-8, cutoff=1e-8, thmin
     # ---------------------------
     nsupMAX = nmuMAX * nmatMAX
 
-    par3 = 0.25  # this last parameter is only used for some PSD
     weight2 = 0.3
 
     nwavels = len(wavelengths)
@@ -751,6 +751,7 @@ def mie_code(aerosols, wavelengths, output=False, delta=1e-8, cutoff=1e-8, thmin
     #Getting aerosols parameters
     r_eff = aerosols.r_eff
     v_eff = aerosols.v_eff
+    par3 = aerosols.par3
     specie = aerosols.typ
     idis = aerosols.psd  # index of the particle size dist
 
