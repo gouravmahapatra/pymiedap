@@ -2067,7 +2067,8 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
 def mask_planet(alpha=15, npix=20, cusp=False, thresh_lat=50., patchy=True,
                  ntypes=2, full_disk=False, fclouds=[0.5,0.5], fixed_cover=None,
                  constant_fcloud=False, sscloud=False, sigma_c=10.,
-                 delta_c=0., xscale=0.1, yscale=0.01):
+                 delta_c=0., xscale=0.1, yscale=0.01,
+                bands=False, bands_lats=[-90,90]):
     """ Generates a mask that can be used for inhomogeneous planetsi
     INPUTS:
         alpha: phase angle at which the calculation is made
@@ -2075,6 +2076,9 @@ def mask_planet(alpha=15, npix=20, cusp=False, thresh_lat=50., patchy=True,
         cusp: if True, polar cusps are added
         thresh_lat: latitude threshold above which the cusps extend
         patchy: generates a random patchy cloud cover
+        bands: generates bands that are defined by their latitudes
+        bands_lats: array with limits of the bands. Should start at -90d and end at 90d. Must be in
+            increasing order.
         ntypes: types of different pixels for patchy
         fcloud: fraction of the planet that should be covered with clouds
         fixed_cover: if None, a new cloud cover is generated. If a table is
@@ -2099,7 +2103,7 @@ def mask_planet(alpha=15, npix=20, cusp=False, thresh_lat=50., patchy=True,
     """
 
     # if no specific pattern, assume full_disk
-    if patchy==False and cusp==False and sscloud==False:
+    if patchy==False and cusp==False and sscloud==False and bands==False:
         full_disk=True
 
     # read the pixel geometries
@@ -2180,6 +2184,25 @@ def mask_planet(alpha=15, npix=20, cusp=False, thresh_lat=50., patchy=True,
         #grid[cuspxidx,cuspyidx] = 0. # validate those
         grid_lit[cuspyidx,cuspxidx] = 0. # validate those
         grid_full[cuspyidx,cuspxidx] = 0. # validate those
+        # wARNING! arrays have shape (nlines, ncols), hence the grid[y,x]!
+
+    if bands is True:
+        grid_full[:] = 1.
+        # validate pixels lit
+        grid_lit[yidx,xidx] = 1. # validate those
+
+        for latidx,lat in enumerate(bands_lats[:-1]):
+            lower_bound = bands_lats[latidx]
+            upper_bound = bands_lats[latidx+1]
+
+            bandidx = np.where((lats>lower_bound)*(lats<upper_bound))[0]
+            newxs = xs[bandidx]
+            newys = ys[bandidx]
+            bandxidx = [np.where(X==item)[0][0] for i, item in enumerate(newxs) if item in X]
+            bandyidx = [np.where(Y==item)[0][0] for i, item in enumerate(newys) if item in Y]
+            grid_lit[bandyidx,bandxidx] = latidx # validate those
+            grid_full[bandyidx,bandxidx] = latidx # validate those
+
         # wARNING! arrays have shape (nlines, ncols), hence the grid[y,x]!
 
     if patchy==True:
