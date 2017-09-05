@@ -50,6 +50,8 @@ Add this to your .bashrc
 export PYTHONPATH=$PYTHONPATH:~/lib/python
 ```
 then run the install.
+Be careful that on Mac, you might need to use another file than .bashrc. Also,
+for **Spyder** users, you can set it with Spyder's PYTHONPATH manager.
 
 Once installed and your path set correctly, you can import PyMieDAP and Exopy in a
 (i)Python terminal or a script using:

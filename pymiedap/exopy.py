@@ -132,14 +132,14 @@ def save_pickle(bodies, tf, dt, I, Q, U, V, conf, directory = None,
         print('Current directory: '+os.getcwd()+'/')
         dirs = [d for d in os.listdir(os.getcwd()) if os.path.isdir(os.path.join(os.getcwd(), d))]
         for i in dirs:
-            print i
+             print(i)
         print(' ')
         directory = raw_input('Save directory: ')
         print(' ')
         print('List of existing files:')
         files = os.listdir(os.getcwd()+'/'+directory)
         for i in files:
-            print i
+             print(i)
         print('')
         name = raw_input('Name of the file: ')
 
@@ -208,7 +208,7 @@ def load_pickle(directory = None, name = None):
         print('Current directory: '+os.getcwd()+'/')
         dirs = [d for d in os.listdir(os.getcwd()) if os.path.isdir(os.path.join(os.getcwd(), d))]
         for i in dirs:
-            print i
+             print(i)
         print(' ')
         directory = raw_input('Load directory: ')
 
@@ -217,7 +217,7 @@ def load_pickle(directory = None, name = None):
         print('List of existing files:')
         files = os.listdir(os.getcwd()+'/'+directory)
         for i in files:
-            print i
+             print(i)
         print('')
         name = raw_input('Name of the file: ')
 
@@ -294,14 +294,14 @@ def print_txt(bodies, tf, dt, I, Q, U, V, exopy, directory = None,
         print('Current directory: '+os.getcwd()+'/')
         dirs = [d for d in os.listdir(os.getcwd()) if os.path.isdir(os.path.join(os.getcwd(), d))]
         for i in dirs:
-            print i
+             print(i)
         print(' ')
         directory = raw_input('Save directory: ')
         print(' ')
         print('List of existing files:')
         files = os.listdir(os.getcwd()+'/'+directory)
         for i in files:
-            print i
+             print(i)
         print('')
         name = raw_input('Name of the file: ')
 
@@ -434,7 +434,7 @@ def read_txt(directory = None, name = None):
         print('Current directory: '+os.getcwd()+'/')
         dirs = [d for d in os.listdir(os.getcwd()) if os.path.isdir(os.path.join(os.getcwd(), d))]
         for i in dirs:
-                print i
+                 print(i)
         print(' ')
         directory = raw_input('Load directory: ')
 
@@ -443,7 +443,7 @@ def read_txt(directory = None, name = None):
         print('List of existing files:')
         files = os.listdir(os.getcwd()+'/'+directory)
         for i in files:
-                print i
+                 print(i)
         print('')
         name = raw_input('Name of the file: ')
 
