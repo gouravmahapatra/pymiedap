@@ -677,7 +677,7 @@ def get_cosbeta(PHA,SZA,EMI,AZI):
     cb = num/denom
     cb[denom==0] = 0.
     cb[cb>1.] = 1.
-    cb[cb<0.] = 0.
+    cb[cb<-1.] = -1.
 
     return cb
 
@@ -1543,7 +1543,7 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
                 picture_full=None
 
             if input_pattern!=None:
-                picture_full=input_pattern
+                picture_full=input_pattern[A,:,:]
 
             if adaptive_pixels is True:
                 npix2 = np.ceil(npix * (1 + np.sin(np.radians(alph)/2.)**2))
@@ -1828,7 +1828,7 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
             picture_full=None
 
         if input_pattern!=None:
-            picture_full=input_pattern
+            picture_full=input_pattern[a,:,:]
 
         #Get geom of pixels
         if adaptive_pixels is True:
@@ -2267,9 +2267,13 @@ def mask_planet(alpha=15, npix=20, cusp=False, thresh_lat=50., patchy=True,
 
         else:
             # else take existing one
-            grid_lit = np.copy(fixed_cover)
-            grid_full = np.copy(fixed_cover)
-            #grid_lit[xv*xv+yv*yv>1]=np.nan
+            grid_lit = np.zeros((npix,npix))
+            grid_full = np.zeros((npix,npix))
+            grid_full[:,:] = np.nan
+            grid_lit[:,:] = np.nan
+            grid_lit[yidx,xidx] = fixed_cover[yidx,xidx]
+            grid_full[yidx,xidx] = fixed_cover[yidx,xidx]
+            grid_lit[xv*xv+yv*yv>1]=np.nan
             grid_full[xv*xv+yv*yv>1]=np.nan
 
     # get current cloud coverage at given phase angle
