@@ -48,10 +48,10 @@ class Layer():
     """ This class is intended to describe a layer for the Doubling-Adding
     program. It contains the basic parameters of the model
     tau : optical thickness (for each lambda)
-    tau_g : optical thickness related to absorption (for each lambda)
+    tau_g : optical thickness related to gaseous absorption (for each lambda)
     tau_ray : optical thickness related to rayleigh scattering set by user (for each lambda)
     rayscat: if True, rayleigh scattering is computed. If false, tau_ray is used instead.
-    press : pressure at the bottom of the layer
+    press : pressure at the bottom of the layer [bars]
     aerosols : an object containing the properties of a type of aerosols.
     col_dens: particular column density in particles per square micrometers
     Several of these aerosol objects can coexist in a layer, but they should have
