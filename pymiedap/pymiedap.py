@@ -264,17 +264,19 @@ class Model(object):
         lays_str = '\n **Layers** \n'
         for layer_name, layer in vars(self.layers).items():
             if hasattr(layer,'mixed_aerosols')==True:
-                strout = (str(layer_name) +
+                strout = ('LAYER ' + str(layer_name) +'\n'+
                           ' Type:' + layer.mixed_aerosols.typ +
                           ', P=' + str(layer.press) +
                           ', tau=' + str(layer.tau) +
                           ', tau_gas=' + str(layer.tau_g) + '\n')
+                strout += layer.aerosols.__repr__()
             else:
-                strout = (str(layer_name) +
+                strout = ('LAYER '+str(layer_name) +'\n'+
                           ' Type:' + layer.aerosols.typ +
                           ', P=' + str(layer.press) +
                           ', tau=' + str(layer.tau) +
                           ', tau_gas=' + str(layer.tau_g) + '\n')
+                strout += layer.aerosols.__repr__()
             strfin = strfin + strout
         return wvl_str+planet_str+gas_str+lays_str+strfin
 
@@ -442,18 +444,21 @@ class Model(object):
 
                 for layer_name, layer in vars(self.layers).items():
                     if hasattr(layer,'mixed_aerosols')==True:
-                        strout = (str(layer_name) +
+                        strout = ('LAYER '+str(layer_name) +'\n'+
                                 ' Type:' + layer.mixed_aerosols.typ +
                                 ', P=' + str(layer.press) +
                                 ', tau=' + str(layer.tau) +
                                 ', tau_gas=' + str(layer.tau_g) + '\n')
+                        strout += layer.aerosols.__repr__()
+                        strfin = strfin + strout
                     else:
-                        strout = (str(layer_name) +
+                        strout = ('LAYER '+str(layer_name) +'\n'+
                                 ' Type:' + layer.aerosols.typ +
                                 ', P=' + str(layer.press) +
                                 ', tau=' + str(layer.tau) +
                                 ', tau_gas=' + str(layer.tau_g) + '\n')
-                    strfin = strfin + strout
+                        strout += layer.aerosols.__repr__()
+                        strfin = strfin + strout
                 fich.write(strfin)
 
 
