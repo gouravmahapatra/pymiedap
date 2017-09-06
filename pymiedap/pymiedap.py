@@ -569,10 +569,7 @@ class Aerosols():
     rcoremant: ratio between the radius of the outer sphere and the inner core;
         only relevant for layered spheres
     r_eff, v_eff : effective radius and variance (constant with lambda)
-    qext : extinction coefficients (for each wvl)
-    sext : extinction cross-section (for each wvl)
-    qsca : scattering coefficients (for each wvl)
-    ssca : scattering cross-section (for each wvl)
+    par3: value that can be used for some size distributions
     typ : string indicating type of aerosols ex:'C' for clouds, 'H' for hazes;
         just for user's reference, doesn't change the results in any way
     layered: if True, the calculation is made with Mie scattering for layered
@@ -580,8 +577,28 @@ class Aerosols():
     psd : type of particle size distribution fct 2 stands for modified gamma
     f: is the mix ratio of this type of aerosol in the layer. If f=0.5, half the
     particules are this type.
+    * OUTPUT variables:
+    qext : extinction coefficients (for each wvl)
+    sext : extinction cross-section (for each wvl)
+    qsca : scattering coefficients (for each wvl)
+    ssca : scattering cross-section (for each wvl)
     coefs: array containing the expansion corefficients from the single
         scattering. For the combined aerosols and for each wvl.
+
+    * SIZE Distributions (value of psd):
+        par1 refers to Aerosols.reff
+        par2 refers to Aerosols.veff
+        par3 refers to Aerosols.par3
+
+        1: TWO PARAMETER GAMMA with alpha (par1) and b (par2) given
+        2: TWO PARAMETER GAMMA with reff (par1) and veff (par2) given
+        3: Bimodal gamma with equal mode weights
+        4: Log normal with rg (par1) and sigma (par2) given
+        5: Log normal with reff (par1) and veff (par2) given
+        6: Power law with alpha (par1), rmin (par2), rmax(par3)
+        7: MODIFIED GAMMA with alpha (par1), rc (par2) and gamma (par3) given
+        8: MODIFIED GAMMA with alpha (par1), b (par2) and gamma (par3) given
+
     """
     def __init__(self, r_eff=1.05, v_eff=0.07, par3=1., rcoremant=0.1, nr=[1.42, 1.41],
                  ni=[1e-8, 1e-8], qext=[0.1, 0.1], sext=[0.1,0.1],
