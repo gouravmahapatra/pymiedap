@@ -1314,7 +1314,7 @@ def compute_model(atm_model, force=False,
     INPUTS:
         atm_model : a Model object with all the input parameters
     KEYWORDS:
-        force : if 0, existing Fourier files are not overwritten; if 1
+        force : if False, existing Fourier files are not overwritten; if True
             existing files are replaced by newer versions
         path_input : path of the fourier DAP files
         set_taus: if True, will set opacities of layers following scattering
@@ -1369,7 +1369,7 @@ def read_model(atm_model,data,step=20, force=False,
         data : a Data object with the observations
     KEYWORDS:
         step : step btw two points used for the fits
-        force : if 0, existing Fourier files are not overwritten; if 1
+        force : if False, existing Fourier files are not overwritten; if True
             existing files are replaced by newer versions
         path_input : path of the fourier DAP files
         set_taus: if True, will set opacities following scattering cross section and column density
