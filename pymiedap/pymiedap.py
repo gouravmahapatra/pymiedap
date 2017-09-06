@@ -48,10 +48,10 @@ class Layer():
     """ This class is intended to describe a layer for the Doubling-Adding
     program. It contains the basic parameters of the model
     tau : optical thickness (for each lambda)
-    tau_g : optical thickness related to absorption (for each lambda)
+    tau_g : optical thickness related to gaseous absorption (for each lambda)
     tau_ray : optical thickness related to rayleigh scattering set by user (for each lambda)
     rayscat: if True, rayleigh scattering is computed. If false, tau_ray is used instead.
-    press : pressure at the bottom of the layer
+    press : pressure at the bottom of the layer [bars]
     aerosols : an object containing the properties of a type of aerosols.
     col_dens: particular column density in particles per square micrometers
     Several of these aerosol objects can coexist in a layer, but they should have
@@ -166,7 +166,8 @@ class Model(object):
     wvl_list : list of wvl to compute. Each time the list is changed (all at
         once) the others vectors within the layers are updated.
     gravity: value of the acceleration of gravity (in m/s^2)
-    asurf: surface albedo for Lambertian surface
+    asurf: surface albedo for Lambertian surface. If changed, surface[0,0]
+    changes too (see below).
     mma: molecular mass of the gas (in atomic mass units)
     dpol: depolarisation factor for the gas medium
     Ts: temperature of the star in K
@@ -176,7 +177,8 @@ class Model(object):
     asym: asymmetry in cloud cover
     picture: image of cloud cover
     surface: an array describing a constant reflection matrix or a filename
-        with the Fourier coefficients of a more complicated surface
+        with the Fourier coefficients of a more complicated surface. If surface
+        is updated, asurf changes accordingly.
     """
 
     def __init__(self, wvl_list=np.array([1.101]), gravity=9.81, dpol=0.09,
@@ -188,7 +190,6 @@ class Model(object):
         self.gravity = gravity
         self.dpol = dpol
         self.mma = mma
-        self.asurf = asurf #surface albedo for lambertian surf
         self.Ts = Ts
         self.Rs = Rs
         self.Dps = Dps
@@ -208,10 +209,12 @@ class Model(object):
         self.asym = asym
         self.picture = picture
 
-        self.surface = np.diag([0.,0,0,0])
+        self._surface = np.diag([asurf,0.,0.,0.])
+        self._asurf = asurf #surface albedo for lambertian surf
 
         self.name = ['']
 
+    # auto update of wvl list in layers
     @property
     def wvl_list(self):
         return self._wvl_list
@@ -224,6 +227,27 @@ class Model(object):
             for aero_name, aero in vars(layer).items():
                 if isinstance(aero, Aerosols):
                     aero.update_arrays(len(wlist))
+
+    # mutual update of asurf and surface matrix
+    @property
+    def asurf(self):
+        return self._asurf
+
+    @asurf.setter
+    def asurf(self, alb):
+        self._asurf = alb
+        self._surface[0,0] = self._asurf
+
+    @property
+    def surface(self):
+        return self._surface
+
+    @surface.setter
+    def surface(self, val):
+        self._surface = val
+        self._asurf = self._surface[0,0]
+
+
 
     def __repr__(self):
         """ Custom display of basic model parameters"""
@@ -240,17 +264,19 @@ class Model(object):
         lays_str = '\n **Layers** \n'
         for layer_name, layer in vars(self.layers).items():
             if hasattr(layer,'mixed_aerosols')==True:
-                strout = (str(layer_name) +
+                strout = ('LAYER ' + str(layer_name) +'\n'+
                           ' Type:' + layer.mixed_aerosols.typ +
                           ', P=' + str(layer.press) +
                           ', tau=' + str(layer.tau) +
                           ', tau_gas=' + str(layer.tau_g) + '\n')
+                strout += layer.aerosols.__repr__()
             else:
-                strout = (str(layer_name) +
+                strout = ('LAYER '+str(layer_name) +'\n'+
                           ' Type:' + layer.aerosols.typ +
                           ', P=' + str(layer.press) +
                           ', tau=' + str(layer.tau) +
                           ', tau_gas=' + str(layer.tau_g) + '\n')
+                strout += layer.aerosols.__repr__()
             strfin = strfin + strout
         return wvl_str+planet_str+gas_str+lays_str+strfin
 
@@ -418,18 +444,21 @@ class Model(object):
 
                 for layer_name, layer in vars(self.layers).items():
                     if hasattr(layer,'mixed_aerosols')==True:
-                        strout = (str(layer_name) +
+                        strout = ('LAYER '+str(layer_name) +'\n'+
                                 ' Type:' + layer.mixed_aerosols.typ +
                                 ', P=' + str(layer.press) +
                                 ', tau=' + str(layer.tau) +
                                 ', tau_gas=' + str(layer.tau_g) + '\n')
+                        strout += layer.aerosols.__repr__()
+                        strfin = strfin + strout
                     else:
-                        strout = (str(layer_name) +
+                        strout = ('LAYER '+str(layer_name) +'\n'+
                                 ' Type:' + layer.aerosols.typ +
                                 ', P=' + str(layer.press) +
                                 ', tau=' + str(layer.tau) +
                                 ', tau_gas=' + str(layer.tau_g) + '\n')
-                    strfin = strfin + strout
+                        strout += layer.aerosols.__repr__()
+                        strfin = strfin + strout
                 fich.write(strfin)
 
 
@@ -545,10 +574,7 @@ class Aerosols():
     rcoremant: ratio between the radius of the outer sphere and the inner core;
         only relevant for layered spheres
     r_eff, v_eff : effective radius and variance (constant with lambda)
-    qext : extinction coefficients (for each wvl)
-    sext : extinction cross-section (for each wvl)
-    qsca : scattering coefficients (for each wvl)
-    ssca : scattering cross-section (for each wvl)
+    par3: value that can be used for some size distributions
     typ : string indicating type of aerosols ex:'C' for clouds, 'H' for hazes;
         just for user's reference, doesn't change the results in any way
     layered: if True, the calculation is made with Mie scattering for layered
@@ -556,8 +582,28 @@ class Aerosols():
     psd : type of particle size distribution fct 2 stands for modified gamma
     f: is the mix ratio of this type of aerosol in the layer. If f=0.5, half the
     particules are this type.
+    * OUTPUT variables:
+    qext : extinction coefficients (for each wvl)
+    sext : extinction cross-section (for each wvl)
+    qsca : scattering coefficients (for each wvl)
+    ssca : scattering cross-section (for each wvl)
     coefs: array containing the expansion corefficients from the single
         scattering. For the combined aerosols and for each wvl.
+
+    * SIZE Distributions (value of psd):
+        par1 refers to Aerosols.reff
+        par2 refers to Aerosols.veff
+        par3 refers to Aerosols.par3
+
+        1: TWO PARAMETER GAMMA with alpha (par1) and b (par2) given
+        2: TWO PARAMETER GAMMA with reff (par1) and veff (par2) given
+        3: Bimodal gamma with equal mode weights
+        4: Log normal with rg (par1) and sigma (par2) given
+        5: Log normal with reff (par1) and veff (par2) given
+        6: Power law with alpha (par1), rmin (par2), rmax(par3)
+        7: MODIFIED GAMMA with alpha (par1), rc (par2) and gamma (par3) given
+        8: MODIFIED GAMMA with alpha (par1), b (par2) and gamma (par3) given
+
     """
     def __init__(self, r_eff=1.05, v_eff=0.07, par3=1., rcoremant=0.1, nr=[1.42, 1.41],
                  ni=[1e-8, 1e-8], qext=[0.1, 0.1], sext=[0.1,0.1],
@@ -1268,10 +1314,12 @@ def compute_model(atm_model, force=False,
     INPUTS:
         atm_model : a Model object with all the input parameters
     KEYWORDS:
-        force : if 0, existing Fourier files are not overwritten; if 1
+        force : if False, existing Fourier files are not overwritten; if True
             existing files are replaced by newer versions
         path_input : path of the fourier DAP files
-        set_taus: if True, will set opacities following scattering cross section and column density
+        set_taus: if True, will set opacities of layers following scattering
+        cross section of the aerosols in that layer and column density of that
+        layer.
         rename: if true, output_name is used
         output_name: custom name radical for the output files of the DAP code
         nmug: number of Gauss points for Mie and DAP calculations
@@ -1321,7 +1369,7 @@ def read_model(atm_model,data,step=20, force=False,
         data : a Data object with the observations
     KEYWORDS:
         step : step btw two points used for the fits
-        force : if 0, existing Fourier files are not overwritten; if 1
+        force : if False, existing Fourier files are not overwritten; if True
             existing files are replaced by newer versions
         path_input : path of the fourier DAP files
         set_taus: if True, will set opacities following scattering cross section and column density
