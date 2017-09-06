@@ -1317,7 +1317,9 @@ def compute_model(atm_model, force=False,
         force : if 0, existing Fourier files are not overwritten; if 1
             existing files are replaced by newer versions
         path_input : path of the fourier DAP files
-        set_taus: if True, will set opacities following scattering cross section and column density
+        set_taus: if True, will set opacities of layers following scattering
+        cross section of the aerosols in that layer and column density of that
+        layer.
         rename: if true, output_name is used
         output_name: custom name radical for the output files of the DAP code
         nmug: number of Gauss points for Mie and DAP calculations
