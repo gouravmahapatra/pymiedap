@@ -166,7 +166,8 @@ class Model(object):
     wvl_list : list of wvl to compute. Each time the list is changed (all at
         once) the others vectors within the layers are updated.
     gravity: value of the acceleration of gravity (in m/s^2)
-    asurf: surface albedo for Lambertian surface
+    asurf: surface albedo for Lambertian surface. If changed, surface[0,0]
+    changes too (see below).
     mma: molecular mass of the gas (in atomic mass units)
     dpol: depolarisation factor for the gas medium
     Ts: temperature of the star in K
@@ -176,7 +177,8 @@ class Model(object):
     asym: asymmetry in cloud cover
     picture: image of cloud cover
     surface: an array describing a constant reflection matrix or a filename
-        with the Fourier coefficients of a more complicated surface
+        with the Fourier coefficients of a more complicated surface. If surface
+        is updated, asurf changes accordingly.
     """
 
     def __init__(self, wvl_list=np.array([1.101]), gravity=9.81, dpol=0.09,
@@ -188,7 +190,6 @@ class Model(object):
         self.gravity = gravity
         self.dpol = dpol
         self.mma = mma
-        self.asurf = asurf #surface albedo for lambertian surf
         self.Ts = Ts
         self.Rs = Rs
         self.Dps = Dps
@@ -208,10 +209,12 @@ class Model(object):
         self.asym = asym
         self.picture = picture
 
-        self.surface = np.diag([0.,0,0,0])
+        self._surface = np.diag([asurf,0.,0.,0.])
+        self._asurf = asurf #surface albedo for lambertian surf
 
         self.name = ['']
 
+    # auto update of wvl list in layers
     @property
     def wvl_list(self):
         return self._wvl_list
@@ -224,6 +227,27 @@ class Model(object):
             for aero_name, aero in vars(layer).items():
                 if isinstance(aero, Aerosols):
                     aero.update_arrays(len(wlist))
+
+    # mutual update of asurf and surface matrix
+    @property
+    def asurf(self):
+        return self._asurf
+
+    @asurf.setter
+    def asurf(self, alb):
+        self._asurf = alb
+        self._surface[0,0] = self._asurf
+
+    @property
+    def surface(self):
+        return self._surface
+
+    @surface.setter
+    def surface(self, val):
+        self._surface = val
+        self._asurf = self._surface[0,0]
+
+
 
     def __repr__(self):
         """ Custom display of basic model parameters"""
