@@ -170,6 +170,7 @@ class Model(object):
     changes too (see below).
     mma: molecular mass of the gas (in atomic mass units)
     dpol: depolarisation factor for the gas medium
+    rindex_gas: refractive index of the gas (same length as wvl_list). Default is for air.
     Ts: temperature of the star in K
     Rs: Radius of the star in meters
     Dps: distance planet-star in meters
@@ -184,7 +185,7 @@ class Model(object):
     def __init__(self, wvl_list=np.array([1.101]), gravity=9.81, dpol=0.09,
                  mma=44, I=[], Q=[], U=[], V=[], P=[], phase=[], asurf=0,
                  Ts=5750, Rs =696342000.,
-                 Dps=108208930000.0,
+                 Dps=108208930000.0, rindex_gas=np.array([0]),
                  fcloud=1., asym=0., picture=[], surface=[]):
         """ Generic properties of the model """
         self.gravity = gravity
@@ -204,6 +205,7 @@ class Model(object):
         self.V = V
         self.P = P  # ! warning P is -Q/I
         self._wvl_list = wvl_list
+        self.set_rindex_gas()
 
         self.fcloud = fcloud
         self.asym = asym
@@ -222,6 +224,7 @@ class Model(object):
     @wvl_list.setter
     def wvl_list(self, wlist):
         self._wvl_list = wlist
+        self.set_rindex_gas()
         for layername,layer in vars(self.layers).items():
             layer.update_layer(len(wlist))
             for aero_name, aero in vars(layer).items():
@@ -412,6 +415,27 @@ class Model(object):
         nrs = k + slope*wvl
         for layername, layer in vars(self.layers).items():
             layer.nr = nrs
+
+    def set_rindex_gas(self, gas='air'):
+        """ Computes the refractive index of a gas and sets the refractive
+        indices of the model
+        INPUTS:
+            wvl: wavelength (in microns)
+            gas: choose between 'air' and pure 'CO2'
+        """
+        S = 1./np.array(self.wvl_list)
+
+        if gas=='air':
+            # see Ciddor et al. 1996
+            rindex = 1 + (0.05792105/(238.0185 - S**2)) + (0.00167917/(57.362 - S**2))
+        if gas=='CO2':
+            # see Bideau-Mehu el. 1973
+            rindex = 1 + ((6.99100*1e-2/(166.175 - S**2)) + (1.44720*1e-3/(79.609 - S**2)) +
+                    (6.42941*1e-5/(56.3064 - S**2)) + (5.21306*1e-5/(46.0196 - S**2))
+                    + (1.46847*1e-6/(0.0584738 - S**2)))
+
+        self.rindex_gas = rindex
+
 
     def summary(self):
         """Writes a summary of model parameters in a .info file with name of
