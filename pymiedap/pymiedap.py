@@ -429,10 +429,19 @@ class Model(object):
             # see Ciddor et al. 1996
             rindex = 1 + (0.05792105/(238.0185 - S**2)) + (0.00167917/(57.362 - S**2))
         if gas=='CO2':
-            # see Bideau-Mehu el. 1973
+            # see Bideau-Mehu el. 1973 (0.1807 -- 1.69 um)
             rindex = 1 + ((6.99100*1e-2/(166.175 - S**2)) + (1.44720*1e-3/(79.609 - S**2)) +
                     (6.42941*1e-5/(56.3064 - S**2)) + (5.21306*1e-5/(46.0196 - S**2))
                     + (1.46847*1e-6/(0.0584738 - S**2)))
+        if gas=='H2':
+            # Peck and Hung 1977 (0.168 -- 1.6945 um)
+            rindex = 1 + (0.0148956/(180.7-S**2)) + (0.0049037/(92 - S**2))
+        if gas=='He':
+            # Mansfield and Peck 1969
+            rindex = 1 + (0.01470091/(423.98 - S**2))
+        if gas=='N2':
+            # Peck and Khanna 1966 (0.47 -- 2.06 um)
+            rindex = 1 + 6.8552*1e5 + (3.243157*1e-2/(144-S**2))
 
         self.rindex_gas = rindex
 
