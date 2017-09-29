@@ -51,12 +51,13 @@ python module module_dap ! in
             double precision dimension(4,4,4001,50),intent(out) :: coefsa
             integer dimension(50),intent(out) :: ncoefsa
         end subroutine baerosols
-        subroutine bmolecules(wav,nlays,pres,depol,mma,grav,bmsca,bmabs,coefsm) ! in :module_dap:./dap_source/bmolecules.f
+        subroutine bmolecules(wav,nlays,pres,depol,ri,mma,grav,bmsca,bmabs,coefsm) ! in :module_dap:./dap_source/bmolecules.f
             double precision intent(in) :: wav
             integer intent(in) :: nlays
             double precision dimension(50),intent(in) :: pres
             double precision intent(in) :: depol
             double precision intent(in) :: mma
+            double precision intent(in) :: ri
             double precision intent(in) :: grav
             double precision dimension(50),intent(out) :: bmsca
             double precision dimension(50),intent(out) :: bmabs

@@ -768,7 +768,6 @@ def sunblackbody(L, Ts=5750):
 
     return B
 
-
 # Main functions
 def mie_code(aerosols, wavelengths, output=False, delta=1e-8, cutoff=1e-8, thmin=0, thmax=180,
              step=1, nsubr=50, ngaur=60, nlaysMAX=50, ncoefsMAX=4001,
@@ -1165,7 +1164,8 @@ def dap_code(model, rename=False, output_name='modelA',
         ncoefin[:l] = ncoefin[layorder]
 
         # Calculate the molecular parameters of the atmosphere:
-        bmsca, bmabs, coefsm = dap.bmolecules(wav, nlays, pres, dpol, mma, gravity)
+        ri = model.rindex_gas[z]
+        bmsca, bmabs, coefsm = dap.bmolecules(wav, nlays, pres, dpol, ri, mma, gravity)
 
         model.coefsm = coefsm
         #-----------------------------------------------------------------
