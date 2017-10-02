@@ -1947,8 +1947,20 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
 
         for pixtype,model in enumerate(models): #for each pixel type
             for j,w in enumerate(wvl): # and each wvl
-                print('Reading {}'.format(model.name[j]))
-                I,Q,U,V = read_dap_output(phase,theta0,theta,model.name[j],phi=phi, beta=beta)
+                # if there is no user mask
+                if input_pattern==None:
+                    print('Reading {}'.format(model.name[j]))
+                    I,Q,U,V = read_dap_output(phase,theta0,theta,model.name[j],phi=phi, beta=beta)
+                # if there is a user-defined mask
+                elif input_pattern!=None:
+                    usefull_masks = np.unique(input_pattern)
+                    # if model is not used by the mask
+                    # don't read it, saves time
+                    if pixtype in usefull_masks:
+                        print('Reading {}'.format(model.name[j]))
+                        I,Q,U,V = read_dap_output(phase,theta0,theta,model.name[j],phi=phi, beta=beta)
+                    else:
+                        I,Q,U,V = (0,0,0,0)
                 Is[pixtype,j,:] = I*np.cos(np.radians(theta0))
                 Qs[pixtype,j,:] = Q*np.cos(np.radians(theta0))
                 Us[pixtype,j,:] = U*np.cos(np.radians(theta0))
