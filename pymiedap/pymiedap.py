@@ -1945,26 +1945,52 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
         Us = np.zeros((len(models),len(wvl),ngeos))
         Vs = np.zeros((len(models),len(wvl),ngeos))
 
+        # First mask
+        picture, mask, picture_full, ncloud, asym = mask_planet(alpha=alph, npix=npix2,
+                                                                fixed_cover=picture_full,
+                                                                cusp=cusp,
+                                                                thresh_lat=thresh_lat,
+                                                                bands=bands,
+                                                                bands_lats=bands_lats,
+                                                                patchy=patchy,
+                                                                xscale=xscale,
+                                                                yscale=yscale,
+                                                                fclouds=fclouds,
+                                                                constant_fcloud=constant_fcloud,
+                                                                full_disk=full_disk,
+                                                                sscloud=sscloud,
+                                                                sigma_c=sigma_c,
+                                                                delta_c=delta_c[a])
+
+
+
         for pixtype,model in enumerate(models): #for each pixel type
             for j,w in enumerate(wvl): # and each wvl
-                # if there is no user mask
-                if input_pattern==None:
-                    print('Reading {}'.format(model.name[j]))
-                    I,Q,U,V = read_dap_output(phase,theta0,theta,model.name[j],phi=phi, beta=beta)
-                # if there is a user-defined mask
-                elif input_pattern!=None:
-                    usefull_masks = np.unique(input_pattern)
-                    # if model is not used by the mask
-                    # don't read it, saves time
-                    if pixtype in usefull_masks:
+
+                # if only one pattern read only relevant pixels
+                if niter==1:
+                    if pixtype in np.unique(mask):
+                        phaseB = phase[mask==pixtype]
+                        theta0B = theta0[mask==pixtype]
+                        thetaB = theta[mask==pixtype]
+                        phiB = phi[mask==pixtype]
+                        betaB = beta[mask==pixtype]
                         print('Reading {}'.format(model.name[j]))
-                        I,Q,U,V = read_dap_output(phase,theta0,theta,model.name[j],phi=phi, beta=beta)
+                        I,Q,U,V = read_dap_output(phaseB,theta0B,thetaB,model.name[j],phi=phiB, beta=betaB)
+                        Is[pixtype,j,mask==pixtype] = I*np.cos(np.radians(theta0B))
+                        Qs[pixtype,j,mask==pixtype] = Q*np.cos(np.radians(theta0B))
+                        Us[pixtype,j,mask==pixtype] = U*np.cos(np.radians(theta0B))
+                        Vs[pixtype,j,mask==pixtype] = V*np.cos(np.radians(theta0B)) # store current pixel type output
                     else:
                         I,Q,U,V = (0,0,0,0)
-                Is[pixtype,j,:] = I*np.cos(np.radians(theta0))
-                Qs[pixtype,j,:] = Q*np.cos(np.radians(theta0))
-                Us[pixtype,j,:] = U*np.cos(np.radians(theta0))
-                Vs[pixtype,j,:] = V*np.cos(np.radians(theta0)) # store current pixel type output
+                else:
+                    # if multiple patterns read all pixels
+                    print('Reading {}'.format(model.name[j]))
+                    I,Q,U,V = read_dap_output(phase,theta0,theta,model.name[j],phi=phi, beta=beta)
+                    Is[pixtype,j,:] = I*np.cos(np.radians(theta0))
+                    Qs[pixtype,j,:] = Q*np.cos(np.radians(theta0))
+                    Us[pixtype,j,:] = U*np.cos(np.radians(theta0))
+                    Vs[pixtype,j,:] = V*np.cos(np.radians(theta0)) # store current pixel type output
 
         # Create table to store output of all pixels
         Ix = np.zeros((len(wvl),ngeos))
@@ -1986,22 +2012,22 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
 
             if citer>0 or npix!=npix2:
                 picture_full = None
-            # Generate a pixel mask
-            picture, mask, picture_full, ncloud, asym = mask_planet(alpha=alph, npix=npix2,
-                                                                    fixed_cover=picture_full,
-                                                                    cusp=cusp,
-                                                                    thresh_lat=thresh_lat,
-                                                                    bands=bands,
-                                                                    bands_lats=bands_lats,
-                                                                    patchy=patchy,
-                                                                    xscale=xscale,
-                                                                    yscale=yscale,
-                                                                    fclouds=fclouds,
-                                                                    constant_fcloud=constant_fcloud,
-                                                                    full_disk=full_disk,
-                                                                    sscloud=sscloud,
-                                                                    sigma_c=sigma_c,
-                                                                    delta_c=delta_c[a])
+                # Generate a new pixel mask
+                picture, mask, picture_full, ncloud, asym = mask_planet(alpha=alph, npix=npix2,
+                                                                        fixed_cover=picture_full,
+                                                                        cusp=cusp,
+                                                                        thresh_lat=thresh_lat,
+                                                                        bands=bands,
+                                                                        bands_lats=bands_lats,
+                                                                        patchy=patchy,
+                                                                        xscale=xscale,
+                                                                        yscale=yscale,
+                                                                        fclouds=fclouds,
+                                                                        constant_fcloud=constant_fcloud,
+                                                                        full_disk=full_disk,
+                                                                        sscloud=sscloud,
+                                                                        sigma_c=sigma_c,
+                                                                        delta_c=delta_c[a])
 
 
             #===============
