@@ -20,7 +20,8 @@ module_mie = Extension(name = 'module_mie',
 
 module_readmie = Extension(name = 'module_readmie',
                             sources=['./readmie_sig.pyf',
-                                     './readmie_source/read_mie_output.f', ])
+                                     './readmie_source/read_mie_output.f',
+                                     './readmie_source/file2coefs.f', ])
 
 module_mieshell = Extension(name = 'module_mieshell',
                             sources=['./mieshell_sig.pyf',

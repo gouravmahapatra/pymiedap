@@ -697,6 +697,24 @@ class Aerosols():
             strD = (" Type: " + str(self.typ) + "\n")
             return (str0 + strA + strB + strC + strD)
 
+    def load_coefs(self,filename_list, ncoefsMAX=4001, nmatMAX=4):
+        """ Method to load files with expansion coeficients into the Aerosol
+        object."""
+
+        nwavels = len(filename_list)
+        # Creating array to receive the coefficients
+        supercoefin = np.zeros((nwavels,nmatMAX,nmatMAX,ncoefsMAX), order='F')
+        superncoefin = np.zeros(nwavels, order='F')
+
+        for i,filename in enumerate(filename_list):
+            ncoef, coefs = readmie.file2coefs(filename)
+
+            # Store the coefficients for each wvl
+            supercoefin[i,:,:,:] = coefs
+            superncoefin[i] = ncoef
+
+        self.coefs = supercoefin
+        self.ncoefs = superncoefin
 
 
 # --------------

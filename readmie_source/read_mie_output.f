@@ -205,10 +205,11 @@ Cf2py intent(out) thetas, Fs
 ****************************************************************
 C LR : it would be good to get rid of that IMPLICIT
       IMPLICIT DOUBLE PRECISION (a-h, o-z)
-      INTEGER k, lnew, lold, l
+      INTEGER k, lnew, lold, l, ncoef
       DOUBLE PRECISION u, qroot6, fac1, fac2, fac3
       DOUBLE PRECISION sql4, sql41, twol1, tmp1, tmp2, denom
       DOUBLE PRECISION itmp, F2i, F3i
+      DOUBLE PRECISION scangle, F, coefs
 
       PARAMETER (pi=3.141592653589793238462643d0,NDcoef=1000)
       DIMENSION F(6),coefs(4,4,0:NDcoef),
