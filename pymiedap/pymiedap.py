@@ -421,7 +421,7 @@ class Model(object):
         indices of the model
         INPUTS:
             wvl: wavelength (in microns)
-            gas: choose between 'air' and pure 'CO2'
+            gas: choose between 'air', 'CO2', 'N2', 'He' and 'H2'
         """
         S = 1./np.array(self.wvl_list)
 
