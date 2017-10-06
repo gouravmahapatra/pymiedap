@@ -441,7 +441,7 @@ class Model(object):
             rindex = 1 + (0.01470091/(423.98 - S**2))
         if gas=='N2':
             # Peck and Khanna 1966 (0.47 -- 2.06 um)
-            rindex = 1 + 6.8552*1e5 + (3.243157*1e-2/(144-S**2))
+            rindex = 1 + 6.8552*1e-5 + (3.243157*1e-2/(144-S**2))
 
         self.rindex_gas = rindex
 
