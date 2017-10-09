@@ -47,15 +47,25 @@ from PIL import Image
 class Layer():
     """ This class is intended to describe a layer for the Doubling-Adding
     program. It contains the basic parameters of the model
-    tau : optical thickness (for each lambda)
-    tau_g : optical thickness related to gaseous absorption (for each lambda)
-    tau_ray : optical thickness related to rayleigh scattering set by user (for each lambda)
-    rayscat: if True, rayleigh scattering is computed. If false, tau_ray is used instead.
-    press : pressure at the bottom of the layer [bars]
-    aerosols : an object containing the properties of a type of aerosols.
-    col_dens: particular column density in particles per square micrometers
-    Several of these aerosol objects can coexist in a layer, but they should have
-    different names.
+
+    Parameters
+    ----------
+    tau : array
+        optical thickness (for each lambda)
+    tau_g : array
+        optical thickness related to gaseous absorption (for each lambda)
+    tau_ray : array
+        optical thickness related to rayleigh scattering set by user (for each lambda)
+    rayscat: Boolean
+        if True, rayleigh scattering is computed. If false, tau_ray is used instead.
+    press : float
+        pressure at the bottom of the layer [bars]
+    aerosols :
+        an object containing the properties of a type of aerosols.
+        Several of these aerosol objects can coexist in a layer, but they should have
+        different names.
+    col_dens: float
+        particular column density in particles per square micrometers
     """
 
     def __init__(self, tau=[30], tau_g=[0.], press=30e-3, psd='2',
@@ -79,7 +89,8 @@ class Layer():
 
     def update_layer(self, nitems):
         """ If the number of working wavelengths is changed, this method
-        updates the vectors that depend on wavelength"""
+        updates the vectors that depend on wavelength
+        """
         self.tau = self.tau[0] * np.ones(nitems)
         self.tau_g = self.tau_g[0] * np.ones(nitems)
         self.tau_ray = self.tau_ray[0] * np.ones(nitems)
@@ -723,17 +734,27 @@ class Aerosols():
 
 # Small utilities
 def calc_azimuth(phase, sza, emission, deg=True):
-    """This method computes the azimuth angle from the geometric
-    data. To be used once all geo data have been read and treated.
-    INPUTS:
-        phase : phase angle
-        sza : solar zenith angle
-        emission : emission angle
-    OUTPUT:
+    """Compute the azimuth angle from the geometric
+    data.
+
+    Parameters
+    ----------
+    phase : float or array
+        phase angle
+    sza : float or array
+        solar zenith angle
+    emission : float or array
+        emission angle
+    deg : Boolean, optional
+        If True, the output is given in degrees; in radians otherwise.
+        By default True
+
+    Returns
+    -------
+    azimuth : float or array
         the azimuthal angle
-    If deg==1, the output is given in degrees
-    Radians otherwise
     """
+
     theta = np.radians(sza)
     thetap = np.radians(emission)
     alpha = np.radians(phase)
@@ -755,14 +776,26 @@ def calc_azimuth(phase, sza, emission, deg=True):
 
 
 def get_cosbeta(PHA,SZA,EMI,AZI):
-
-    ''' Calculates the rotation angle between the local meridian plane and the
+    """Calculate the rotation angle between the local meridian plane and the
     scattering plane.
-    Inputs : SZA (deg)
-             EMI (deg)
-             PHA (deg)
-             AZI (deg)
-    Returns: cos BETA (rad) '''
+
+    Parameters
+    ----------
+    PHA :
+        phase angle (deg)
+    SZA :
+        solar zenith angle (deg)
+    EMI :
+        emission angle (deg)
+    AZI :
+        azimuthal angle (deg)
+
+    Returns
+    -------
+    cb :
+        cosine of angle beta (rad)
+
+    """
 
     sgn = np.ones(len(AZI))
     #sgn[AZI<0.] = 1
@@ -780,8 +813,23 @@ def get_cosbeta(PHA,SZA,EMI,AZI):
 
 
 def sunblackbody(L, Ts=5750):
-    """ Computes the blackbody radiance of the Sun at given
-    wavelength L in metres"""
+    """ Compute the blackbody radiance of the Sun at given
+    wavelength
+
+    Parameters
+    ----------
+    L : float or array
+        wavelength in metres
+    Ts : float, optional
+        Surface temperature of the star, in K.
+        By default 5750 K
+
+    Returns
+    -------
+    B : float or array
+        Blackbody radiance in W/m2/sr/um
+
+    """
 
     h = 6.63e-34  # Planck's constant
     c = 2.99e8  # Speed of light
@@ -795,40 +843,51 @@ def sunblackbody(L, Ts=5750):
 
     return B
 
+
 # Main functions
 def mie_code(aerosols, wavelengths, output=False, delta=1e-8, cutoff=1e-8, thmin=0, thmax=180,
-             step=1, nsubr=50, ngaur=60, nlaysMAX=50, ncoefsMAX=4001,
+             nsubr=50, ngaur=60, ncoefsMAX=4001,
              nfouMAX=4001, nmuMAX=201, nmatMAX=4):
-    """ Takes an input Model object and computes the Mie expansion coefficients
-    for the different aerosols types.
+    """ Compute Mie expansion coefficients for Aerosol object.
     Requires the module_mie module.
-    INPUT:
-        aerosols : an input aerosol type model containing all the modeling parameters
-    OPTIONAL INPUT:
-        delta: truncation of the Mie sum
-        cutoff: cutoff value for the particle size distribution
-        thmin: minimal value of phase angle (in degrees)
-        thmax: maximal phase angle
-        nsubr: number of subintervals for the distribution
-        ngaur: number of Gauss points used in the calculations
 
-        nlaysMAX: maximal number of layers
-        ncoefsMAX: max number of coefs
-        nfouMAX: max number of Fourier coefs
-        nmuMAX:
-        nsupMAX:
-    OUTPUT:
-        coefin : mie expansion coefficients for all layers in the model
-        ncoefin : number of non-zero elements in coefin for each layer
-        Also generates output file for the different aerosols types if output==True.
+    Parameters
+    ----------
+    aerosols : Aerosol object
+        an input aerosol type model containing all the modeling parameters
+    wavelengths : array
+        list of wavelengths for which computations should be performed
+    delta: float, optional
+        truncation of the Mie sum. Default 1e-8
+    cutoff: float, optional
+        cutoff value for the particle size distribution. Default 1e-8
+    thmin: float, optional
+        minimal value of phase angle (in degrees). Default 0
+    thmax: float, optional
+        maximal phase angle. Default 180.
+    nsubr: integer, optional
+        number of subintervals for the distribution. Default 50
+    ngaur: integer, optional
+        number of Gauss points used in the calculations. Default 60
+    ncoefsMAX: int, optional
+        max number of coefs for the Mie expansion. Default 4001.
+        Warning: changing this might conflict with Fortan modules
+    nmatMAX: int, optional
+        number of Stokes elements to compute. Should be 1, 3 or 4.
+        Default 4
+    output : Bool, optional
+        if True, expansion coefficients are written in a file with name in the form
+        scfile_name = aerosols.specie + '.sc.' + '{:06.3f}'.format(wav)
 
-    NOTES:
+    Returns
+    -------
+    Stores expansion coefficients in aerosols object
+
     """
 
     # ---------------------------
     # Mie calculations parameters
     # ---------------------------
-    nsupMAX = nmuMAX * nmatMAX
 
     weight2 = 0.3
 
@@ -918,39 +977,48 @@ def mie_code(aerosols, wavelengths, output=False, delta=1e-8, cutoff=1e-8, thmin
 
 
 def mie_shell(aerosols, wavelengths, output=False, delta=1e-8, cutoff=1e-8, thmin=0, thmax=180,
-              step=1, nsubr=20, ngaur=20, nlaysMAX=50, ncoefsMAX=4001,
+              nsubr=20, ngaur=20, nlaysMAX=50, ncoefsMAX=4001,
               nfouMAX=4001, nmuMAX=201, nmatMAX=4):
-    """ Takes an input Model object and computes the Mie expansion coefficients
-    for layered spheres.
-    Requires the module_mie module.
-    INPUT:
-        aerosols : an input aerosol type model containing all the modeling parameters
-    OPTIONAL INPUT:
-        delta: truncation of the Mie sum
-        cutoff: cutoff value for the particle size distribution
-        thmin: minimal value of phase angle (in degrees)
-        thmax: maximal phase angle
-        nsubr:
-        ngaur: number of Gauss points used in the calculations
+    """ Compute Layered spheres Mie expansion coefficients for Aerosol object.
+    Requires the module_mieshell module.
 
-        nlaysMAX: maximal number of layers
-        ncoefsMAX: max number of coefs
-        nfouMAX: max number of Fourier coefs
-        nmuMAX:
-        nsupMAX:
-    OUTPUT:
-        coefin : mie expansion coefficients for all layers in the model
-        ncoefin : number of non-zero elements in coefin for each layer
-        Also generates output file for the different aerosols types if output==1.
+    Parameters
+    ----------
+    aerosols : Aerosol object
+        an input aerosol type model containing all the modeling parameters
+    wavelengths : array
+        list of wavelengths for which computations should be performed
+    delta: float, optional
+        truncation of the Mie sum. Default 1e-8
+    cutoff: float, optional
+        cutoff value for the particle size distribution. Default 1e-8
+    thmin: float, optional
+        minimal value of phase angle (in degrees). Default 0
+    thmax: float, optional
+        maximal phase angle. Default 180.
+    nsubr: integer, optional
+        number of subintervals for the distribution. Default 50
+    ngaur: integer, optional
+        number of Gauss points used in the calculations. Default 60
+    ncoefsMAX: int, optional
+        max number of coefs for the Mie expansion. Default 4001.
+        Warning: changing this might conflict with Fortan modules
+    nmatMAX: int, optional
+        number of Stokes elements to compute. Should be 1, 3 or 4.
+        Default 4
+    output : Bool, optional
+        if True, expansion coefficients are written in a file with name in the form
+        scfile_name = aerosols.specie + '.sc.' + '{:06.3f}'.format(wav)
 
-    NOTES:
+    Returns
+    -------
+    Stores expansion coefficients in aerosols object
+
     """
 
     # ---------------------------
     # Mie calculations parameters
     # ---------------------------
-    nsupMAX = nmuMAX * nmatMAX
-
     par3 = 0.25  # this last parameter is only used for some PSD
     weight2 = 0.0
 
@@ -1050,33 +1118,60 @@ def mie_shell(aerosols, wavelengths, output=False, delta=1e-8, cutoff=1e-8, thmi
 
 def matrix_expansion(ncoefs, nangle, u, wg, F):
     """ Expansion of a scattering matrix in fourier coefficients.
-    INPUT:
-        ncoefs: the number of coefficients to be used in the expansion
-        nangle: number of scattering angles
-        u: cosine of scattering angles
-        wg: gaussian weights associated with u
-        F: scattering matrix
-    OUTPUT:
-        returns the expansion coefficients PRECISE SHAPE!
+
+    Used only as an alias for mie.devel
+
+    Parameters
+    ----------
+    ncoefs :
+        the number of coefficients to be used in the expansion
+    nangle:
+        number of scattering angles
+    u:
+        cosine of scattering angles
+    wg:
+        gaussian weights associated with u
+    F:
+        scattering matrix
+
+    Returns
+    -------
+    coefs : array (nmatMAX, nmatMAX, ncoefsMAX)
+        the expansion coefficients
+
     """
+
     coefs = mie.devel(ncoefs, nangle, u, wg, F)
     return coefs
 
 
 def read_mie_output(filename, full_output=False, nameout='stuff.dat'):
-    """ This function reads the output of the Mie code (cf. function mie_code
-    above)
-    INPUTS:
-        filename: the name of the files containing the expansion coefficients
-    OUTPUT:
-        theta: scattering angle
-        Pl: degree of linear polarization
-    if full_output=True, the output is:
-        theta: scattering angle
-        F : a (6,nangles) array with F11, F22, F33, F44, F12, F34 elements of
-        the scattering matrix and degree of polarisation
+    """ Read Mie expansion coefficients from file
 
-    Also produces an output file 'stuff.dat'
+    Parameters
+    ----------
+    filename : string
+        the name of the file containing the expansion coefficients
+    full_output : Bool, optional
+        if True, returns phase angles and full scattering matrix. If False,
+        returns only phase and -Q/I
+        Default is False
+    nameout : string
+        name of the output file
+
+    Returns
+    -------
+    theta : array
+        scattering angle
+    Pl : array
+        degree of linear polarization. If full_output is False
+    F : array
+        a (6,nangles) array with F11, F22, F33, F44, F12, F34 elements of
+        the scattering matrix and degree of polarisation
+        Only if full_output is True
+
+    Also produces an output file with name nameout
+
     """
 
     theta, F = readmie.readmieoutput(filename, nameout)
@@ -1090,19 +1185,47 @@ def read_mie_output(filename, full_output=False, nameout='stuff.dat'):
 
 
 def dap_code(model, rename=False, output_name='modelA',
-             path_output='./dap_database/', step=10,
-             nlaysMAX=50, ncoefsMAX=4001, nfouMAX=4001, ngeosMAX=200,
+             path_output='./dap_database/',
+             nlaysMAX=50, ncoefsMAX=4001, nfouMAX=4001,
              nmuMAX=201, nmatMAX=4, nmat=4, nmug=20):
     """ This function launches the DAP code to calculate the supermatrices
     produced by the doubling-adding code. Reads input from a model class.
     Requires the module module_dap.
-    INPUT:
-        model : a Model object
-    OPTIONAL INPUT:
-        rename: if True, the user set output file is used for the resulting coefficient files
-        output_file: name of the output if rename==True
-    OUTPUT:
-        produces an output file
+
+    Parameters
+    ----------
+    model : Model object
+        an input model containing all the modeling parameters
+    rename: Bool
+        if True, the user set output file is used for the resulting coefficient files
+    output_name : string
+        base of filename to be used for the Fourier output files
+    path_output : string
+        Path of folder where to store the output Fourier files. Folder is
+        created if not existing.
+    nlaysMAX : integer, optional
+        Maximum number of layers. Default 50
+    ncoefsMAX: int, optional
+        max number of coefs for the Mie expansion. Default 4001.
+        Warning: changing this might conflict with Fortan modules
+    nfouMAX : integer, optional
+        max number of Fourier coefficients. Default is 4001
+    nmug : integer, optional
+        number of Gauss points used in the calculations. Default 20
+    nnuMAX: int, optional
+        maximal number of Gauss points
+    nmatMAX: int, optional
+        max number of Stokes elements. Should be 1, 3 or 4.
+        Default 4
+    nmat: int, optional
+        number of Stokes elements to compute. Should be 1, 3 or 4.
+        Default 4
+
+    Returns
+    -------
+        produces an output file containing Fourier coefficients for the given
+        model
+
     """
 
     # Checking that the output directory exists
@@ -1292,17 +1415,49 @@ def dap_code(model, rename=False, output_name='modelA',
 
 def read_dap_output(phase, sza, emission, filename, beta=None, phi=None,
                     ngeosMAX=100000, nmuMAX=300, nfouMAX=2000, nmatMAX=4):
-    """ This function takes a geometry and reads the supermatrices coefficients
-    from the DAP code.
-    Input:
-        phase (deg)
-        sza (deg)
-        emission (deg)
-        filename
-    Output:
-        Stokes vectors I,Q,U,V normalised with input flux unity (not Pi)
-        Assuming normal reflection (i.e. multiply by cos(theta0) if you want real observed flux)
+    """ Reads the supermatrices coefficients for given geometry
+
+    Parameters
+    ----------
+    phase : float or array
+        phase angle (deg)
+    sza : float or array
+        solar zenith angle (deg)
+    emission : float or array
+        emission angle (deg)
+    filename : string
+        name of the Fourier file to be read
+    beta : None, float or array, optional
+        angle between the meridian plane and the scattering plane (deg)
+    phi : None, float or array, optional
+        azimuthal angle (deg)
+    nfouMAX : integer, optional
+        max number of Fourier coefficients. Default is 4001
+    ngeosMAX : integer, optional
+        max number of geometries. Default 100000
+    nnuMAX: int, optional
+        maximal number of Gauss points
+    nmatMAX: int, optional
+        max number of Stokes elements. Should be 1, 3 or 4.
+        Default 4
+
+
+    Returns
+    -------
+    I : array (same shape as phase)
+        Stokes element I, normalised with input flux unity (not Pi)
+    Q : array (same shape as phase)
+        Stokes element Q, normalised with input flux unity (not Pi)
+    U : array (same shape as phase)
+        Stokes element U, normalised with input flux unity (not Pi)
+    V : array (same shape as phase)
+        Stokes element V, normalised with input flux unity (not Pi)
+
+    All elements are given assuming normal reflection (i.e. multiply by
+    cos(theta0) if you want real observed flux)
+
     """
+
     ngeos = len(phase)
     betaF = np.zeros(ngeosMAX, order='F')
     azimuthF = np.zeros(ngeosMAX, order='F')
@@ -1361,22 +1516,44 @@ def compute_model(atm_model, force=False,
                path_input='./dap_database/', set_taus=False, rename=False,
                output_name='modelA', nmug_mie=20, nmug=20, nsubr=50, nmat=4):
     """
-    Function to compute the Fourier files associated with a Model object.
-    INPUTS:
-        atm_model : a Model object with all the input parameters
-    KEYWORDS:
-        force : if False, existing Fourier files are not overwritten; if True
-            existing files are replaced by newer versions
-        path_input : path of the fourier DAP files
-        set_taus: if True, will set opacities of layers following scattering
-        cross section of the aerosols in that layer and column density of that
-        layer.
-        rename: if true, output_name is used
-        output_name: custom name radical for the output files of the DAP code
-        nmug: number of Gauss points for Mie and DAP calculations
-        nmat: number of Stokes elements to compute
-    OUTPUT: computes the Fourier files  related to the given model. Also stores
+    Compute the Fourier files associated with a Model object.
+
+    Runs mie_code for all Aerosol objects and dap_code on the model
+
+    Parameters
+    ----------
+    atm_model : Model object
+        an input model containing all the modeling parameters
+    force : bool, optional
+        if True, existing Fourier files are overwritten
+        if False, Fourier files are computed only if atm_model has no
+        associated file yet.
+    path_output : string
+        Path of folder where to store the output Fourier files. Folder is
+        created if not existing.
+    set_taus : bool
+        if True, the opacities in atm_model are computed using the column
+        densities, instead of the user-defined tau
+    rename: Bool
+        if True, the user set output file is used for the resulting coefficient files
+    output_name : string
+        base of filename to be used for the Fourier output files
+    nmug : integer, optional
+        number of Gauss points used in the DAP calculations. Default 20
+    nmug_mie : integer, optional
+        number of Gauss points used in the Mie calculations. Default 20
+    nsubr : int, optional
+        Number of subintervals for Mie scattering.
+        Default 50
+    nmat: int, optional
+        number of Stokes elements to compute. Should be 1, 3 or 4.
+        Default 4
+
+    Returns
+    -------
+    Computes the Fourier files related to the given model. Also stores
     their names in the model object.
+
     """
 
     # Get wvl list
@@ -1490,11 +1667,29 @@ def gen_clouds():
 
 
 def rotate_stokes(Q,U,beta):
-    """ Calculates values of Q and U after rotation from local meridian
-	plane to scattering plane with angle beta"""
+    """ Compute values of Q and U after rotation from one reference
+	plane to another plane separated by an angle beta
+
+    Parameters
+    ----------
+    Q : float or array
+        Stokes Q
+    U : float or array
+        Stokes U
+    beta : float or array
+        Angle between two reference planes (radians)
+
+    Returns
+    -------
+    newQ : float or array
+        rotated Q
+    newU : float or array
+        rotated U
+
+    """
 
     newQ = np.cos(2*beta)*Q + np.sin(2*beta)*U
-    newU= -np.sin(2*beta)*Q + np.cos(2*beta)*U
+    newU = -np.sin(2*beta)*Q + np.cos(2*beta)*U
 
     return newQ, newU
 
@@ -1547,43 +1742,93 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
                   fclouds=[0.5,0.5], constant_fcloud=False, sscloud=False,
                   sigma_c=10., delta_c=[0.], nmug_mie=20, nmug=20., nsubr=50,
                   nmat=4, pixscaler=1, adaptive_pixels=False):
-    """ Function to generate disk-resolved images of a planet according to model
-    INPUT:
-        atm_model: model to compute
-        alpha: phase angles
-        npix: number of pixels (total number of pixels will be npix**2)
-        force: if True, will force recalculation of model
-        set_taus: if True, will set opacities following scattering cross section and column density
-        rename: if True, model output files will be renamed
-        output_name: output name used for the DAP files if rename=True
-        alternate_model: model to be used if inhomogeneous cloud cover. Defines the NON cloudy.
-        fixed_pattern: if True, a cloud pattern is generated at start and then
-            reused for all phase angle after.
-        input_pattern: an existing pattern that can be used as a starter
-            (caution: must have size npix*npix)
-        cusp: if True, polar cusps are created
-        thresh_lat: defines the latitude above which the cusps exist
-        patchy: if True, patchy clouds are generated
-        fcloud: fraction of the planet to be covered with clouds
-        constant_fcloud: if True, the factor fcloud applies not to the whole
-            planet but to the lit part of the planet
-        sscloud: if True, a subsolar cloud is created
-        sigma_c: extend in degrees of the subsolar cloud with respect to the
-            SSP. Cloud exists for SZA<sigma_c
-        delta_c: offset in degrees the position of the subsolar cloud with
-            respect to subsolar point.
-        nmug, nmug_mie: number of Gauss point for Mie and DAP codes
-        nmat: number of Stokes elements to compute
-        nsubr: number of divisions for size dist in Mie calculations
-        adaptive_pixels: if True, npix increases with increasing phase angle
-            (in sin**2 of alpha/2)
-        pixscaler: factor used in combination with adaptive_pixels to set the
-            rate of increase in pix number
-        xscale: for patchy clouds gives the typical size on x-axis, as a function of npix
-        yscale: for patchy clouds gives the typical size on y-axis, as a function of npix
-    OUTPUT:
-        produces two pdf files for intensity and degree of linear polarization
+    """ Generate disk-resolved images of a planet according to model
+
+    Parameters
+    ----------
+    models : list of Model objects
+        models to use in computations
+    alpha : array
+        phase angles for which to compute
+    npix : int
+        number of pixels (total number of pixels will be npix**2)
+    force : bool, optional
+        if True, will force recalculation of model
+    set_taus : bool, optional
+        if True, will set opacities following scattering cross section and column density
+    rename : bool, optional
+        if True, model output files will be renamed
+    output_names : list of strings
+        list of names of the models, used for the name of the Fourier files
+    fixed_pattern : bool, optional
+        if True, a cloud pattern is generated at start and then
+        reused for all phase angle after.
+    input_pattern: array, optional
+        an existing pattern that can be used as a starter
+        (caution: must have size nphase*npix*npix)
+    cusp : bool, optional
+        if True, polar cusps are created
+    thresh_lat : float, optional
+        defines the latitude above which the cusps exist
+    patchy : bool, optional
+        if True, patchy clouds are generated
+    fcloud : array, optional
+        fraction of the planet to be covered with clouds
+        should have same length as models input list
+    constant_fcloud : bool, optional
+        if True, the factor fcloud applies not to the whole
+        planet but to the lit part of the planet
+    sscloud : bool, optional
+        if True, a subsolar cloud is created
+    sigma_c : float, optional
+        extend in degrees of the subsolar cloud with respect to the SSP. Cloud
+        exists for SZA<sigma_c
+    delta_c : float, optional
+        offset in degrees the position of the subsolar cloud with
+        respect to subsolar point.
+    bands : bool, optional
+        if True, defines latitudinal bands
+    bands_lats : array, optional
+        array listing the borders of the bands.
+        Ex: [-90, 45, 90] defines two bands
+    nmug : int, optional
+        number of Gauss point for DAP code
+    nmug_mie : int, optional
+        number of Gauss point for Mie code
+    nmat : int, optional
+        number of Stokes elements to compute
+    nsubr : int, optional
+        number of divisions for size dist in Mie calculations
+    adaptive_pixels : bool, optional
+        if True, npix increases with increasing phase angle (in sin**2 of
+        alpha/2)
+    pixscaler : float, optional
+        factor used in combination with adaptive_pixels to set the
+        rate of increase in pix number. Default 1
+    xscale : float, optional
+        for patchy clouds gives the typical size on x-axis, as a function of npix
+    yscale : float, optional
+        for patchy clouds gives the typical size on y-axis, as a function of npix
+
+    Returns
+    -------
+    I,Q,U,V : arrays
+        Stokes elements. I(alpha=0) being the geometric albedo
+    P : array
+        P is -Q/I
+    Pqmin,Pqmax : arrays
+        min and max values of -Q/I
+    Plmin,Plmax : arrays
+        min and max values of Pl
+    Ptmin,Plmax : arrays
+        min and max values of total polarization
+    Imin,Imax : arrays
+        min and max values of intensity
+
+    Those parameters being stored in the first model object given as input.
+
     """
+
     # If onyl one model is given, assumes a full cover.
     if len(models)==1:
         full_disk=True
@@ -1832,47 +2077,90 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
                       adaptive_pixels=False):
 
     """ Function to generate disk-integrated images of a planet according to model
-    INPUT:
-        models: a list or tuples of models to compute
-        alpha: phase angles
-        npix: number of pixels (total number of pixels will be npix**2)
-        force: if True, will force recalculation of models
-        set_taus: if True, will set opacities of each layer in models following
-            scattering cross section and column density
-        rename: if True, model output files will be renamed
-        fixed_pattern: if True, a cloud pattern is generated at start and then
-            reused for all phase angles after.
-        input_pattern: an existing pattern that can be used as a starter
-            (caution: must have size npix*npix)
-        cusp: if True, polar cusps are created
-        thresh_lat: defines the latitude above which the cusps exist
-        patchy: if True, patchy coverage is generated
-        fclouds: fractions of the planet to be covered with each model
-        constant_fcloud: if True, the factor fcloud applies not to the whole
-            planet but to the lit part of the planet
-        sscloud: if True, a subsolar cloud is created
-        sigma_c: extend in degrees of the subsolar cloud with respect to the
-            SSP. Cloud exists for SZA<sigma_c
-        delta_c: offset in degrees the position of the subsolar cloud with
-            respect to subsolar point.
-        output_names: output names used for the DAP files if rename=True
-        nmug_mie: number of Gauss point for Mie codes
-        nmug: number of Gauss point for DAP codes
-        nmat: number of Stokes elements to compute
-        nsubr: number of divisions for size dist in Mie calculations
-        niter: number of iterations for the coverage
-        adaptive_pixels: if True, npix increases with increasing phase angle
-            (in sin**2 of alpha/2)
-        xscale: for patchy clouds gives the typical size on x-axis, as a function of npix
-        yscale: for patchy clouds gives the typical size on y-axis, as a function of npix
-    OUTPUT:
-        I,Q,U,V: Stokes elements. I(alpha=0) being the geometric albedo
-        P: -Q/I
-        Pqmin,Pqmax: min and max values of -Q/I
-        Plmin,Plmax: min and max values of Pl
-        Ptmin,Plmax: min and max values of total polarization
-        Imin,Imax: min and max values of intensity
-        those parameters being stored in the first model object given as input.
+
+    Parameters
+    ----------
+    models : list of Model objects
+        models to use in computations
+    alpha : array
+        phase angles for which to compute
+    npix : int
+        number of pixels (total number of pixels will be npix**2)
+    force : bool
+        if True, will force recalculation of model
+    set_taus : bool
+        if True, will set opacities following scattering cross section and column density
+    rename : bool
+        if True, model output files will be renamed
+    output_names : list of strings
+        list of names of the models, used for the name of the Fourier files
+    fixed_pattern : bool
+        if True, a cloud pattern is generated at start and then
+        reused for all phase angle after.
+    input_pattern: array
+        an existing pattern that can be used as a starter
+        (caution: must have size nphase*npix*npix)
+    cusp : bool
+        if True, polar cusps are created
+    thresh_lat : float
+        defines the latitude above which the cusps exist
+    patchy : bool
+        if True, patchy clouds are generated
+    fcloud : array
+        fraction of the planet to be covered with clouds
+        should have same length as models input list
+    constant_fcloud : bool
+        if True, the factor fcloud applies not to the whole
+        planet but to the lit part of the planet
+    sscloud : bool
+        if True, a subsolar cloud is created
+    sigma_c : float
+        extend in degrees of the subsolar cloud with respect to the SSP. Cloud
+        exists for SZA<sigma_c
+    delta_c : float
+        offset in degrees the position of the subsolar cloud with
+        respect to subsolar point.
+    bands : bool
+        if True, defines latitudinal bands
+    bands_lats : array
+        array listing the borders of the bands.
+        Ex: [-90, 45, 90] defines two bands
+    nmug : int
+        number of Gauss point for DAP code
+    nmug_mie : int
+        number of Gauss point for Mie code
+    nmat : int
+        number of Stokes elements to compute
+    nsubr : int
+        number of divisions for size dist in Mie calculations
+    adaptive_pixels : bool
+        if True, npix increases with increasing phase angle (in sin**2 of
+        alpha/2)
+    pixscaler : float, optional
+        factor used in combination with adaptive_pixels to set the
+        rate of increase in pix number. Default 1
+    xscale : float
+        for patchy clouds gives the typical size on x-axis, as a function of npix
+    yscale : float
+        for patchy clouds gives the typical size on y-axis, as a function of npix
+
+    Returns
+    -------
+    I,Q,U,V : arrays
+        Stokes elements. I(alpha=0) being the geometric albedo
+    P : array
+        P is -Q/I
+    Pqmin,Pqmax : arrays
+        min and max values of -Q/I
+    Plmin,Plmax : arrays
+        min and max values of Pl
+    Ptmin,Plmax : arrays
+        min and max values of total polarization
+    Imin,Imax : arrays
+        min and max values of intensity
+
+    Those parameters being stored in the first model object given as input.
+
     """
 
     # If onyl one model is given, assumes a full cover.
