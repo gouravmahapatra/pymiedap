@@ -2007,21 +2007,41 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
 def plot_pixels(model, wvl_idx=0, display='grid', stokes='Ps', phase_idx=0,
                 title='Polarization', cmap='YlOrRd',vmin=0,vmax=1,
                 font_size=12):
-    """ Function to nicely plot a resolved planet
+    """ Function to nicely plot a resolved planet based on Model object
 
-    Inputs:
+    Parameters
+    ----------
+    model : Model object
+        a model object already computed and read with pmd.planet_pixels
+    wvl_idx : int
+        index of the wvl to be plotted
+    phase_idx : int, optional
+        index in the phase angle array to be plotted. Default is 0
+    display : string, optional
+        if 'grid', displays the planet as an orthographic projection of a
+        sphere at a given phase angle.
+        If 'map' displays results as function of latitude/longitude
+        Default is 'grid'
+    stokes : string, optional
+        which Stokes element to plot. Allowed are 'Ps' (-Q/I), 'I', 'Q', 'U',
+        'V', 'Pt' (total polarization), 'Pl' total linear pol.
+        Default is 'Ps'
+    title : string, optional
+        title of the figure
+        Default is 'Polarization'
+    cmap : string, optional
+        a matplotlib colormap name, default is 'YlOrRd'
+    vmin, vmax: floats, optional
+        minimum and maximum range of values to plot, default is 0 and 1
+    font_size : int, optional
+        size of the font for the figure, default is 12
 
-        model: a model object
-        wvl_idx: index of the wvl to be plotted
-        phase_idx: index of the phase to be plotted
-        display: if 'grid', displays the planet as a sphere at a given phase
-            angle. If 'map' displays results as function of latitude/longitude
-        stokes: which Stokes element to plot. 'Ps' is for -Q/I.
-        title: title of the figure
-        cmap: a matplotlib colormap
-        vmin, vmax: range of values to plot
-        font_size: size of the font for the figure
+    Returns
+    -------
+    Returns a figure with axes
+
     """
+
     npix=model.npix
 
     if display == 'grid':
@@ -2063,7 +2083,6 @@ def plot_pixels(model, wvl_idx=0, display='grid', stokes='Ps', phase_idx=0,
     ax.set_aspect('equal')
 
     return fig,ax
-
 
 
 def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
@@ -2495,41 +2514,74 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
     atm_model.npix = npix
 
 
-def mask_planet(alpha=15, npix=20, cusp=False, thresh_lat=50., patchy=True,
-                 ntypes=2, full_disk=False, fclouds=[0.5,0.5], fixed_cover=None,
+def mask_planet(alpha=0, npix=20, cusp=False, thresh_lat=50., patchy=True,
+                 full_disk=False, fclouds=[0.5,0.5], fixed_cover=None,
                  constant_fcloud=False, sscloud=False, sigma_c=10.,
                  delta_c=0., xscale=0.1, yscale=0.01,
                 bands=False, bands_lats=[-90,90]):
-    """ Generates a mask that can be used for inhomogeneous planetsi
-    INPUTS:
-        alpha: phase angle at which the calculation is made
-        npix: number of pixels on each axis
-        cusp: if True, polar cusps are added
-        thresh_lat: latitude threshold above which the cusps extend
-        patchy: generates a random patchy cloud cover
-        bands: generates bands that are defined by their latitudes
-        bands_lats: array with limits of the bands. Should start at -90d and end at 90d. Must be in
-            increasing order.
-        ntypes: types of different pixels for patchy
-        fcloud: fraction of the planet that should be covered with clouds
-        fixed_cover: if None, a new cloud cover is generated. If a table is
-            given, it will be used as the cloud cover
-        constant_fcloud: if True, the cloud cover fraction is calculated for
-            the given phase angle and not for the whole disk
-        sscloud: if True, a subsolar cloud is generated
-        sigma_c: extend in degrees of the subsolar cloud. Points between the
-            subsolar point and the points with SZA=alpha+sigma are cloudy.
-        delta_c: longitudinal offset for the cloud, in degrees
-        xscale: for patchy clouds gives the typical size on x-axis, as a function of npix
-        yscale: for patchy clouds gives the typical size on y-axis, as a function of npix
+    """ Generates a mask that can be used for inhomogeneous planets
 
-    OUTPUT:
-        grid_lit: array corresponding to the points of the generated cloud
-            cover that are lit
-        grid_out: array with the points that actually will be used in an array form
-        gird_full: cloud cover of the whole disk
-        nb_cloud: fraction of the planet covered with clouds
-        asym: asymetry parameter
+    Parameters
+    ----------
+    alpha : int,optional
+        phase angle at which the calculation is made
+        default is 0
+    npix : int, optional
+        number of pixels on each axis
+        default is 20
+    cusp : bool, optional
+        if True, polar cusps are added and pixels above thresh_lat have value 0
+        default is False
+    thresh_lat : float, optional
+        latitude threshold above which the cusps extend
+        default is 50.
+    patchy : bool
+        if True, generates a random patchy cloud cover. First type of patches
+        is given value 0, second is 1, etc.
+        Default is True
+    bands : bool
+        If True, generates bands that are defined by their latitudes. First
+        band has mask value 0, second is 1, etc.
+        default is False
+    bands_lats : array
+        array with limits of the bands. Should start at -90d and end at 90d. Must be in
+        increasing order. Default is [-90,90]
+    fclouds : array
+        List of fractions of the planet that should be covered with pixels of
+        each model
+        Default is [0.5, 0.5]
+    fixed_cover : None or array
+        if None, a new cloud cover is generated. If a table is
+        given, it will be used as the cloud cover. Default is None.
+    constant_fcloud : Bool
+        if True, the cloud cover fraction is calculated for
+        the given phase angle and not for the whole disk
+        Default is False
+    sscloud : bool
+        if True, a subsolar cloud is generated
+    sigma_c : float
+        extend in degrees of the subsolar cloud. Points between the
+        subsolar point and the points with SZA=alpha+sigma are given value 0.
+    delta_c : float
+        longitudinal offset for the subsolar cloud, in degrees
+    xscale : float
+        for patchy clouds gives the typical size on x-axis, as a function of npix
+    yscale : float
+        for patchy clouds gives the typical size on y-axis, as a function of npix
+
+    Returns
+    -------
+    grid_lit : 2d array
+        array corresponding to the points of the generated pattern that are lit
+    grid_out: 1d array
+        flat array with the pixels that are actually lit and on the planet
+    gird_full : 2d array
+        mask of the whole disk, including the non-lit part of the planet
+    nb_cloud : float
+        fraction of the planet covered with clouds
+    asym : float
+        asymetry parameter: amount of pixels of the mask that don't match their
+        image by symmetry through the equatorial axis
 
     """
 
