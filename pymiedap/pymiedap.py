@@ -164,26 +164,76 @@ class Layers:
 
 class Model(object):
     """ This class defines a model planet.
-    Layers : a Layer class object containing several layers
-    I, Q, U, V : Stokes vectors
-    P : degree of linear polarization (-Q/I)
-    wvl_list : list of wvl to compute. Each time the list is changed (all at
+
+    Parameters
+    ----------
+    Layers : Layers class object
+        contains several layers
+    wvl_list : array
+        list of wvl to compute. Each time the list is changed (all at
         once) the others vectors within the layers are updated.
-    gravity: value of the acceleration of gravity (in m/s^2)
-    asurf: surface albedo for Lambertian surface. If changed, surface[0,0]
-    changes too (see below).
-    mma: molecular mass of the gas (in atomic mass units)
-    dpol: depolarisation factor for the gas medium
-    rindex_gas: refractive index of the gas (same length as wvl_list). Default is for air.
-    Ts: temperature of the star in K
-    Rs: Radius of the star in meters
-    Dps: distance planet-star in meters
-    fcloud: cloud cover when doing resolved and integrated simulations
-    asym: asymmetry in cloud cover
-    picture: image of cloud cover
-    surface: an array describing a constant reflection matrix or a filename
+    gravity : float
+        value of the acceleration of gravity (in m/s^2)
+        default 9.81
+    asurf : float
+        surface albedo for Lambertian surface. If changed, surface[0,0] changes
+        too (see below).
+        Default is 0
+    mma : float
+        mean molecular mass of the gas (in atomic mass units)
+    dpol : float
+        depolarisation factor for the gas medium
+        default is 0.09
+    rindex_gas : array
+        refractive index of the gas (same length as wvl_list). Default is for air.
+    Ts : float
+        temperature of the star in K
+    Rs : float
+        Radius of the star in meters
+    Dps : float
+        distance planet-star in meters
+    surface : 4x4 array or string
+        an array describing a constant reflection matrix or a filename
         with the Fourier coefficients of a more complicated surface. If surface
         is updated, asurf changes accordingly.
+
+    Returns
+    -------
+    I, Q, U, V : nd arrays
+        Stokes elements
+    P : nd array
+        degree of linear polarization (-Q/I)
+    Pl : nd array
+        total degree of linear polarization (sqrt(Q**2+U**2)/I)
+    Pt : nd array
+        total degree of polarization
+    Pu : nd array
+        U/I
+    Pv : nd array
+        V/I
+    Pxstd : ndarray
+        Standard deviation of quantity x in case of variable pixel masks
+    Pxmax1s : ndarray
+        Standard deviation of quantity x in case of variable pixel masks
+    Pxmax : ndarray
+        Max of quantity x in case of variable pixel masks
+    Pxmin : ndarray
+        Min of quantity x in case of variable pixel masks
+    PxminNs : ndarray
+        Value of quantity x - N times the standard deviation in case of
+        variable pixel masks
+    PxmaxNs : ndarray
+        Value of quantity x + N times the standard deviation in case of
+        variable pixel masks
+    fcloud : float
+        cloud cover when doing resolved and integrated simulations
+    asym : float
+        asymmetry of the planet
+    picture : 2d array
+        image of cloud cover
+
+    The returned attributes depend on the function used on the model object
+
     """
 
     def __init__(self, wvl_list=np.array([1.101]), gravity=9.81, dpol=0.09,
