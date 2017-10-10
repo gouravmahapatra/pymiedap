@@ -27,17 +27,10 @@ import module_mieshell as mieshell
 import module_readmie as readmie
 import module_dap as dap
 import module_geos as geos
-import scipy.interpolate as scpint
-import scipy.integrate as scpinteg
-import scipy.stats as st
 import os
 import sys
 import os.path
-import copy
-import matplotlib
-#matplotlib.use('Agg')
 import matplotlib.pyplot as mpl
-#from lmfit import minimize, Parameters
 from PIL import Image
 
 # ---------
