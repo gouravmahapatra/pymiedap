@@ -2048,8 +2048,8 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
 
 
 def plot_pixels(model, wvl_idx=0, display='grid', stokes='Ps', phase_idx=0,
-                title='Polarization', cmap='YlOrRd',vmin=0,vmax=1,
-                font_size=12):
+                title='Polarization', cmap='YlOrRd',vmin=None,vmax=None,
+                font_size=12, figsize=8, dpi=100):
     """ Function to nicely plot a resolved planet based on Model object
 
     Parameters
@@ -2074,10 +2074,14 @@ def plot_pixels(model, wvl_idx=0, display='grid', stokes='Ps', phase_idx=0,
         Default is 'Polarization'
     cmap : string, optional
         a matplotlib colormap name, default is 'YlOrRd'
-    vmin, vmax: floats, optional
-        minimum and maximum range of values to plot, default is 0 and 1
+    vmin, vmax: floats or None, optional
+        minimum and maximum range of values to plot, default are None
     font_size : int, optional
         size of the font for the figure, default is 12
+    figsize : float, optional
+        size of the figure in inches
+    dpi : int, optional
+        dots per inch, resolution of the figure
 
     Returns
     -------
@@ -2087,12 +2091,34 @@ def plot_pixels(model, wvl_idx=0, display='grid', stokes='Ps', phase_idx=0,
 
     npix=model.npix
 
+    fig = mpl.figure(figsize=(figsize,figsize), dpi=dpi)
+    ax = fig.add_subplot(111, aspect=1)
+
+
     if display == 'grid':
         X = model.geom.x[wvl_idx,phase_idx,:]
         Y = model.geom.y[wvl_idx,phase_idx,:]
+        circ = mpl.Circle((0,0),1,color='gray')
+        ax.add_patch(circ)
+        ax.set_xlim(-1,1)
+        ax.set_ylim(-1,1)
+        bbox = ax.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
+        axh = bbox.height
+        axw = bbox.width
+        scalingx = np.ones_like(X)
+        scalingy = np.ones_like(Y)
+        area = (axh*dpi*axw*dpi)/(1.5*npix)**2
     if display == 'map':
         X = model.geom.longitude[wvl_idx,phase_idx,:]
         Y = model.geom.latitude[wvl_idx,phase_idx,:]
+        ax.set_xlim(-90,90)
+        ax.set_ylim(-90,90)
+        bbox = ax.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
+        axh = bbox.height
+        axw = bbox.width
+        scalingx = 1./np.cos(np.radians(X))
+        scalingy = 1./np.cos(np.radians(Y))
+        area = (axh*dpi*axw*dpi)/(2*1.5*npix)**2
 
     if stokes=='I':
         Z = model.I[wvl_idx,phase_idx,:]
@@ -2104,25 +2130,21 @@ def plot_pixels(model, wvl_idx=0, display='grid', stokes='Ps', phase_idx=0,
         Z = model.V[wvl_idx,phase_idx,:]
     if stokes=='Ps':
         Z = model.P[wvl_idx,phase_idx,:]
+    if stokes=='Pl':
+        Z = model.Pl[wvl_idx,phase_idx,:]
+    if stokes=='Pt':
+        Z = model.Pt[wvl_idx,phase_idx,:]
 
 
-    figsize = 850
-    dpi = 90
 
-    fig = mpl.figure(figsize=(figsize/dpi,figsize/dpi), dpi=dpi)
-    ax = fig.add_subplot(111, aspect=1)
     ax.set_title(title)
-    circ = mpl.Circle((0,0),1,color='gray')
-    ax.add_patch(circ)
     sc = ax.scatter(X, Y, c=Z,lw=0, marker='s',
-                    s=(0.6*figsize/npix)**2,
+                    s=area*scalingx*scalingy,
                     cmap=cmap, zorder=10,
                     vmin=vmin, vmax=vmax)
     fig.tight_layout(pad=1.2)
     cb = fig.colorbar(sc,pad=0.02, extend='both')
     cb.set_label(stokes,size=font_size)
-    ax.set_xlim(-np.nanmax(X),np.nanmax(X))
-    ax.set_ylim(-np.nanmax(Y),np.nanmax(Y))
     ax.set_aspect('equal')
 
     return fig,ax
