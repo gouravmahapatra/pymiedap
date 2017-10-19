@@ -2286,7 +2286,7 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
     #At start, no specific cloud cover
     picture_full = None
     vecfcloud = np.zeros((len(alpha),len(fclouds)))
-    vecasym = np.zeros(len(alpha))
+    vecasym = np.zeros((nalpha,niter))
 
     if len(alpha)!=len(delta_c):
         delta_c = delta_c[0]*np.ones(len(alpha))
@@ -2440,7 +2440,7 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
 
                     # save some information in the model
                     vecfcloud[a,:] = fclouds
-                    vecasym[a] = asym
+                    vecasym[a,citer] = asym
                     model.picture = np.copy(picture_full)
 
                     Ix[:,mask==pixtype] = IB
@@ -2461,7 +2461,7 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
             else:
                 # save some information in the model
                 vecfcloud[a,:] = fclouds
-                vecasym[a] = asym
+                vecasym[a,citer] = asym
                 model.picture = np.copy(picture_full)
 
                 # Integrating over planet
