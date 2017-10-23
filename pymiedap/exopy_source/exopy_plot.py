@@ -40,7 +40,7 @@ def settings():
                                  'legend.labelspacing': 0.2,
                                  'legend.markerscale': 0.2})
 
-def IQUP(bodies, Nsqv= 10, t = 0, wvl=0, phase = False, save = False):
+def IQUP(bodies, Nsqv= 10, t = 0, wvl=0, phase = False, save = False, cmap=_matplotlib.cm.viridis):
     from matplotlib.patches import Rectangle
     import scipy as _scipy
 
@@ -92,9 +92,9 @@ def IQUP(bodies, Nsqv= 10, t = 0, wvl=0, phase = False, save = False):
         square = Rectangle( (faces00[i]*2,faces10[i]*2),-2*faces00[i]+2*faces01[i],-2*faces00[i]+2*faces01[i] )
         patches.append(square)
 
-    p1 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
-    p2 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
-    p3 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
+    p1 = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces, zorder = 2)
+    p2 = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces, zorder = 2)
+    p3 = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces, zorder = 2)
 #    p4 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
 
     p1.set_array(I0)
@@ -159,9 +159,9 @@ def IQUP(bodies, Nsqv= 10, t = 0, wvl=0, phase = False, save = False):
         square = Rectangle( (faces00[i]*2,faces10[i]*2),-2*faces00[i]+2*faces01[i],-2*faces00[i]+2*faces01[i] )
         patches.append(square)
 
-    p5 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
-    p6 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
-    p7 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
+    p5 = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces, zorder = 2)
+    p6 = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces, zorder = 2)
+    p7 = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces, zorder = 2)
 #    p8 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
 
     p5.set_array(I1)
@@ -332,7 +332,7 @@ def IQUP(bodies, Nsqv= 10, t = 0, wvl=0, phase = False, save = False):
 
 
 
-def IQUP_gif(bodies, Nsqv= 10, dt = 10, wvl=0, path = 'gif', seconds = None):
+def IQUP_gif(bodies, Nsqv= 10, dt = 10, wvl=0, path = 'gif', seconds = None, cmap=_matplotlib.cm.viridis):
     from matplotlib.patches import Rectangle
     import scipy as _scipy
     _plt.ioff()
@@ -459,9 +459,9 @@ def IQUP_gif(bodies, Nsqv= 10, dt = 10, wvl=0, path = 'gif', seconds = None):
             square = Rectangle( (faces00[i]*2,faces10[i]*2),-2*faces00[i]+2*faces01[i],-2*faces00[i]+2*faces01[i] )
             patches.append(square)
 
-        p1 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
-        p2 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
-        p3 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
+        p1 = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces, zorder = 2)
+        p2 = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces, zorder = 2)
+        p3 = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces, zorder = 2)
     #    p4 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
 
         p1.set_array(I0)
@@ -502,9 +502,9 @@ def IQUP_gif(bodies, Nsqv= 10, dt = 10, wvl=0, path = 'gif', seconds = None):
             square = Rectangle( (faces00[i]*2,faces10[i]*2),-2*faces00[i]+2*faces01[i],-2*faces00[i]+2*faces01[i] )
             patches.append(square)
 
-        p5 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
-        p6 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
-        p7 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
+        p5 = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces, zorder = 2)
+        p6 = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces, zorder = 2)
+        p7 = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces, zorder = 2)
     #    p8 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
 
         p5.set_array(I1)
@@ -620,7 +620,7 @@ def IQUP_gif(bodies, Nsqv= 10, dt = 10, wvl=0, path = 'gif', seconds = None):
 
 
 
-def IQ2(bodies, t = 0, wvl=0, phase = False, save = False):
+def IQ2(bodies, t = 0, wvl=0, phase = False, save = False, cmap=_matplotlib.cm.viridis):
     from matplotlib.patches import Rectangle
     # create a figure with subplots
     fig = _plt.figure(figsize=(15,7))
@@ -701,8 +701,8 @@ def IQ2(bodies, t = 0, wvl=0, phase = False, save = False):
         square = Rectangle( (faces00[i]*2,faces10[i]*2),-2*faces00[i]+2*faces01[i],-2*faces00[i]+2*faces01[i] )
         patches.append(square)
 
-    p1 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
-    p2 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
+    p1 = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces, zorder = 2)
+    p2 = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces, zorder = 2)
 
     p1.set_array(I0)
     p2.set_array(Q0)
@@ -739,8 +739,8 @@ def IQ2(bodies, t = 0, wvl=0, phase = False, save = False):
         square = Rectangle( (faces00[i]*2,faces10[i]*2),-2*faces00[i]+2*faces01[i],-2*faces00[i]+2*faces01[i] )
         patches.append(square)
 
-    p3 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
-    p4 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
+    p3 = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces, zorder = 2)
+    p4 = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces, zorder = 2)
 
     p3.set_array(I1)
     p4.set_array(Q1)
@@ -1318,7 +1318,7 @@ def shadow_dd(body, conf, t = [0,0,0], save = False, dots = False):
 
         _plt.show()
 
-def I_d(body, conf, t = 0, wvl=0, dots = False):
+def I_d(body, conf, t = 0, wvl=0, dots = False, cmap=_matplotlib.cm.viridis):
 
     print('\n    ⇒ Plotting I parameter ' + body.type + ' ' + body.name+' at t ='+str(body.ephemeris.time[t])+' seconds')
     from matplotlib.patches import Rectangle
@@ -1343,7 +1343,7 @@ def I_d(body, conf, t = 0, wvl=0, dots = False):
         square = Rectangle( (body.grid.faces[i,0,0]*2,body.grid.faces[i,1,0]*2),-2*body.grid.faces[i,0,0]+2*body.grid.faces[i,0,1],-2*body.grid.faces[i,0,0]+2*body.grid.faces[i,0,1] )
         patches.append(square)
 
-    p = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces)
+    p = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces)
     p.set_array(body.grid.I[wvl, t,:])
     ax.add_collection(p)
     _plt.colorbar(p)
@@ -1359,7 +1359,7 @@ def I_d(body, conf, t = 0, wvl=0, dots = False):
     #fig.patch.set_visible(False)
 
 
-def Q_d(body, conf, t = 0, wvl=0, dots = False):
+def Q_d(body, conf, t = 0, wvl=0, dots = False, cmap=_matplotlib.cm.viridis):
 
     print('\n    ⇒ Plotting Q parameter ' + body.type + ' ' + body.name+' at t ='+str(body.ephemeris.time[t])+' seconds')
     from matplotlib.patches import Rectangle
@@ -1384,7 +1384,7 @@ def Q_d(body, conf, t = 0, wvl=0, dots = False):
         square = Rectangle( (body.grid.faces[i,0,0]*2,body.grid.faces[i,1,0]*2),-2*body.grid.faces[i,0,0]+2*body.grid.faces[i,0,1],-2*body.grid.faces[i,0,0]+2*body.grid.faces[i,0,1] )
         patches.append(square)
 
-    p = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces)
+    p = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces)
     p.set_array(body.grid.Q[wvl,t,:])
     ax.add_collection(p)
     _plt.colorbar(p)
@@ -1399,7 +1399,7 @@ def Q_d(body, conf, t = 0, wvl=0, dots = False):
     _plt.tight_layout()
 
 
-def U_d(body, conf, t = 0, wvl=0, dots = False):
+def U_d(body, conf, t = 0, wvl=0, dots = False, cmap=_matplotlib.cm.viridis):
 
     print('\n    ⇒ Plotting U parameter ' + body.type + ' ' + body.name+' at t ='+str(body.ephemeris.time[t])+' seconds')
     from matplotlib.patches import Rectangle
@@ -1424,7 +1424,7 @@ def U_d(body, conf, t = 0, wvl=0, dots = False):
         square = Rectangle( (body.grid.faces[i,0,0]*2,body.grid.faces[i,1,0]*2),-2*body.grid.faces[i,0,0]+2*body.grid.faces[i,0,1],-2*body.grid.faces[i,0,0]+2*body.grid.faces[i,0,1] )
         patches.append(square)
 
-    p = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces)
+    p = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces)
     p.set_array(body.grid.U[wvl,t,:])
     ax.add_collection(p)
     _plt.colorbar(p)
@@ -1439,7 +1439,7 @@ def U_d(body, conf, t = 0, wvl=0, dots = False):
     _plt.tight_layout()
 
 
-def V_d(body, conf, t = 0, wvl=0, dots = False):
+def V_d(body, conf, t = 0, wvl=0, dots = False, cmap=_matplotlib.cm.viridis):
 
     print('\n    ⇒ Plotting V parameter ' + body.type + ' ' + body.name+' at t ='+str(body.ephemeris.time[t])+' seconds')
     from matplotlib.patches import Rectangle
@@ -1464,7 +1464,7 @@ def V_d(body, conf, t = 0, wvl=0, dots = False):
         square = Rectangle( (body.grid.faces[i,0,0]*2,body.grid.faces[i,1,0]*2),-2*body.grid.faces[i,0,0]+2*body.grid.faces[i,0,1],-2*body.grid.faces[i,0,0]+2*body.grid.faces[i,0,1] )
         patches.append(square)
 
-    p = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces)
+    p = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces)
     p.set_array(body.grid.V[wvl,t,:])
     ax.add_collection(p)
     _plt.colorbar(p)
@@ -1479,7 +1479,7 @@ def V_d(body, conf, t = 0, wvl=0, dots = False):
     _plt.tight_layout()
 
 
-def radiance_d(body, conf, t = 0, wvl=0, save = False, dots = False):
+def radiance_d(body, conf, t = 0, wvl=0, save = False, dots = False, cmap=_matplotlib.cm.viridis):
 
     print('\n    ⇒ Plotting stokes parameters of ' + body.type + ' ' + body.name+' at t ='+str(body.ephemeris.time[t])+' seconds')
     from matplotlib.patches import Rectangle
@@ -1521,10 +1521,10 @@ def radiance_d(body, conf, t = 0, wvl=0, save = False, dots = False):
         square = Rectangle( (faces00[i]*2,faces10[i]*2),-2*faces00[i]+2*faces01[i],-2*faces00[i]+2*faces01[i] )
         patches.append(square)
 
-    p1 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
-    p2 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
-    p3 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
-    p4 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
+    p1 = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces, zorder = 2)
+    p2 = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces, zorder = 2)
+    p3 = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces, zorder = 2)
+    p4 = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces, zorder = 2)
 
     Q_aux = -Q/I
     U_aux = U/I
