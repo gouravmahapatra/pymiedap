@@ -130,8 +130,8 @@ class Layer():
 
         for aero_name, aero in vars(self).items():
             if isinstance(aero, Aerosols):
-                sum_coefs += (aero.ssca[:,np.newaxis,np.newaxis,np.newaxis] *  aero.f * aero.coefs)
-        mix_coefs = sum_coefs / sum_tau_sca[:,np.newaxis, np.newaxis, np.newaxis]
+                sum_coefs += (aero.f * aero.coefs)
+        mix_coefs = sum_coefs #/ sum_tau_sca[:,np.newaxis, np.newaxis, np.newaxis]
 
         # filling the mixed object with the result
         self.mixed_aerosols = Aerosols()
