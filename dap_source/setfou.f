@@ -1,3 +1,6 @@
+* This file is part of PyMieDAP, released under GNU General Public License.
+* See license.md or http://gitlab.com/loic.cg.rossi/pymiedap for details.
+
       SUBROUTINE setfou(coefs,ncoefs,nlays,a,b,xmu,nmug,
      .                  M0,M1,M2,iadd)
 

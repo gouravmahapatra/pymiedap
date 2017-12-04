@@ -1,3 +1,6 @@
+* This file is part of PyMieDAP, released under GNU General Public License.
+* See license.md or http://gitlab.com/loic.cg.rossi/pymiedap for details.
+
       SUBROUTINE matint(matrix, phi, nmat, nmu, nphi, nm, matexp) 
 Cf2py intent(in) matrix, phi, nmat, nmu, nphi, nm
 Cf2py intent(out) matexp

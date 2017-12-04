@@ -1,3 +1,6 @@
+* This file is part of PyMieDAP, released under GNU General Public License.
+* See license.md or http://gitlab.com/loic.cg.rossi/pymiedap for details.
+
       SUBROUTINE scatmat(m,wav,idis,nsubr,ngaur,rmin,
      .                   rmax,par1,par2,par3,weight2,delta,
      .                   u,wg,F,miec,nangle)

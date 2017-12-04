@@ -1,3 +1,6 @@
+* This file is part of PyMieDAP, released under GNU General Public License.
+* See license.md or http://gitlab.com/loic.cg.rossi/pymiedap for details.
+
       SUBROUTINE BHCOAT(YY,XX,RRFRL2,RRFRL1,ANV,BNV)
 
 Cf2py intent(in) XX, YY, RRFRL1, RRFRL2
