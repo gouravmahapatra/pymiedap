@@ -447,6 +447,145 @@ def nested2bp(moon, planet, star, dt, tf):
     return moon, planet, star
 
 
+def kepler_orbit(planet, star, dt, tf):
+    """
+    ==================================================================
+        EXOPY function: kepler_orbit()
+        Delft University of Technology
+        ------------------------------------------------------------------
+        Author: Javier Berzosa Molina, Loic Rossi, Daphne Stam
+        Date: 2016-2017
+        ------------------------------------------------------------------
+        Dependences:
+        DESCRIPTION
+        ------------------------------------------------------------------
+        Computes the orbit of the planet under the assumption of a Kepler
+        problem.
+        INPUTS
+        ------------------------------------------------------------------
+        - planet: body object of type 'planet' [-] ('body' object)
+        - star: body object of type 'star' [-] ('body' object)
+        - dt: time step [s] (float)
+        - tf: final time to be computed [s] (float)
+        OUTPUTS
+        ------------------------------------------------------------------
+        - planet: updated body object of type 'planet' [-] ('body' object)
+        - star: updated body object of type 'star' [-] ('body' object)
+        REFERENCES
+        ------------------------------------------------------------------
+
+    """
+    #===========================================================
+    #
+    #  ZERO STEP: Load the problem parameters from the input data
+    #
+    #===========================================================
+
+     G = 6.674e-11                             # Universal gravitational constant
+                                               # [N⋅m2/kg2]
+     m_p      = planet.properties.m            # Mass of planet [kg]
+     m_s      = star.properties.m              # Mass of star   [kg]
+     a_s     = planet.orbital_elements.a_b     # Planet-star semim.axis [m]
+     e_s     = planet.orbital_elements.e_b     # Planet eccentricity [-]
+     i_s     = planet.orbital_elements.i_b     # Planet inclination [deg]
+     Omega_s = planet.orbital_elements.Omega_b # Planet RAAN [deg]
+     omega_s = planet.orbital_elements.omega_b # Argument of planet periapsis [deg]
+     t0      = planet.orbital_elements.t0_b    # Planet time of last per.  passage [s]
+
+     #===========================================================
+     #
+     #  FIRST STEP: Create time vector and true anomaly vector
+     #
+     #===========================================================
+     mu_s   = G*(m_p + m_s)       # planet-star stnd. grav. parameter [N⋅m2/kg]
+
+     time   = np.arange(0, tf, dt, dtype=np.float)  # Time vector [s]
+     n_s   = (mu_s/a_s**3)**0.5   # Barycenter-star mean motion [1/s]
+
+     if t0 is None and t0 is None:
+         f0     = planet.orbital_elements.f0_b
+         E0s  = 2* np.atan( np.sqrt((1-e_s)/(1+e_s)) * np.tan(f0/2) )
+         M0s  = E0s - e_s*np.sin(E0s)
+         t0 = -M0s/n_s
+     M_s = n_s * (time - t0)  # Barycenter-star mean anomaly [rad]
+     # Eccentric anomaly and true anomaly are initialized
+     E_s = np.zeros(len(time))
+     f_s = np.zeros(len(time))
+
+     for index in range(len(E_s)):
+         # E is calculated through the Kepler equation. Then, f can be computed
+         # The fun.symp function is used in order to reduce the angular range
+         # from 0 to 2pi
+
+         E_s[index] = kepler(fun.symp(M_s[index]), e_s, method = 'Newton-Raphson')
+         f_s[index] = math.atan2((math.sin(E_s[index])*(1-e_s**2)**0.5)/
+                                 (1-e_s*math.cos(E_s[index])),( (math.cos(E_s[index])
+                                      -e_s)/(1-e_s*math.cos(E_s[index]))))
+         f_s[index] = fun.symp(f_s[index])
+     #===========================================================
+     #
+     #  SECOND STEP: Keplerian orbit of planet (p) around the hosting star (s).
+     #
+     #===========================================================
+     # Conversion of angles from degrees to radians
+     i_s     = i_s     * math.pi / 180 # [rad]
+     Omega_s = Omega_s * math.pi / 180 # [rad]
+     omega_s = omega_s * math.pi / 180 # [rad]
+
+     # Orbit equation for the barycenter
+     r_s = a_s*(1-math.pow(e_s,2))/(1+e_s*np.cos(f_s)) # [meters]
+
+     # 2-dimensional cartesian coordinates of the planet position
+     # around the hosting star <position2D_s = (x_s, y_s, z_s=0)>
+     x_s    = r_s * np.cos(f_s)    # [meters]
+     y_s    = r_s * np.sin(f_s)    # [meters]
+     position2D_s    = np.zeros((3,len(x_s)))  # [meters]
+     position2D_s[0] = x_s                     # [meters]
+     position2D_s[1] = y_s                     # [meters]
+
+     # 3-dimensional cartesian coordinates of the planet position around
+     # the star <position3D_s = (X_s, Y_s, Z_s)>
+     #
+     # The effect of orbit inclination, longitude of the ascending node and the
+     # argument of periapsis are introduced by mean of three rotation matrices.
+
+     Mz_Omega_s = np.array([[ np.cos(Omega_s), np.sin(Omega_s),   0   ],
+                             [-np.sin(Omega_s), np.cos(Omega_s),   0   ],
+                             [        0        ,        0        ,   1 ]]).T
+     Mz_omega_s = np.array([[ np.cos(omega_s), np.sin(omega_s),   0   ],
+                             [-np.sin(omega_s), np.cos(omega_s),   0   ],
+                             [        0        ,        0        ,   1 ]]).T
+     Mx_i_s     = np.array([[     1     ,        0        ,      0      ],
+                             [     0     ,  np.cos(i_s)   , np.sin(i_s)],
+                             [     0     , -np.sin(i_s)   , np.cos(i_s)]]).T
+
+     # Three-dimensional motion of the planet with respect to the hosting
+     # star
+
+     position3D_s =Mz_Omega_s.dot(Mx_i_s).dot(Mz_omega_s).dot(position2D_s)
+     r_ps = np.linalg.norm(position3D_s, axis = 0)     # [meters]
+
+     # Export results to body objects
+     planet.ephemeris.time         = time
+     planet.orbital_elements.nu_ps = f_s
+     planet.orbital_elements.M_ps  = M_s
+     planet.orbital_elements.E_ps  = E_s
+     planet.ephemeris.r_s          = r_ps
+     planet.ephemeris.position2D_s = position2D_s
+     planet.ephemeris.position3D_s = position3D_s
+     planet.ephemeris.period_ps    = 2*math.pi/(n_s)
+     star.ephemeris.time           = time
+     star.orbital_elements.nu_ps   = f_s
+     star.orbital_elements.M_ps    = M_s
+     star.orbital_elements.E_ps    = E_s
+     star.ephemeris.r_p            = r_ps
+     star.ephemeris.position2D_ps  = position2D_s
+     star.ephemeris.position3D_ps  = position3D_s
+     star.ephemeris.period_ps      = 2*math.pi/(n_s)
+     star.ephemeris.position3D_s   = np.zeros([3,len(time)])
+     print('    ✓ The trajectories of ' + planet.name + ' and ' + star.name + ' have been calculated.\n')
+     return planet, star
+
 
 ###%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'''
 ###-------------------------- End of script --------------------------------'''
