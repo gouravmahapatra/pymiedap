@@ -1,3 +1,6 @@
+* This file is part of PyMieDAP, released under GNU General Public License.
+* See license.md or http://gitlab.com/loic.cg.rossi/pymiedap for details.
+
       SUBROUTINE spline(x,y,n,nMAX,y2)
 
 Cf2py intent(in) x,y,n,nMAX

@@ -1,3 +1,6 @@
+# This file is part of PyMieDAP, released under GNU General Public License.
+# See license.md or http://gitlab.com/loic.cg.rossi/pymiedap for details.
+
 from .. import pymiedap as _pmd
 import numpy as _np
 import os as _os

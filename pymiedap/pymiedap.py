@@ -1,3 +1,6 @@
+# This file is part of PyMieDAP, released under GNU General Public License.
+# See license.md or http://gitlab.com/loic.cg.rossi/pymiedap for details.
+
 """
 # PYthon MIE DAP (PYMIEDAP)
 # This code is used to make computations of Mie scattering along with radiative
