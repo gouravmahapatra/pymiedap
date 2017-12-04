@@ -85,7 +85,7 @@ def combine(bodies, reference):
     for wvl,j in enumerate(reference.atmosphere.wvl_list):
         for body in bodies:
 
-            size_scale = body.properties.R/reference.properties.R
+            size_scale = (body.properties.R/reference.properties.R)**2
             distance_scale = (reference.ephemeris.r_s/body.ephemeris.r_s)**2
 
             #IQUV = [body.radiance.I[wvl,:], body.radiance.Q[wvl,:], body.radiance.U[wvl,:], body.radiance.V[wvl,:]]
