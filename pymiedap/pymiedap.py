@@ -2054,7 +2054,7 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
 
 
 def plot_pixels(model, wvl_idx=0, display='grid', stokes='Ps', phase_idx=0,
-                title='Polarization', cmap='YlOrRd',vmin=None,vmax=None,
+                title='Polarization', cmap='YlOrRd',vmin=None,vmax=None, data_scale=1.,
                 font_size=12, figsize=8, dpi=100):
     """ Function to nicely plot a resolved planet based on Model object
 
@@ -2082,6 +2082,9 @@ def plot_pixels(model, wvl_idx=0, display='grid', stokes='Ps', phase_idx=0,
         a matplotlib colormap name, default is 'YlOrRd'
     vmin, vmax: floats or None, optional
         minimum and maximum range of values to plot, default are None
+    data_scale :
+        multiplier for the displayed quantity. plotted output is data_scale*data
+        For example if you want P_l in percents, use data_scale=100.
     font_size : int, optional
         size of the font for the figure, default is 12
     figsize : float, optional
@@ -2143,7 +2146,7 @@ def plot_pixels(model, wvl_idx=0, display='grid', stokes='Ps', phase_idx=0,
     if stokes=='Pv':
         Z = model.Pv[wvl_idx,phase_idx,:]
 
-
+    Z = data_scale * Z
 
     ax.set_title(title)
     sc = ax.scatter(X, Y, c=Z,lw=0, marker='s',
