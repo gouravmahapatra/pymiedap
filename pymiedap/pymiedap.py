@@ -2072,7 +2072,7 @@ def plot_pixels(model, wvl_idx=0, display='grid', stokes='Ps', phase_idx=0,
         Default is 'grid'
     stokes : string, optional
         which Stokes element to plot. Allowed are 'Ps' (-Q/I), 'I', 'Q', 'U',
-        'V', 'Pt' (total polarization), 'Pl' total linear pol.
+        'V', 'Pt' (total polarization), 'Pl' total linear pol, 'Pv' for V/I.
         Default is 'Ps'
     title : string, optional
         title of the figure
@@ -2139,6 +2139,8 @@ def plot_pixels(model, wvl_idx=0, display='grid', stokes='Ps', phase_idx=0,
         Z = model.Pl[wvl_idx,phase_idx,:]
     if stokes=='Pt':
         Z = model.Pt[wvl_idx,phase_idx,:]
+    if stokes=='Pv':
+        Z = model.Pv[wvl_idx,phase_idx,:]
 
 
 
