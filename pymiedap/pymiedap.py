@@ -2040,6 +2040,7 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
         atm_model.P = -Qf/If
         atm_model.Pt = np.sqrt(Qf**2 + Uf**2 + Vf**2)/If
         atm_model.Pl = np.sqrt(Qf**2 + Uf**2)/If
+        atm_model.Pv = Vf/If
 
         # PLOT
         font_size=14
