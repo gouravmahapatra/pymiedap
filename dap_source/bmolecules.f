@@ -1,4 +1,7 @@
-      SUBROUTINE bmolecules(wav,nlays,pres,depol, mma,
+* This file is part of PyMieDAP, released under GNU General Public License.
+* See license.md or http://gitlab.com/loic.cg.rossi/pymiedap for details.
+
+      SUBROUTINE bmolecules(wav,nlays,pres,depol,ri,mma,
      .                      grav,bmsca,bmabs,coefsm)
 
 ************************************************************************
@@ -12,7 +15,7 @@
 
       INTEGER i,j,k,nlays
 
-      DOUBLE PRECISION depol,grav,mma,ma,dpres,wav,dep,ri,ssca,
+      DOUBLE PRECISION depol,ri,grav,mma,ma,dpres,wav,dep,ssca,
      .                 rindex,w2
 
       DOUBLE PRECISION coefsm(4,4,0:ncoefsMAX),
@@ -27,7 +30,7 @@
       DOUBLE PRECISION loschmidt
       PARAMETER (loschmidt=2.54743D25)
 
-Cf2py intent(in) wav, nlays, pres,depol,mma,grav
+Cf2py intent(in) wav, nlays, pres,depol,ri,mma,grav
 Cf2py intent(out) bmsca, bmabs, coefsm
                       
 *-----------------------------------------------------------------------
@@ -45,16 +48,16 @@ C      grav= 8.87D0
 *     Calculate the refractive index "ri" for dry air at STP (288.15 K):
 *     Peck and Reader (1972)
 *-----------------------------------------------------------------------
-      w2= 1.D0/(wav*wav)
-      IF (wav.GT.0.23D0) THEN
-         ri= 1.D0 +
-     .       1.D-8*( 5791817.D0/ (238.0185D0 - w2)) +
-     .       1.D-8*( 167909.D0/ (57.362D0 - w2))
-      ELSE
-         ri= 1.D0 + 1.D-8*8060.51D0 +
-     .       1.D-8*( 2480990.D0/ (132.274D0 - w2) ) +
-     .       1.D-8*( 17455.7D0/ (39.32957D0 - w2) )
-      ENDIF
+C     w2= 1.D0/(wav*wav)
+C     IF (wav.GT.0.23D0) THEN
+C        ri= 1.D0 +
+C    .       1.D-8*( 5791817.D0/ (238.0185D0 - w2)) +
+C    .       1.D-8*( 167909.D0/ (57.362D0 - w2))
+C     ELSE
+C        ri= 1.D0 + 1.D-8*8060.51D0 +
+C    .       1.D-8*( 2480990.D0/ (132.274D0 - w2) ) +
+C    .       1.D-8*( 17455.7D0/ (39.32957D0 - w2) )
+C     ENDIF
 
 *-----------------------------------------------------------------------
 *     Calculate the molecular scattering cross section (in m^2):

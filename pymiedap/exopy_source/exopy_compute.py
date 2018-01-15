@@ -1,3 +1,6 @@
+# This file is part of PyMieDAP, released under GNU General Public License.
+# See license.md or http://gitlab.com/loic.cg.rossi/pymiedap for details.
+
 # -*- coding: utf-8 -*-
 
 # ==================================================================
@@ -44,6 +47,7 @@ from exopy_transit  import transits    as _transit
 from exopy_radiance import integration as _integ
 from exopy_radiance import combine     as _comb
 from exopy_orbit    import nested2bp   as _2bp
+from exopy_orbit    import kepler_orbit as _kep
 
 
 

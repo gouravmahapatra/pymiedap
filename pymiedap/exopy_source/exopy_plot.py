@@ -1,3 +1,6 @@
+# This file is part of PyMieDAP, released under GNU General Public License.
+# See license.md or http://gitlab.com/loic.cg.rossi/pymiedap for details.
+
 # -*- coding: utf-8 -*-
 
 """
@@ -32,7 +35,7 @@ from matplotlib import animation as _animation
 import numpy as _np
 from exopy_functions import grid_area as _grid_area
 import time as _time
-import exopy_config as _cfg
+#import exopy_config as _cfg
 
 def settings():
     _matplotlib.rcParams.update({'font.size': 14,
@@ -40,12 +43,12 @@ def settings():
                                  'legend.labelspacing': 0.2,
                                  'legend.markerscale': 0.2})
 
-def IQUP(bodies, Nsqv= 10, t = 0, wvl=0, phase = False, save = False):
+def IQUP(bodies, Nsqv= 10, t = 0, wvl=0, phase = False, save = False, cmap=_matplotlib.cm.viridis):
     from matplotlib.patches import Rectangle
     import scipy as _scipy
-    
+
     settings()
-    
+
     # create a figure with subplots
     fig = _plt.figure(figsize=(15,7))
     ax1 = _plt.subplot2grid((2,4), (0,0))
@@ -57,15 +60,15 @@ def IQUP(bodies, Nsqv= 10, t = 0, wvl=0, phase = False, save = False):
     ax7 = _plt.subplot2grid((2,4), (1,2))
     ax8 = _plt.subplot2grid((2,4), (1,3))
 
-    circle1 = _plt.Circle((0, 0), 1, edgecolor = _plot_color('circle'), facecolor = _plot_color('circle1'), linewidth = 2.5)
-    circle2 = _plt.Circle((0, 0), 1, edgecolor = _plot_color('circle'), facecolor = _plot_color('circle1'), fill=True , linewidth = 2.5)
-    circle3 = _plt.Circle((0, 0), 1, edgecolor = _plot_color('circle'), facecolor = _plot_color('circle1'), fill=True , linewidth = 2.5)
-    circle4 = _plt.Circle((0, 0), 1, edgecolor = _plot_color('circle'), facecolor = _plot_color('circle1'), fill=True , linewidth = 2.5)
-    circle5 = _plt.Circle((0, 0), 1, edgecolor = _plot_color('circle'), facecolor = _plot_color('circle1'), linewidth = 2.5)
-    circle6 = _plt.Circle((0, 0), 1, edgecolor = _plot_color('circle'), facecolor = _plot_color('circle1'), fill=True , linewidth = 2.5)
-    circle7 = _plt.Circle((0, 0), 1, edgecolor = _plot_color('circle'), facecolor = _plot_color('circle1'), fill=True , linewidth = 2.5)
-    circle8 = _plt.Circle((0, 0), 1, edgecolor = _plot_color('circle'), facecolor = _plot_color('circle1'), fill=True , linewidth = 2.5)
-    
+    circle1 = _plt.Circle((0, 0), 1, edgecolor = conf._plot_color('circle'), facecolor = conf._plot_color('circle1'), linewidth = 2.5)
+    circle2 = _plt.Circle((0, 0), 1, edgecolor = conf._plot_color('circle'), facecolor = conf._plot_color('circle1'), fill=True , linewidth = 2.5)
+    circle3 = _plt.Circle((0, 0), 1, edgecolor = conf._plot_color('circle'), facecolor = conf._plot_color('circle1'), fill=True , linewidth = 2.5)
+    circle4 = _plt.Circle((0, 0), 1, edgecolor = conf._plot_color('circle'), facecolor = conf._plot_color('circle1'), fill=True , linewidth = 2.5)
+    circle5 = _plt.Circle((0, 0), 1, edgecolor = conf._plot_color('circle'), facecolor = conf._plot_color('circle1'), linewidth = 2.5)
+    circle6 = _plt.Circle((0, 0), 1, edgecolor = conf._plot_color('circle'), facecolor = conf._plot_color('circle1'), fill=True , linewidth = 2.5)
+    circle7 = _plt.Circle((0, 0), 1, edgecolor = conf._plot_color('circle'), facecolor = conf._plot_color('circle1'), fill=True , linewidth = 2.5)
+    circle8 = _plt.Circle((0, 0), 1, edgecolor = conf._plot_color('circle'), facecolor = conf._plot_color('circle1'), fill=True , linewidth = 2.5)
+
     ax1.add_artist(circle1)
     ax2.add_artist(circle2)
     ax3.add_artist(circle3)
@@ -86,22 +89,22 @@ def IQUP(bodies, Nsqv= 10, t = 0, wvl=0, phase = False, save = False):
     Q0	     = bodies[0].grid.Q[wvl,t,bodies[0].grid.shadow[t,:]!=0]#/Q0ref
     U0	     = bodies[0].grid.U[wvl,t,bodies[0].grid.shadow[t,:]!=0]#/Q0ref
 #    P0	     = _np.sqrt(Q0**2 + U0**2)/I0
-    
+
     patches = []
     for i in range(N):
         square = Rectangle( (faces00[i]*2,faces10[i]*2),-2*faces00[i]+2*faces01[i],-2*faces00[i]+2*faces01[i] )
         patches.append(square)
 
-    p1 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
-    p2 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
-    p3 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
+    p1 = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces, zorder = 2)
+    p2 = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces, zorder = 2)
+    p3 = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces, zorder = 2)
 #    p4 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
-    
+
     p1.set_array(I0)
     p2.set_array(Q0)
     p3.set_array(U0)
 #    p4.set_array(P0)
-    
+
     aux1 = ax1.add_collection(p1)
     a = fig.colorbar(aux1,ax=ax1,fraction=0.046, pad=0.04)
 #    a.set_clim(bodies[0].grid.I[:,bodies[0].grid.shadow!=0].min(), bodies[0].grid.I[:,bodies[0].grid.shadow!=0].max())
@@ -119,32 +122,32 @@ def IQUP(bodies, Nsqv= 10, t = 0, wvl=0, phase = False, save = False):
 
 #    aux4 = ax4.add_collection(p4)
 #    fig.colorbar(aux4,ax=ax4,fraction=0.046, pad=0.04)
-    
+
     tit1 = ax1.set_title('I [-]')
-    tit2 = ax2.set_title('Q [-]')    
+    tit2 = ax2.set_title('Q [-]')
     tit3 = ax3.set_title('U [-]')
     tit4 = ax4.set_title('$\\displaystyle \\chi$ [-]')
-    
+
     tit1.set_position([.5, 1.07])
     tit2.set_position([.5, 1.07])
     tit3.set_position([.5, 1.07])
     tit4.set_position([.5, 1.02])
 
-    _plot_config_r(ax1)
-    _plot_config_r(ax2)
-    _plot_config_r(ax3)
-    _plot_config_r(ax4)
-    
+    _plot_config_r(ax1,conf)
+    _plot_config_r(ax2,conf)
+    _plot_config_r(ax3,conf)
+    _plot_config_r(ax4,conf)
+
     ax4.set_xlim([-1.1, 1.1])
     ax4.set_ylim([-1.1, 1.1])
-    
-    circle11 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
-    circle12 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
-    circle13 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+
+    circle11 = _plt.Circle((0, 0), 1, color = conf._plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+    circle12 = _plt.Circle((0, 0), 1, color = conf._plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+    circle13 = _plt.Circle((0, 0), 1, color = conf._plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
     ax1.add_artist(circle11)
     ax2.add_artist(circle12)
     ax3.add_artist(circle13)
-	
+
     N           = _np.sum(bodies[1].grid.shadow[t,:]!=0)
     faces00	= bodies[1].grid.faces[bodies[1].grid.shadow[t,:]!=0,0,0]
     faces10	= bodies[1].grid.faces[bodies[1].grid.shadow[t,:]!=0,1,0]
@@ -159,16 +162,16 @@ def IQUP(bodies, Nsqv= 10, t = 0, wvl=0, phase = False, save = False):
         square = Rectangle( (faces00[i]*2,faces10[i]*2),-2*faces00[i]+2*faces01[i],-2*faces00[i]+2*faces01[i] )
         patches.append(square)
 
-    p5 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
-    p6 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
-    p7 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
+    p5 = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces, zorder = 2)
+    p6 = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces, zorder = 2)
+    p7 = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces, zorder = 2)
 #    p8 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
 
     p5.set_array(I1)
     p6.set_array(Q1)
     p7.set_array(U1)
 #    p8.set_array(P1)
-    
+
     aux5 = ax5.add_collection(p5)
     fig.colorbar(aux5,ax=ax5,fraction=0.046, pad=0.04)
     aux6 = ax6.add_collection(p6)
@@ -177,65 +180,65 @@ def IQUP(bodies, Nsqv= 10, t = 0, wvl=0, phase = False, save = False):
     fig.colorbar(aux7,ax=ax7,fraction=0.046, pad=0.04)
 #    aux8 = ax8.add_collection(p8)
 #    fig.colorbar(aux8,ax=ax8,fraction=0.046, pad=0.04)
-    
+
 #    ax5.set_title('I [-]')
 #    ax6.set_title('Q [-]')
 #    ax7.set_title('U [-]')
 #    ax8.set_title('Moon P parameter')
-    
-    _plot_config_r(ax5)
-    _plot_config_r(ax6)
-    _plot_config_r(ax7)
-    _plot_config_r(ax8)
-    
+
+    _plot_config_r(ax5,conf)
+    _plot_config_r(ax6,conf)
+    _plot_config_r(ax7,conf)
+    _plot_config_r(ax8,conf)
+
     ax8.set_xlim([-1.1, 1.1])
     ax8.set_ylim([-1.1, 1.1])
-    
-    circle15= _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
-    circle16= _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
-    circle17= _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+
+    circle15= _plt.Circle((0, 0), 1, color = conf._plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+    circle16= _plt.Circle((0, 0), 1, color = conf._plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+    circle17= _plt.Circle((0, 0), 1, color = conf._plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
     ax5.add_artist(circle15)
     ax6.add_artist(circle16)
     ax7.add_artist(circle17)
-        
+
     ax1.text(-1.3,0,'Planet', {'ha': 'center', 'va': 'center'}, rotation = 90,fontsize=18)
     ax5.text(-1.3,0,'Moon', {'ha': 'center', 'va': 'center'}, rotation = 90,fontsize=18)
 #    ax1.set_xlim([-1.35, 1.01])
 #    ax1.set_xlim([-1.35, 1.01])
 
-    
+
     Nsq = bodies[0].grid.Nsq
     X,Y   = _np.meshgrid(_np.linspace(-0.5+0.5/Nsq,0.5-0.5/Nsq,Nsq), _np.linspace(-0.5+0.5/Nsq,0.5-0.5/Nsq,Nsq))
     Zu    = _np.zeros_like(X)
     Zq    = _np.zeros_like(X)
 
-    ii = 0    
+    ii = 0
     for i in range(Nsq):
         for j in range(Nsq):
             if (4*X[0,i]**2+4*Y[j,0]**2)<1:
                 Zu[i,j] = bodies[0].grid.U[wvl,t,ii]
                 Zq[i,j] = bodies[0].grid.Q[wvl,t,ii]
                 ii = ii+1
-    
+
     Xv,Yv = _np.meshgrid(_np.linspace(-0.5+0.5/Nsqv,0.5-0.5/Nsqv,Nsqv), _np.linspace(-0.5+0.5/Nsqv,0.5-0.5/Nsqv,Nsqv))
     Zuv   = _np.zeros_like(Xv)
     Zqv   = _np.zeros_like(Xv)
-    
+
     zu = _scipy.interpolate.interp2d(X[0,:],Y[:,0],Zu)
     zq = _scipy.interpolate.interp2d(X[0,:],Y[:,0],Zq)
     for i in range(Nsqv):
         for j in range(Nsqv):
             Zuv[i,j] = zu(Xv[0,i],Yv[j,0])
             Zqv[i,j] = zq(Xv[0,i],Yv[j,0])
-    
+
     angle1 = _np.rad2deg(_np.arctan(Zuv/Zqv))
     angle1[(Zqv <0) & (Zuv >0)] = angle1[(Zqv <0) & (Zuv >0)] + 180
     angle1[(Zqv <0) & (Zuv <0)] = angle1[(Zqv <0) & (Zuv <0)] - 180
     p = _np.sqrt(Zqv**2 + Zuv**2)
-    
+
     U = p*_np.cos(_np.deg2rad(angle1*0.5))
-    V = p*_np.sin(_np.deg2rad(angle1*0.5))     
-    
+    V = p*_np.sin(_np.deg2rad(angle1*0.5))
+
     Q  = ax4.quiver(2*Xv[0,:], 2*Yv[:,0], U, V, pivot='mid', units='inches', zorder=2)
 
     Nsq = bodies[1].grid.Nsq
@@ -243,54 +246,54 @@ def IQUP(bodies, Nsqv= 10, t = 0, wvl=0, phase = False, save = False):
     Zu    = _np.zeros_like(X)
     Zq    = _np.zeros_like(X)
 
-    ii = 0    
+    ii = 0
     for i in range(Nsq):
         for j in range(Nsq):
             if (4*X[0,i]**2+4*Y[j,0]**2)<1:
                 Zu[i,j] = bodies[1].grid.U[wvl,t,ii]
                 Zq[i,j] = bodies[1].grid.Q[wvl,t,ii]
                 ii = ii+1
-    
+
     Xv,Yv = _np.meshgrid(_np.linspace(-0.5+0.5/Nsqv,0.5-0.5/Nsqv,Nsqv), _np.linspace(-0.5+0.5/Nsqv,0.5-0.5/Nsqv,Nsqv))
     Zuv   = _np.zeros_like(Xv)
     Zqv   = _np.zeros_like(Xv)
-    
+
     zu = _scipy.interpolate.interp2d(X[0,:],Y[:,0],Zu)
     zq = _scipy.interpolate.interp2d(X[0,:],Y[:,0],Zq)
     for i in range(Nsqv):
         for j in range(Nsqv):
             Zuv[i,j] = zu(Xv[0,i],Yv[j,0])
             Zqv[i,j] = zq(Xv[0,i],Yv[j,0])
-    
+
     angle1 = _np.rad2deg(_np.arctan(Zuv/Zqv))
     angle1[(Zqv <0) & (Zuv >0)] = angle1[(Zqv <0) & (Zuv >0)] + 180
     angle1[(Zqv <0) & (Zuv <0)] = angle1[(Zqv <0) & (Zuv <0)] - 180
     p = _np.sqrt(Zqv**2 + Zuv**2)
-    
+
     U = p*_np.cos(_np.deg2rad(angle1*0.5))
-    V = p*_np.sin(_np.deg2rad(angle1*0.5))     
-    
+    V = p*_np.sin(_np.deg2rad(angle1*0.5))
+
     Q  = ax8.quiver(2*Xv[0,:], 2*Yv[:,0], U, V, pivot='mid', units='inches', zorder=2)
 
 
-#    
+#
 #    Xv,Yv = _np.meshgrid(_np.linspace(-0.5,0.5,N), _np.linspace(-0.5,0.5,N))
 #    Zuv   = _np.zeros_like(X)
-#    Zqv   = _np.zeros_like(X)    
-#    
-#    ii = 0    
+#    Zqv   = _np.zeros_like(X)
+#
+#    ii = 0
 #    for i in range(Nsq):
 #        for j in range(Nsq):
 #            if (4*X[0,i]**2+4*Y[j,0]**2)<1:
 #                Zuv = bodies[0].grid.U[wvl,t,ii]
 #                Zqv = bodies[0].grid.Q[wvl,t,ii]
 #                ii  = ii+1
-#                
-#                
-#                
-#                
-#                
-#                
+#
+#
+#
+#
+#
+#
 #    X = 2*bodies[0].grid.nodes[::d,0]
 #    Y = 2*bodies[0].grid.nodes[::d,1]
 #    angle1 = _np.rad2deg(_np.arctan(bodies[0].grid.U[wvl,t,:]/bodies[0].grid.Q[wvl,t,:]))
@@ -298,11 +301,11 @@ def IQUP(bodies, Nsqv= 10, t = 0, wvl=0, phase = False, save = False):
 #    angle1[(bodies[0].grid.Q[wvl,t,:] <0) & (bodies[0].grid.U[wvl,t,:] <0)] = angle1[(bodies[0].grid.Q[wvl,t,:] <0) & (bodies[0].grid.U[wvl,t,:] <0)] - 180
 #    p = _np.sqrt(bodies[0].grid.Q[wvl,t,:]**2 + bodies[0].grid.U[wvl,t,:]**2)
 #    U = p[::d]*_np.cos(_np.deg2rad(angle1[::d]*0.5))
-#    V = p[::d]*_np.sin(_np.deg2rad(angle1[::d]*0.5))   
-#    
+#    V = p[::d]*_np.sin(_np.deg2rad(angle1[::d]*0.5))
+#
 #    Q  = ax4.quiver(X, Y, U, V, pivot='mid', units='inches', zorder=2)
 ##    qk = ax4.quiverkey(Q, 0.9, 0.9, 1, r'$1 \frac{m}{s}$', labelpos='E', coordinates='figure')
-#    
+#
 #    X = 2*bodies[1].grid.nodes[:,0]
 #    Y = 2*bodies[1].grid.nodes[:,1]
 #    angle1 = _np.rad2deg(_np.arctan(bodies[1].grid.U[wvl,t,:]/bodies[1].grid.Q[wvl,t,:]))
@@ -310,14 +313,14 @@ def IQUP(bodies, Nsqv= 10, t = 0, wvl=0, phase = False, save = False):
 #    angle1[(bodies[1].grid.Q[wvl,t,:] <0) & (bodies[1].grid.U[wvl,t,:] <0)] = angle1[(bodies[1].grid.Q[wvl,t,:] <0) & (bodies[1].grid.U[wvl,t,:] <0)] - 180
 #    p = _np.sqrt(bodies[1].grid.Q[wvl,t,:]**2 + bodies[1].grid.U[wvl,t,:]**2)
 #    U = p*_np.cos(_np.deg2rad(angle1*0.5))
-#    V = p*_np.sin(_np.deg2rad(angle1*0.5))  
+#    V = p*_np.sin(_np.deg2rad(angle1*0.5))
 #
 #    QQ = ax8.quiver(X, Y, U, V, pivot='mid', units='inches', zorder=2)
 ##    qqk= ax8.quiverkey(QQ, 0.9, 0.9, 1, r'$1 \frac{m}{s}$', labelpos='E', coordinates='figure')
 #
-    circle14 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+    circle14 = _plt.Circle((0, 0), 1, color = conf._plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
     ax4.add_artist(circle14)
-    circle18= _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+    circle18= _plt.Circle((0, 0), 1, color = conf._plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
     ax8.add_artist(circle18)
 
     _plt.tight_layout(rect=(0.02,0,1,1))
@@ -332,26 +335,26 @@ def IQUP(bodies, Nsqv= 10, t = 0, wvl=0, phase = False, save = False):
 
 
 
-def IQUP_gif(bodies, Nsqv= 10, dt = 10, wvl=0, path = 'gif', seconds = None):
+def IQUP_gif(bodies, Nsqv= 10, dt = 10, wvl=0, path = 'gif', seconds = None, cmap=_matplotlib.cm.viridis):
     from matplotlib.patches import Rectangle
     import scipy as _scipy
     _plt.ioff()
-    
-    
+
+
     settings()
-    
-  
-    
+
+
+
     import imageio as _ima
-    
+
     images = []
     time = bodies[0].ephemeris.time
     time_index = _np.linspace(0,_np.size(time)-1, _np.size(time))
     time_index = time_index[::dt]
     for jj,t in enumerate(time_index):
-        
+
         t = int(t)
-        
+
         # create a figure with subplots
         fig = _plt.figure(figsize=(15,7))
         ax1 = _plt.subplot2grid((2,4), (0,0))
@@ -362,16 +365,16 @@ def IQUP_gif(bodies, Nsqv= 10, dt = 10, wvl=0, path = 'gif', seconds = None):
         ax6 = _plt.subplot2grid((2,4), (1,1))
         ax7 = _plt.subplot2grid((2,4), (1,2))
         ax8 = _plt.subplot2grid((2,4), (1,3))
-    
-        circle1 = _plt.Circle((0, 0), 1, edgecolor = _plot_color('circle'), facecolor = _plot_color('circle1'), linewidth = 2.5)
-        circle2 = _plt.Circle((0, 0), 1, edgecolor = _plot_color('circle'), facecolor = _plot_color('circle1'), fill=True , linewidth = 2.5)
-        circle3 = _plt.Circle((0, 0), 1, edgecolor = _plot_color('circle'), facecolor = _plot_color('circle1'), fill=True , linewidth = 2.5)
-        circle4 = _plt.Circle((0, 0), 1, edgecolor = _plot_color('circle'), facecolor = _plot_color('circle1'), fill=True , linewidth = 2.5)
-        circle5 = _plt.Circle((0, 0), 1, edgecolor = _plot_color('circle'), facecolor = _plot_color('circle1'), linewidth = 2.5)
-        circle6 = _plt.Circle((0, 0), 1, edgecolor = _plot_color('circle'), facecolor = _plot_color('circle1'), fill=True , linewidth = 2.5)
-        circle7 = _plt.Circle((0, 0), 1, edgecolor = _plot_color('circle'), facecolor = _plot_color('circle1'), fill=True , linewidth = 2.5)
-        circle8 = _plt.Circle((0, 0), 1, edgecolor = _plot_color('circle'), facecolor = _plot_color('circle1'), fill=True , linewidth = 2.5)
-        
+
+        circle1 = _plt.Circle((0, 0), 1, edgecolor = conf._plot_color('circle'), facecolor = conf._plot_color('circle1'), linewidth = 2.5)
+        circle2 = _plt.Circle((0, 0), 1, edgecolor = conf._plot_color('circle'), facecolor = conf._plot_color('circle1'), fill=True , linewidth = 2.5)
+        circle3 = _plt.Circle((0, 0), 1, edgecolor = conf._plot_color('circle'), facecolor = conf._plot_color('circle1'), fill=True , linewidth = 2.5)
+        circle4 = _plt.Circle((0, 0), 1, edgecolor = conf._plot_color('circle'), facecolor = conf._plot_color('circle1'), fill=True , linewidth = 2.5)
+        circle5 = _plt.Circle((0, 0), 1, edgecolor = conf._plot_color('circle'), facecolor = conf._plot_color('circle1'), linewidth = 2.5)
+        circle6 = _plt.Circle((0, 0), 1, edgecolor = conf._plot_color('circle'), facecolor = conf._plot_color('circle1'), fill=True , linewidth = 2.5)
+        circle7 = _plt.Circle((0, 0), 1, edgecolor = conf._plot_color('circle'), facecolor = conf._plot_color('circle1'), fill=True , linewidth = 2.5)
+        circle8 = _plt.Circle((0, 0), 1, edgecolor = conf._plot_color('circle'), facecolor = conf._plot_color('circle1'), fill=True , linewidth = 2.5)
+
         ax1.add_artist(circle1)
         ax2.add_artist(circle2)
         ax3.add_artist(circle3)
@@ -380,52 +383,52 @@ def IQUP_gif(bodies, Nsqv= 10, dt = 10, wvl=0, path = 'gif', seconds = None):
         ax6.add_artist(circle6)
         ax7.add_artist(circle7)
         ax8.add_artist(circle8)
-    
+
         #faces = _plot_color('faces')
         faces = "none"
-        
-    
-        
+
+
+
         tit1 = ax1.set_title('I [-]')
-        tit2 = ax2.set_title('Q [-]')    
+        tit2 = ax2.set_title('Q [-]')
         tit3 = ax3.set_title('U [-]')
         tit4 = ax4.set_title('$\\displaystyle \\chi$ [-]')
-        
+
         tit1.set_position([.5, 1.07])
         tit2.set_position([.5, 1.07])
         tit3.set_position([.5, 1.07])
         tit4.set_position([.5, 1.02])
-    
-        _plot_config_r(ax1)
-        _plot_config_r(ax2)
-        _plot_config_r(ax3)
-        _plot_config_r(ax4)
-        
+
+        _plot_config_r(ax1,conf)
+        _plot_config_r(ax2,conf)
+        _plot_config_r(ax3,conf)
+        _plot_config_r(ax4,conf)
+
         ax4.set_xlim([-1.1, 1.1])
         ax4.set_ylim([-1.1, 1.1])
-    
-        circle11 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
-        circle12 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
-        circle13 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+
+        circle11 = _plt.Circle((0, 0), 1, color = conf._plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+        circle12 = _plt.Circle((0, 0), 1, color = conf._plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+        circle13 = _plt.Circle((0, 0), 1, color = conf._plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
         ax1.add_artist(circle11)
         ax2.add_artist(circle12)
         ax3.add_artist(circle13)
-    
-        _plot_config_r(ax5)
-        _plot_config_r(ax6)
-        _plot_config_r(ax7)
-        _plot_config_r(ax8)
-        
+
+        _plot_config_r(ax5,conf)
+        _plot_config_r(ax6,conf)
+        _plot_config_r(ax7,conf)
+        _plot_config_r(ax8,conf)
+
         ax8.set_xlim([-1.1, 1.1])
         ax8.set_ylim([-1.1, 1.1])
-        
-        circle15= _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
-        circle16= _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
-        circle17= _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+
+        circle15= _plt.Circle((0, 0), 1, color = conf._plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+        circle16= _plt.Circle((0, 0), 1, color = conf._plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+        circle17= _plt.Circle((0, 0), 1, color = conf._plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
         ax5.add_artist(circle15)
         ax6.add_artist(circle16)
         ax7.add_artist(circle17)
-        
+
         ax1.text(-1.3,0,'Planet', {'ha': 'center', 'va': 'center'}, rotation = 90,fontsize=18)
         ax5.text(-1.3,0,'Moon'  , {'ha': 'center', 'va': 'center'}, rotation = 90,fontsize=18)
 
@@ -436,15 +439,15 @@ def IQUP_gif(bodies, Nsqv= 10, dt = 10, wvl=0, path = 'gif', seconds = None):
         ax8.text( 0.0,-1.2, text_alpha, {'ha': 'left', 'va': 'center'}, rotation = 0,fontsize=15)
 
 
-        circle14 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+        circle14 = _plt.Circle((0, 0), 1, color = conf._plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
         ax4.add_artist(circle14)
-        circle18= _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
-        ax8.add_artist(circle18)           
-        
-        
-        
+        circle18= _plt.Circle((0, 0), 1, color = conf._plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+        ax8.add_artist(circle18)
+
+
+
         t = int(t)
-        
+
         N           = _np.sum(bodies[0].grid.shadow[t,:]!=0)
         faces00	= bodies[0].grid.faces[bodies[0].grid.shadow[t,:]!=0,0,0]
         faces10	= bodies[0].grid.faces[bodies[0].grid.shadow[t,:]!=0,1,0]
@@ -452,42 +455,42 @@ def IQUP_gif(bodies, Nsqv= 10, dt = 10, wvl=0, path = 'gif', seconds = None):
         I0	     = bodies[0].grid.I[wvl,t,bodies[0].grid.shadow[t,:]!=0]#/I0ref
         Q0	     = bodies[0].grid.Q[wvl,t,bodies[0].grid.shadow[t,:]!=0]#/Q0ref
         U0	     = bodies[0].grid.U[wvl,t,bodies[0].grid.shadow[t,:]!=0]#/Q0ref
-    #    P0	     = _np.sqrt(Q0**2 + U0**2)/I0    
-        
+    #    P0	     = _np.sqrt(Q0**2 + U0**2)/I0
+
         patches = []
         for i in range(N):
             square = Rectangle( (faces00[i]*2,faces10[i]*2),-2*faces00[i]+2*faces01[i],-2*faces00[i]+2*faces01[i] )
             patches.append(square)
-    
-        p1 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
-        p2 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
-        p3 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
+
+        p1 = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces, zorder = 2)
+        p2 = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces, zorder = 2)
+        p3 = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces, zorder = 2)
     #    p4 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
-        
+
         p1.set_array(I0)
         p2.set_array(Q0)
         p3.set_array(U0)
     #    p4.set_array(P0)
-        
+
 #        if jj==0:
         p1.set_clim([bodies[0].grid.I[:,bodies[0].grid.shadow!=0].min(), bodies[0].grid.I[:,bodies[0].grid.shadow!=0].max()])
         p2.set_clim([bodies[0].grid.Q[:,bodies[0].grid.shadow!=0].min(), bodies[0].grid.Q[:,bodies[0].grid.shadow!=0].max()])
         p3.set_clim([bodies[0].grid.U[:,bodies[0].grid.shadow!=0].min(), bodies[0].grid.U[:,bodies[0].grid.shadow!=0].max()])
-        
-        
+
+
         aux1 = ax1.add_collection(p1)
         aux2 = ax2.add_collection(p2)
         aux3 = ax3.add_collection(p3)
-        
-        
+
+
 #        if jj==0:
         fig.colorbar(aux1,ax=ax1,fraction=0.046, pad=0.04)
         fig.colorbar(aux2,ax=ax2,fraction=0.046, pad=0.04)
         fig.colorbar(aux3,ax=ax3,fraction=0.046, pad=0.04)
         #    aux4 = ax4.add_collection(p4)
         #    fig.colorbar(aux4,ax=ax4,fraction=0.046, pad=0.04)
-        	
-         
+
+
         N           = _np.sum(bodies[1].grid.shadow[t,:]!=0)
         faces00	= bodies[1].grid.faces[bodies[1].grid.shadow[t,:]!=0,0,0]
         faces10	= bodies[1].grid.faces[bodies[1].grid.shadow[t,:]!=0,1,0]
@@ -496,108 +499,108 @@ def IQUP_gif(bodies, Nsqv= 10, dt = 10, wvl=0, path = 'gif', seconds = None):
         Q1          = bodies[1].grid.Q[wvl,t,bodies[1].grid.shadow[t,:]!=0]#/Q1ref
         U1          = bodies[1].grid.U[wvl,t,bodies[1].grid.shadow[t,:]!=0]#/Q1ref
     #    P1          = _np.sqrt(Q1**2 + U1**2)/I1
-    
+
         patches = []
         for i in range(N):
             square = Rectangle( (faces00[i]*2,faces10[i]*2),-2*faces00[i]+2*faces01[i],-2*faces00[i]+2*faces01[i] )
             patches.append(square)
-    
-        p5 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
-        p6 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
-        p7 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
+
+        p5 = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces, zorder = 2)
+        p6 = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces, zorder = 2)
+        p7 = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces, zorder = 2)
     #    p8 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
-        
+
         p5.set_array(I1)
         p6.set_array(Q1)
         p7.set_array(U1)
-    #    p8.set_array(P1)   
-        
+    #    p8.set_array(P1)
+
 #        if jj==0:
         p5.set_clim([bodies[1].grid.I[:,bodies[1].grid.shadow!=0].min(), bodies[1].grid.I[:,bodies[1].grid.shadow!=0].max()])
         p6.set_clim([bodies[1].grid.Q[:,bodies[1].grid.shadow!=0].min(), bodies[1].grid.Q[:,bodies[1].grid.shadow!=0].max()])
         p7.set_clim([bodies[1].grid.U[:,bodies[1].grid.shadow!=0].min(), bodies[1].grid.U[:,bodies[1].grid.shadow!=0].max()])
-        
+
         aux5 = ax5.add_collection(p5)
         aux6 = ax6.add_collection(p6)
         aux7 = ax7.add_collection(p7)
 
-        
+
 #        if jj==0:
         fig.colorbar(aux5,ax=ax5,fraction=0.046, pad=0.04)
         fig.colorbar(aux6,ax=ax6,fraction=0.046, pad=0.04)
         fig.colorbar(aux7,ax=ax7,fraction=0.046, pad=0.04)
         #    aux8 = ax8.add_collection(p8)
-        #    fig.colorbar(aux8,ax=ax8,fraction=0.046, pad=0.04)    
-    
-        
+        #    fig.colorbar(aux8,ax=ax8,fraction=0.046, pad=0.04)
+
+
         Nsq = bodies[0].grid.Nsq
         X,Y   = _np.meshgrid(_np.linspace(-0.5+0.5/Nsq,0.5-0.5/Nsq,Nsq), _np.linspace(-0.5+0.5/Nsq,0.5-0.5/Nsq,Nsq))
         Zu    = _np.zeros_like(X)
         Zq    = _np.zeros_like(X)
-    
-        ii = 0    
+
+        ii = 0
         for i in range(Nsq):
             for j in range(Nsq):
                 if (4*X[0,i]**2+4*Y[j,0]**2)<1:
                     Zu[i,j] = bodies[0].grid.U[wvl,t,ii]
                     Zq[i,j] = bodies[0].grid.Q[wvl,t,ii]
                     ii = ii+1
-        
+
         Xv,Yv = _np.meshgrid(_np.linspace(-0.5+0.5/Nsqv,0.5-0.5/Nsqv,Nsqv), _np.linspace(-0.5+0.5/Nsqv,0.5-0.5/Nsqv,Nsqv))
         Zuv   = _np.zeros_like(Xv)
         Zqv   = _np.zeros_like(Xv)
-        
+
         zu = _scipy.interpolate.interp2d(X[0,:],Y[:,0],Zu)
         zq = _scipy.interpolate.interp2d(X[0,:],Y[:,0],Zq)
         for i in range(Nsqv):
             for j in range(Nsqv):
                 Zuv[i,j] = zu(Xv[0,i],Yv[j,0])
                 Zqv[i,j] = zq(Xv[0,i],Yv[j,0])
-        
+
         angle1 = _np.rad2deg(_np.arctan(Zuv/Zqv))
         angle1[(Zqv <0) & (Zuv >0)] = angle1[(Zqv <0) & (Zuv >0)] + 180
         angle1[(Zqv <0) & (Zuv <0)] = angle1[(Zqv <0) & (Zuv <0)] - 180
         p = _np.sqrt(Zqv**2 + Zuv**2)
-        
+
         U = p*_np.cos(_np.deg2rad(angle1*0.5))
-        V = p*_np.sin(_np.deg2rad(angle1*0.5))     
-        
+        V = p*_np.sin(_np.deg2rad(angle1*0.5))
+
         Q  = ax4.quiver(2*Xv[0,:], 2*Yv[:,0], U, V, pivot='mid', units='inches', zorder=2)
-    
-    
-    
+
+
+
         Nsq = bodies[1].grid.Nsq
         X,Y   = _np.meshgrid(_np.linspace(-0.5+0.5/Nsq,0.5-0.5/Nsq,Nsq), _np.linspace(-0.5+0.5/Nsq,0.5-0.5/Nsq,Nsq))
         Zu    = _np.zeros_like(X)
         Zq    = _np.zeros_like(X)
-    
-        ii = 0    
+
+        ii = 0
         for i in range(Nsq):
             for j in range(Nsq):
                 if (4*X[0,i]**2+4*Y[j,0]**2)<1:
                     Zu[i,j] = bodies[1].grid.U[wvl,t,ii]
                     Zq[i,j] = bodies[1].grid.Q[wvl,t,ii]
                     ii = ii+1
-        
+
         Xv,Yv = _np.meshgrid(_np.linspace(-0.5+0.5/Nsqv,0.5-0.5/Nsqv,Nsqv), _np.linspace(-0.5+0.5/Nsqv,0.5-0.5/Nsqv,Nsqv))
         Zuv   = _np.zeros_like(Xv)
         Zqv   = _np.zeros_like(Xv)
-        
+
         zu = _scipy.interpolate.interp2d(X[0,:],Y[:,0],Zu)
         zq = _scipy.interpolate.interp2d(X[0,:],Y[:,0],Zq)
         for i in range(Nsqv):
             for j in range(Nsqv):
                 Zuv[i,j] = zu(Xv[0,i],Yv[j,0])
                 Zqv[i,j] = zq(Xv[0,i],Yv[j,0])
-        
+
         angle1 = _np.rad2deg(_np.arctan(Zuv/Zqv))
         angle1[(Zqv <0) & (Zuv >0)] = angle1[(Zqv <0) & (Zuv >0)] + 180
         angle1[(Zqv <0) & (Zuv <0)] = angle1[(Zqv <0) & (Zuv <0)] - 180
         p = _np.sqrt(Zqv**2 + Zuv**2)
-        
+
         U = p*_np.cos(_np.deg2rad(angle1*0.5))
-        V = p*_np.sin(_np.deg2rad(angle1*0.5))     
-        
+        V = p*_np.sin(_np.deg2rad(angle1*0.5))
+
         Q  = ax8.quiver(2*Xv[0,:], 2*Yv[:,0], U, V, pivot='mid', units='inches', zorder=2)
 
         _plt.tight_layout(rect=(0.02,0,1,1))
@@ -610,17 +613,17 @@ def IQUP_gif(bodies, Nsqv= 10, dt = 10, wvl=0, path = 'gif', seconds = None):
 
         _plt.close(fig)
 
-        
+
     if seconds is not None:
         _ima.mimsave(path + '/gif_' + _time.strftime("%d-%m-%Y") + '_' + _time.strftime("%X")  + '.gif', images, duration = seconds)
     else:
         _ima.mimsave(path + '/gif_' + _time.strftime("%d-%m-%Y") + '_' + _time.strftime("%X")  + '.gif', images)
 
     _plt.ion()
-    
-    
-    
-def IQ2(bodies, t = 0, wvl=0, phase = False, save = False):
+
+
+
+def IQ2(bodies, t = 0, wvl=0, phase = False, save = False, cmap=_matplotlib.cm.viridis):
     from matplotlib.patches import Rectangle
     # create a figure with subplots
     fig = _plt.figure(figsize=(15,7))
@@ -635,7 +638,7 @@ def IQ2(bodies, t = 0, wvl=0, phase = False, save = False):
         xlabelstr = 'Time [Earth days]'
     else:
         xlabelstr = 'Phase angle [deg]'
-	
+
     I0ref = max(abs(bodies[0].radiance.I_ref[wvl,:]))
     I1ref = max(abs(bodies[1].radiance.I_ref[wvl,:]))
     Q0ref = max(abs(bodies[0].radiance.Q_ref[wvl,:]))
@@ -665,7 +668,7 @@ def IQ2(bodies, t = 0, wvl=0, phase = False, save = False):
     Q0 = bodies[0].radiance.Q[wvl,:]#/Q0ref
     Q0[_np.isnan(Q0)] = 0
     Q1 = bodies[1].radiance.Q[wvl,:]#/Q1ref
-    Q1[_np.isnan(Q1)] = 0    
+    Q1[_np.isnan(Q1)] = 0
     if phase is False:
         ax2.plot(bodies[0].ephemeris.time/3600/24, Q0,'-k', linewidth = 1.5, label = bodies[0].name)
         ax2.plot(bodies[1].ephemeris.time/3600/24, Q1,'k' , dashes=[10, 5, 10, 5], linewidth = 1.5, label = bodies[1].name)
@@ -677,10 +680,10 @@ def IQ2(bodies, t = 0, wvl=0, phase = False, save = False):
 
 
 
-    circle1 = _plt.Circle((0, 0), 1, facecolor = _plot_color('circle1'), edgecolor = _plot_color('circle'), linewidth = 2.5)
-    circle2 = _plt.Circle((0, 0), 1, edgecolor = _plot_color('circle'), facecolor = _plot_color('circle1'), fill=True , linewidth = 2.5)
-    circle3 = _plt.Circle((0, 0), 1, edgecolor = _plot_color('circle'), facecolor = _plot_color('circle1'), fill=True , linewidth = 2.5)
-    circle4 = _plt.Circle((0, 0), 1, edgecolor = _plot_color('circle'), facecolor = _plot_color('circle1'), fill=True , linewidth = 2.5)
+    circle1 = _plt.Circle((0, 0), 1, facecolor = conf._plot_color('circle1'), edgecolor = conf._plot_color('circle'), linewidth = 2.5)
+    circle2 = _plt.Circle((0, 0), 1, edgecolor = conf._plot_color('circle'), facecolor = conf._plot_color('circle1'), fill=True , linewidth = 2.5)
+    circle3 = _plt.Circle((0, 0), 1, edgecolor = conf._plot_color('circle'), facecolor = conf._plot_color('circle1'), fill=True , linewidth = 2.5)
+    circle4 = _plt.Circle((0, 0), 1, edgecolor = conf._plot_color('circle'), facecolor = conf._plot_color('circle1'), fill=True , linewidth = 2.5)
     ax3.add_artist(circle1)
     ax4.add_artist(circle2)
     ax5.add_artist(circle3)
@@ -695,14 +698,14 @@ def IQ2(bodies, t = 0, wvl=0, phase = False, save = False):
     faces01	= bodies[0].grid.faces[bodies[0].grid.shadow[t,:]!=0,0,1]
     I0	= bodies[0].grid.I[wvl,t,bodies[0].grid.shadow[t,:]!=0]#/I0ref
     Q0	= bodies[0].grid.Q[wvl,t,bodies[0].grid.shadow[t,:]!=0]#/Q0ref
-    
+
     patches = []
     for i in range(N):
         square = Rectangle( (faces00[i]*2,faces10[i]*2),-2*faces00[i]+2*faces01[i],-2*faces00[i]+2*faces01[i] )
         patches.append(square)
 
-    p1 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
-    p2 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
+    p1 = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces, zorder = 2)
+    p2 = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces, zorder = 2)
 
     p1.set_array(I0)
     p2.set_array(Q0)
@@ -714,16 +717,16 @@ def IQ2(bodies, t = 0, wvl=0, phase = False, save = False):
     ax3.set_title('Planet I parameter')
     ax4.set_title('Planet Q parameter')
 
-    _plot_config_r(ax3)
-    _plot_config_r(ax4)
+    _plot_config_r(ax3,conf)
+    _plot_config_r(ax4,conf)
 
     _plt.tight_layout()
 
-    circle5 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
-    circle6 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+    circle5 = _plt.Circle((0, 0), 1, color = conf._plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+    circle6 = _plt.Circle((0, 0), 1, color = conf._plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
     ax3.add_artist(circle5)
     ax4.add_artist(circle6)
-	
+
 
 
 
@@ -733,14 +736,14 @@ def IQ2(bodies, t = 0, wvl=0, phase = False, save = False):
     faces01	= bodies[1].grid.faces[bodies[1].grid.shadow[t,:]!=0,0,1]
     I1	= bodies[1].grid.I[wvl,t,bodies[1].grid.shadow[t,:]!=0]#/I1ref
     Q1	= bodies[1].grid.Q[wvl,t,bodies[1].grid.shadow[t,:]!=0]#/Q1ref
-    
+
     patches = []
     for i in range(N):
         square = Rectangle( (faces00[i]*2,faces10[i]*2),-2*faces00[i]+2*faces01[i],-2*faces00[i]+2*faces01[i] )
         patches.append(square)
 
-    p3 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
-    p4 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
+    p3 = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces, zorder = 2)
+    p4 = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces, zorder = 2)
 
     p3.set_array(I1)
     p4.set_array(Q1)
@@ -752,11 +755,11 @@ def IQ2(bodies, t = 0, wvl=0, phase = False, save = False):
     ax5.set_title('Moon I parameter')
     ax6.set_title('Moon Q parameter')
 
-    _plot_config_r(ax5)
-    _plot_config_r(ax6)
+    _plot_config_r(ax5,conf)
+    _plot_config_r(ax6,conf)
 
-    circle7 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
-    circle8 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+    circle7 = _plt.Circle((0, 0), 1, color = conf._plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+    circle8 = _plt.Circle((0, 0), 1, color = conf._plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
     ax5.add_artist(circle7)
     ax6.add_artist(circle8)
 
@@ -771,7 +774,7 @@ def IQ2(bodies, t = 0, wvl=0, phase = False, save = False):
 
 
 
-def geometry_d(body, t = 0, save = False, dots = False):
+def geometry_d(body, conf, t = 0, save = False, dots = False):
 
     print('\n    ⇒ Plotting geometry parameters of ' + body.name+' at t = '+str(body.ephemeris.time[t])+' seconds')
     from matplotlib.patches import Rectangle
@@ -784,12 +787,12 @@ def geometry_d(body, t = 0, save = False, dots = False):
     ax4 = _plt.subplot2grid((2,2), (1,1))
 
 
-    if _cfg.plot_faces == True:
-    	faces = _plot_color('faces')
+    if conf.plot_faces == True:
+    	faces = conf._plot_color('faces')
     else:
         faces = "none"
     if dots:
-        ax.plot(body.grid.nodes[:,0]*2, body.grid.nodes[:,1]*2, 'o', color = _plot_color('nodes'), markersize=3)
+        ax.plot(body.grid.nodes[:,0]*2, body.grid.nodes[:,1]*2, 'o', color = conf._plot_color('nodes'), markersize=3)
 
     patches = []
     for i in range(body.grid.N_points):
@@ -815,10 +818,10 @@ def geometry_d(body, t = 0, save = False, dots = False):
     aux4 = ax4.add_collection(p4)
     fig.colorbar(aux4,ax=ax4,fraction=0.046, pad=0.04)
 
-    circle1 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
-    circle2 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
-    circle3 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
-    circle4 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+    circle1 = _plt.Circle((0, 0), 1, color = conf._plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+    circle2 = _plt.Circle((0, 0), 1, color = conf._plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+    circle3 = _plt.Circle((0, 0), 1, color = conf._plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+    circle4 = _plt.Circle((0, 0), 1, color = conf._plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
     ax1.add_artist(circle1)
     ax2.add_artist(circle2)
     ax3.add_artist(circle3)
@@ -829,10 +832,10 @@ def geometry_d(body, t = 0, save = False, dots = False):
     ax3.set_title('BETA')
     ax4.set_title('PHI')
 
-    _plot_config_r(ax1)
-    _plot_config_r(ax2)
-    _plot_config_r(ax3)
-    _plot_config_r(ax4)
+    _plot_config_r(ax1,conf)
+    _plot_config_r(ax2,conf)
+    _plot_config_r(ax3,conf)
+    _plot_config_r(ax4,conf)
     _plt.tight_layout()
 
     if save:
@@ -962,40 +965,40 @@ def _move_figure(f, x, y):
         None
     _plt.show()
 
-def _plot_color(string):
+#def _plot_color(string):
+#
+#    color = _np.array([[ 'faces'      , '#aaadab', 'b'  ],
+#                      [ 'nodes'      , '#aaadab', 'r'  ],
+#                      [ 'circle1'    , '#D3D3D3', 'k'  ],
+#                      [ 'circle'     , '#444544', 'r'  ],
+#                      [ 'sun'        ,  'y'     , 'y'  ],
+#                      [ 'umbra_c'    ,  'k'     , 'k'  ],
+#                      [ 'antumbra_c' ,  '0.4'   , '0.4'],
+#                      [ 'phase_c'    ,  'g'     , 'g'  ],
+#                      [ 'penumbra_c' ,  '0.7'   , '0.7'],
+#                      [ 'transit_c'  ,  'y'     , 'y'  ],
+#                      [ 'umbra'      ,  'k'     , 'k'  ],
+#                      [ 'antumbra'   ,  '0.4'   , '0.4'],
+#                      [ 'phase'      ,  'k'     , 'k'  ],
+#                      [ 'penumbra'   ,  '0.7'   , '0.7'],
+#                      [ 'transit'    ,  'k'     , 'k'  ],
+#                      [ 'background' ,  'w'     , 'w'  ],
+#                      [ 'border'     ,  'r'     , 'm'  ]])
+#
+#    return color[_np.where(color==string)[0][0],1+conf.plot_color]
 
-    color = _np.array([[ 'faces'      , '#aaadab', 'b'  ],
-                      [ 'nodes'      , '#aaadab', 'r'  ],
-                      [ 'circle1'    , '#D3D3D3', 'k'  ],
-                      [ 'circle'     , '#444544', 'r'  ],
-                      [ 'sun'        ,  'y'     , 'y'  ],
-                      [ 'umbra_c'    ,  'k'     , 'k'  ],
-                      [ 'antumbra_c' ,  '0.4'   , '0.4'],
-                      [ 'phase_c'    ,  'g'     , 'g'  ],
-                      [ 'penumbra_c' ,  '0.7'   , '0.7'],
-                      [ 'transit_c'  ,  'y'     , 'y'  ],
-                      [ 'umbra'      ,  'k'     , 'k'  ],
-                      [ 'antumbra'   ,  '0.4'   , '0.4'],
-                      [ 'phase'      ,  'k'     , 'k'  ],
-                      [ 'penumbra'   ,  '0.7'   , '0.7'],
-                      [ 'transit'    ,  'k'     , 'k'  ],
-                      [ 'background' ,  'w'     , 'w'  ],
-                      [ 'border'     ,  'r'     , 'm'  ]])
-
-    return color[_np.where(color==string)[0][0],1+_cfg.plot_color]
-
-def _initialize_indicators(ax, m=2):
+def _initialize_indicators(ax, conf, m=2):
     circles = [0,0,0,0,0]
     # Phase
-    circles[0] = _plt.Circle((0.54*m, -0.54*m), 0.02*m, color = _plot_color('phase_c')    ,ec='k'   , fill=False, zorder=1)
+    circles[0] = _plt.Circle((0.54*m, -0.54*m), 0.02*m, color = conf._plot_color('phase_c')    ,ec='k'   , fill=False, zorder=1)
     # Umbra
-    circles[1] = _plt.Circle((0.54*m, -0.44*m), 0.01*m, color = _plot_color('umbra_c')    ,ec='none', fill=False, zorder=2)
+    circles[1] = _plt.Circle((0.54*m, -0.44*m), 0.01*m, color = conf._plot_color('umbra_c')    ,ec='none', fill=False, zorder=2)
     # Antumbra
-    circles[2] = _plt.Circle((0.54*m, -0.44*m), 0.01*m, color = _plot_color('antumbra_c') ,ec='none', fill=False, zorder=2)
+    circles[2] = _plt.Circle((0.54*m, -0.44*m), 0.01*m, color = conf._plot_color('antumbra_c') ,ec='none', fill=False, zorder=2)
     # Penumbra
-    circles[3] = _plt.Circle((0.54*m, -0.44*m), 0.02*m, color = _plot_color('penumbra_c') ,ec='k'   , fill=False, zorder=1)
+    circles[3] = _plt.Circle((0.54*m, -0.44*m), 0.02*m, color = conf._plot_color('penumbra_c') ,ec='k'   , fill=False, zorder=1)
     # Transit
-    circles[4] = _plt.Circle((0.54*m, -0.49*m), 0.02*m, color = _plot_color('transit_c')  ,ec='k'   , fill=False, zorder=1)
+    circles[4] = _plt.Circle((0.54*m, -0.49*m), 0.02*m, color = conf._plot_color('transit_c')  ,ec='k'   , fill=False, zorder=1)
 
     ax.add_artist(circles[0])
     ax.add_artist(circles[1])
@@ -1076,18 +1079,18 @@ def _load_flags(body,Type,time):
     return flags
 
 
-def _plot_config(ax):
+def _plot_config(ax,conf):
     ax.get_xaxis().set_visible(False)
     ax.get_yaxis().set_visible(False)
-    ax.set_axis_bgcolor((_plot_color('background')))
+    ax.set_axis_bgcolor((conf._plot_color('background')))
     ax.set_aspect('equal', adjustable='box')
     ax.set_xlim([-1.14, 1.14])
     ax.set_ylim([-1.14, 1.20])
 
-def _plot_config_r(ax):
+def _plot_config_r(ax,conf):
     ax.get_xaxis().set_visible(False)
     ax.get_yaxis().set_visible(False)
-    ax.set_axis_bgcolor((_plot_color('background')))
+    ax.set_axis_bgcolor((conf._plot_color('background')))
     ax.set_aspect('equal', adjustable='box')
     ax.set_xlim([-1.01, 1.01])
     ax.set_ylim([-1.01, 1.01])
@@ -1181,10 +1184,10 @@ def grid(body):
     print('\n    ⇒ Plotting grid of ' + body.type + ' ' + body.name)
 
     fig , ax = _plt.subplots()
-    _plt.plot(body.grid.nodes[:,0], body.grid.nodes[:,1], 'o', color = _plot_color('nodes'), markersize=3)
+    _plt.plot(body.grid.nodes[:,0], body.grid.nodes[:,1], 'o', color = conf._plot_color('nodes'), markersize=3)
     for i in range(body.grid.N_points):
-        _plt.plot(body.grid.faces[i,0,:], body.grid.faces[i,1,:], _plot_color('faces'), linewidth = 2)
-    circle1 = _plt.Circle((0, 0), 0.5, color = _plot_color('circle'), fill=False, zorder=1)
+        _plt.plot(body.grid.faces[i,0,:], body.grid.faces[i,1,:], conf._plot_color('faces'), linewidth = 2)
+    circle1 = _plt.Circle((0, 0), 0.5, color = conf._plot_color('circle'), fill=False, zorder=1)
     ax.add_artist(circle1)
     ax.set_aspect('equal', adjustable='box')
     ax.set_xlim([-0.55, 0.55])
@@ -1193,7 +1196,7 @@ def grid(body):
     #ax.text(0.14,  0.525,'$\^{A}$: '+ str(_np.round(_np.sum(body.grid.area)/(m.pi*0.5**2),3)), fontsize= 15)
 
 
-def shadow_d(body, t = 0, save = False, dots = False):
+def shadow_d(body, conf, t = 0, save = False, dots = False):
 
     if not hasattr(body.grid, 'shadow'):
     	body.grid.shadow = _np.ones([len(body.ephemeris.time), len(body.grid.nodes)])
@@ -1209,10 +1212,10 @@ def shadow_d(body, t = 0, save = False, dots = False):
     cell        = []#list(_np.zeros(body.grid.N_points))
     patch_cells = []#list(_np.zeros(body.grid.N_points))
 
-    if _cfg.plot_faces == True:
-    	ax.plot(body.grid.faces[:,0,:].T*2, body.grid.faces[:,1,:].T*2, color= _plot_color('faces'), linewidth = 0.5,zorder=2)
+    if conf.plot_faces == True:
+    	ax.plot(body.grid.faces[:,0,:].T*2, body.grid.faces[:,1,:].T*2, color= conf._plot_color('faces'), linewidth = 0.5,zorder=2)
     if dots:
-        ax.plot(body.grid.nodes[:,0]*2, body.grid.nodes[:,1]*2, 'o', color = _plot_color('nodes'), markersize=3)
+        ax.plot(body.grid.nodes[:,0]*2, body.grid.nodes[:,1]*2, 'o', color = conf._plot_color('nodes'), markersize=3)
     for i in range(body.grid.N_points):
         cell.append( [_Polygon(2*body.grid.faces[i,:,:].T)] )
         patch_cells.append( _PatchCollection(cell[i], alpha=1, color=str(body.grid.shadow[t,i]), edgecolor='none', zorder=1) )
@@ -1220,16 +1223,16 @@ def shadow_d(body, t = 0, save = False, dots = False):
 
 
     # Body circle
-    circle = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+    circle = _plt.Circle((0, 0), 1, color = conf._plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
     ax.add_artist(circle)
 
     # Indicators
-    circles = _initialize_indicators(ax)
+    circles = _initialize_indicators(ax, conf)
     _update_indicators(ax,flags,0, circles)
 
     # Sun point
     P = [ 1.08*_np.cos(body.geometry.solar_azimuth_angle[t]) , 1.08*_np.sin(body.geometry.solar_azimuth_angle[t]+_np.pi)]
-    circleP = _plt.Circle((P[0], P[1]), 0.03, color = _plot_color('sun'), fill=True, zorder=1)
+    circleP = _plt.Circle((P[0], P[1]), 0.03, color = conf._plot_color('sun'), fill=True, zorder=1)
     ax.add_artist(circleP)
 
     # Text
@@ -1238,7 +1241,7 @@ def shadow_d(body, t = 0, save = False, dots = False):
 
     ax.set_title('Discretized '+body.type+' '+body.name)
 
-    _plot_config(ax)
+    _plot_config(ax,conf)
 #    _plt.tight_layout()
 
     if save:
@@ -1250,7 +1253,7 @@ def shadow_d(body, t = 0, save = False, dots = False):
 
     _plt.show()
 
-def shadow_dd(body, t = [0,0,0], save = False, dots = False):
+def shadow_dd(body, conf, t = [0,0,0], save = False, dots = False):
 
         if not hasattr(body.grid, 'shadow'):
                 body.grid.shadow = _np.ones([len(body.ephemeris.time), len(body.grid.nodes)])
@@ -1264,12 +1267,12 @@ def shadow_dd(body, t = [0,0,0], save = False, dots = False):
         ax2 = _plt.subplot2grid((1,3), (0,1))
         ax3 = _plt.subplot2grid((1,3), (0,2))
 
-        if _cfg.plot_faces == True:
-    	        faces = _plot_color('faces')
+        if conf.plot_faces == True:
+    	        faces = conf._plot_color('faces')
         else:
                 faces = "none"
         if dots:
-                ax.plot(body.grid.nodes[:,0]*2, body.grid.nodes[:,1]*2, 'o', color = _plot_color('nodes'), markersize=3)
+                ax.plot(body.grid.nodes[:,0]*2, body.grid.nodes[:,1]*2, 'o', color = conf._plot_color('nodes'), markersize=3)
 
         patches = []
         for i in range(body.grid.N_points):
@@ -1287,9 +1290,9 @@ def shadow_dd(body, t = [0,0,0], save = False, dots = False):
         aux2 = ax2.add_collection(p2)
         aux3 = ax3.add_collection(p3)
 
-        circle1 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)        
-        circle2 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
-        circle3 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+        circle1 = _plt.Circle((0, 0), 1, color = conf._plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+        circle2 = _plt.Circle((0, 0), 1, color = conf._plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+        circle3 = _plt.Circle((0, 0), 1, color = conf._plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
         ax1.add_artist(circle1)
         ax2.add_artist(circle2)
         ax3.add_artist(circle3)
@@ -1304,9 +1307,9 @@ def shadow_dd(body, t = [0,0,0], save = False, dots = False):
                      (int(body.ephemeris.time[t[2]]/60/60/24), (body.ephemeris.time[t[2]]/24/60/60-
                       int(body.ephemeris.time[t[2]]/60/60/24))*24))
 
-        _plot_config_r(ax1)
-        _plot_config_r(ax2)
-        _plot_config_r(ax3)
+        _plot_config_r(ax1,conf)
+        _plot_config_r(ax2,conf)
+        _plot_config_r(ax3,conf)
         _plt.tight_layout()
 
         if save:
@@ -1318,7 +1321,7 @@ def shadow_dd(body, t = [0,0,0], save = False, dots = False):
 
         _plt.show()
 
-def I_d(body, t = 0, wvl=0, dots = False):
+def I_d(body, conf, t = 0, wvl=0, dots = False, cmap=_matplotlib.cm.viridis):
 
     print('\n    ⇒ Plotting I parameter ' + body.type + ' ' + body.name+' at t ='+str(body.ephemeris.time[t])+' seconds')
     from matplotlib.patches import Rectangle
@@ -1331,25 +1334,25 @@ def I_d(body, t = 0, wvl=0, dots = False):
     _move_figure(fig, 155, 110)
     ax  = fig.add_subplot(1, 1, 1)
 
-    if _cfg.plot_faces == True:
-    	faces = _plot_color('faces')
+    if conf.plot_faces == True:
+    	faces = conf._plot_color('faces')
     else:
         faces = "none"
     if dots:
-        ax.plot(body.grid.nodes[:,0]*2, body.grid.nodes[:,1]*2, 'o', color = _plot_color('nodes'), markersize=3)
+        ax.plot(body.grid.nodes[:,0]*2, body.grid.nodes[:,1]*2, 'o', color = conf._plot_color('nodes'), markersize=3)
 
     patches = []
     for i in range(body.grid.N_points):
         square = Rectangle( (body.grid.faces[i,0,0]*2,body.grid.faces[i,1,0]*2),-2*body.grid.faces[i,0,0]+2*body.grid.faces[i,0,1],-2*body.grid.faces[i,0,0]+2*body.grid.faces[i,0,1] )
         patches.append(square)
 
-    p = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces)
+    p = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces)
     p.set_array(body.grid.I[wvl, t,:])
     ax.add_collection(p)
     _plt.colorbar(p)
 
     # Body circle
-    circle = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+    circle = _plt.Circle((0, 0), 1, color = conf._plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
     ax.add_artist(circle)
 
     ax.set_title('I parameter')
@@ -1359,7 +1362,7 @@ def I_d(body, t = 0, wvl=0, dots = False):
     #fig.patch.set_visible(False)
 
 
-def Q_d(body, t = 0, wvl=0, dots = False):
+def Q_d(body, conf, t = 0, wvl=0, dots = False, cmap=_matplotlib.cm.viridis):
 
     print('\n    ⇒ Plotting Q parameter ' + body.type + ' ' + body.name+' at t ='+str(body.ephemeris.time[t])+' seconds')
     from matplotlib.patches import Rectangle
@@ -1372,25 +1375,25 @@ def Q_d(body, t = 0, wvl=0, dots = False):
     _move_figure(fig, 155, 110)
     ax  = fig.add_subplot(1, 1, 1)
 
-    if _cfg.plot_faces == True:
-        faces = _plot_color('faces')
+    if conf.plot_faces == True:
+        faces = conf._plot_color('faces')
     else:
         faces = "none"
     if dots:
-        ax.plot(body.grid.nodes[:,0]*2, body.grid.nodes[:,1]*2, 'o', color = _plot_color('nodes'), markersize=3)
+        ax.plot(body.grid.nodes[:,0]*2, body.grid.nodes[:,1]*2, 'o', color = conf._plot_color('nodes'), markersize=3)
 
     patches = []
     for i in range(body.grid.N_points):
         square = Rectangle( (body.grid.faces[i,0,0]*2,body.grid.faces[i,1,0]*2),-2*body.grid.faces[i,0,0]+2*body.grid.faces[i,0,1],-2*body.grid.faces[i,0,0]+2*body.grid.faces[i,0,1] )
         patches.append(square)
 
-    p = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces)
+    p = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces)
     p.set_array(body.grid.Q[wvl,t,:])
     ax.add_collection(p)
     _plt.colorbar(p)
 
     # Body circle
-    circle = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+    circle = _plt.Circle((0, 0), 1, color = conf._plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
     ax.add_artist(circle)
 
     ax.set_title('Q parameter')
@@ -1399,7 +1402,7 @@ def Q_d(body, t = 0, wvl=0, dots = False):
     _plt.tight_layout()
 
 
-def U_d(body, t = 0, wvl=0, dots = False):
+def U_d(body, conf, t = 0, wvl=0, dots = False, cmap=_matplotlib.cm.viridis):
 
     print('\n    ⇒ Plotting U parameter ' + body.type + ' ' + body.name+' at t ='+str(body.ephemeris.time[t])+' seconds')
     from matplotlib.patches import Rectangle
@@ -1412,25 +1415,25 @@ def U_d(body, t = 0, wvl=0, dots = False):
     _move_figure(fig, 155, 110)
     ax  = fig.add_subplot(1, 1, 1)
 
-    if _cfg.plot_faces == True:
-        faces = _plot_color('faces')
+    if conf.plot_faces == True:
+        faces = conf._plot_color('faces')
     else:
         faces = "none"
     if dots:
-        ax.plot(body.grid.nodes[:,0]*2, body.grid.nodes[:,1]*2, 'o', color = _plot_color('nodes'), markersize=3)
+        ax.plot(body.grid.nodes[:,0]*2, body.grid.nodes[:,1]*2, 'o', color = conf._plot_color('nodes'), markersize=3)
 
     patches = []
     for i in range(body.grid.N_points):
         square = Rectangle( (body.grid.faces[i,0,0]*2,body.grid.faces[i,1,0]*2),-2*body.grid.faces[i,0,0]+2*body.grid.faces[i,0,1],-2*body.grid.faces[i,0,0]+2*body.grid.faces[i,0,1] )
         patches.append(square)
 
-    p = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces)
+    p = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces)
     p.set_array(body.grid.U[wvl,t,:])
     ax.add_collection(p)
     _plt.colorbar(p)
 
     # Body circle
-    circle = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+    circle = _plt.Circle((0, 0), 1, color = conf._plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
     ax.add_artist(circle)
 
     ax.set_title('U parameter')
@@ -1439,7 +1442,7 @@ def U_d(body, t = 0, wvl=0, dots = False):
     _plt.tight_layout()
 
 
-def V_d(body, t = 0, wvl=0, dots = False):
+def V_d(body, conf, t = 0, wvl=0, dots = False, cmap=_matplotlib.cm.viridis):
 
     print('\n    ⇒ Plotting V parameter ' + body.type + ' ' + body.name+' at t ='+str(body.ephemeris.time[t])+' seconds')
     from matplotlib.patches import Rectangle
@@ -1452,25 +1455,25 @@ def V_d(body, t = 0, wvl=0, dots = False):
     _move_figure(fig, 155, 110)
     ax  = fig.add_subplot(1, 1, 1)
 
-    if _cfg.plot_faces == True:
-        faces = _plot_color('faces')
+    if conf.plot_faces == True:
+        faces = conf._plot_color('faces')
     else:
         faces = "none"
     if dots:
-        ax.plot(body.grid.nodes[:,0]*2, body.grid.nodes[:,1]*2, 'o', color = _plot_color('nodes'), markersize=3)
+        ax.plot(body.grid.nodes[:,0]*2, body.grid.nodes[:,1]*2, 'o', color = conf._plot_color('nodes'), markersize=3)
 
     patches = []
     for i in range(body.grid.N_points):
         square = Rectangle( (body.grid.faces[i,0,0]*2,body.grid.faces[i,1,0]*2),-2*body.grid.faces[i,0,0]+2*body.grid.faces[i,0,1],-2*body.grid.faces[i,0,0]+2*body.grid.faces[i,0,1] )
         patches.append(square)
 
-    p = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces)
+    p = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces)
     p.set_array(body.grid.V[wvl,t,:])
     ax.add_collection(p)
     _plt.colorbar(p)
 
     # Body circle
-    circle = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+    circle = _plt.Circle((0, 0), 1, color = conf._plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
     ax.add_artist(circle)
 
     ax.set_title('V parameter')
@@ -1479,7 +1482,7 @@ def V_d(body, t = 0, wvl=0, dots = False):
     _plt.tight_layout()
 
 
-def radiance_d(body, t = 0, wvl=0, save = False, dots = False):
+def radiance_d(body, conf, t = 0, wvl=0, save = False, dots = False, cmap=_matplotlib.cm.viridis):
 
     print('\n    ⇒ Plotting stokes parameters of ' + body.type + ' ' + body.name+' at t ='+str(body.ephemeris.time[t])+' seconds')
     from matplotlib.patches import Rectangle
@@ -1491,21 +1494,21 @@ def radiance_d(body, t = 0, wvl=0, save = False, dots = False):
     ax3 = _plt.subplot2grid((2,2), (1,0))
     ax4 = _plt.subplot2grid((2,2), (1,1))
 
-    circle1 = _plt.Circle((0, 0), 1, facecolor = _plot_color('circle1'), edgecolor = _plot_color('circle'), linewidth = 2.5)
-    circle2 = _plt.Circle((0, 0), 1, edgecolor = _plot_color('circle'), facecolor = _plot_color('circle1'), fill=True , linewidth = 2.5)
-    circle3 = _plt.Circle((0, 0), 1, edgecolor = _plot_color('circle'), facecolor = _plot_color('circle1'), fill=True , linewidth = 2.5)
-    circle4 = _plt.Circle((0, 0), 1, edgecolor = _plot_color('circle'), facecolor = _plot_color('circle1'), fill=True , linewidth = 2.5)
+    circle1 = _plt.Circle((0, 0), 1, facecolor = conf._plot_color('circle1'), edgecolor = conf._plot_color('circle'), linewidth = 2.5)
+    circle2 = _plt.Circle((0, 0), 1, edgecolor = conf._plot_color('circle'), facecolor = conf._plot_color('circle1'), fill=True , linewidth = 2.5)
+    circle3 = _plt.Circle((0, 0), 1, edgecolor = conf._plot_color('circle'), facecolor = conf._plot_color('circle1'), fill=True , linewidth = 2.5)
+    circle4 = _plt.Circle((0, 0), 1, edgecolor = conf._plot_color('circle'), facecolor = conf._plot_color('circle1'), fill=True , linewidth = 2.5)
     ax1.add_artist(circle1)
     ax2.add_artist(circle2)
     ax3.add_artist(circle3)
     ax4.add_artist(circle4)
 
-    if _cfg.plot_faces == True:
-        faces = _plot_color('faces')
+    if conf.plot_faces == True:
+        faces = conf._plot_color('faces')
     else:
         faces = "none"
         if dots:
-            ax.plot(body.grid.nodes[:,0]*2, body.grid.nodes[:,1]*2, 'o', color = _plot_color('nodes'), markersize=3)
+            ax.plot(body.grid.nodes[:,0]*2, body.grid.nodes[:,1]*2, 'o', color = conf._plot_color('nodes'), markersize=3)
 
     N 	= _np.sum(body.grid.shadow[t,:]!=0)
     faces00	= body.grid.faces[body.grid.shadow[t,:]!=0,0,0]
@@ -1521,10 +1524,10 @@ def radiance_d(body, t = 0, wvl=0, save = False, dots = False):
         square = Rectangle( (faces00[i]*2,faces10[i]*2),-2*faces00[i]+2*faces01[i],-2*faces00[i]+2*faces01[i] )
         patches.append(square)
 
-    p1 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
-    p2 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
-    p3 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
-    p4 = _PatchCollection(patches,cmap=_matplotlib.cm.jet, alpha = 1, edgecolor = faces, zorder = 2)
+    p1 = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces, zorder = 2)
+    p2 = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces, zorder = 2)
+    p3 = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces, zorder = 2)
+    p4 = _PatchCollection(patches,cmap=cmap, alpha = 1, edgecolor = faces, zorder = 2)
 
     Q_aux = -Q/I
     U_aux = U/I
@@ -1552,16 +1555,16 @@ def radiance_d(body, t = 0, wvl=0, save = False, dots = False):
     ax3.set_title('U parameter')
     ax4.set_title('V parameter')
 
-    _plot_config_r(ax1)
-    _plot_config_r(ax2)
-    _plot_config_r(ax3)
-    _plot_config_r(ax4)
+    _plot_config_r(ax1,conf)
+    _plot_config_r(ax2,conf)
+    _plot_config_r(ax3,conf)
+    _plot_config_r(ax4,conf)
     _plt.tight_layout()
 
-    circle5 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
-    circle6 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
-    circle7 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
-    circle8 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+    circle5 = _plt.Circle((0, 0), 1, color = conf._plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+    circle6 = _plt.Circle((0, 0), 1, color = conf._plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+    circle7 = _plt.Circle((0, 0), 1, color = conf._plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+    circle8 = _plt.Circle((0, 0), 1, color = conf._plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
     ax1.add_artist(circle5)
     ax2.add_artist(circle6)
     ax3.add_artist(circle7)
@@ -1610,26 +1613,26 @@ def anim_shadow_1(body, dots = False, time  = 'all', info = [15, False]):
     t = time[t_i]
     t_vector = _np.arange(time[0],time[1])
 
-    ax.plot(body.grid.faces[:,0,:].T*2, body.grid.faces[:,1,:].T*2, _plot_color('faces'), linewidth = 0.5,zorder=2)
+    ax.plot(body.grid.faces[:,0,:].T*2, body.grid.faces[:,1,:].T*2, conf._plot_color('faces'), linewidth = 0.5,zorder=2)
     if dots:
-        ax.plot(body.grid.nodes[:,0]*2, body.grid.nodes[:,1]*2, 'o', color = _plot_color('nodes'), markersize=3)
+        ax.plot(body.grid.nodes[:,0]*2, body.grid.nodes[:,1]*2, 'o', color = conf._plot_color('nodes'), markersize=3)
     for i in range(body.grid.N_points):
         cell.append( [_Polygon(2*body.grid.faces[i,:,:].T)] )
         patch_cells.append( _PatchCollection(cell[i], alpha=1, color=str(body.grid.shadow[t,i]), edgecolor='none', zorder=1) )
         ax.add_collection(patch_cells[i])
 
     # Body circle
-    circle = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
+    circle = _plt.Circle((0, 0), 1, color = conf._plot_color('circle'), fill=False, zorder=3,linewidth = 2.5)
     ax.add_artist(circle)
 
     # Indicators
-    circles = _initialize_indicators(ax)
+    circles = _initialize_indicators(ax, conf)
     _update_indicators(ax,flags,t, circles)
 
     # Sun point
     P = [ 1.08*_np.cos(body.geometry.solar_azimuth_angle[time[0]:time[1]]+_np.pi) , 1.08*_np.sin(body.geometry.solar_azimuth_angle[time[0]:time[1]]+_np.pi)]
 
-    circleP = _plt.Circle((P[0][t], P[1][t]), 0.03, color = _plot_color('sun'), fill=True, zorder=1)
+    circleP = _plt.Circle((P[0][t], P[1][t]), 0.03, color = conf._plot_color('sun'), fill=True, zorder=1)
     ax.add_artist(circleP)
 
     # Text
@@ -1638,7 +1641,7 @@ def anim_shadow_1(body, dots = False, time  = 'all', info = [15, False]):
 
     ax.set_title('Discretized '+body.type+' '+body.name)
 
-    _plot_config(ax)
+    _plot_config(ax,conf)
 
     def animate(t_i):
         global t_vector
@@ -1706,39 +1709,39 @@ def anim_shadow_2(body1, body2, dots = False, time  = 'all', info = [ 15, False]
     t = time[t_i]
     t_vector = _np.arange(time[0],time[1])
 
-    ax1.plot(body1.grid.faces[:,0,:].T*2, body1.grid.faces[:,1,:].T*2, _plot_color('faces'), linewidth = 0.5,zorder=2)
+    ax1.plot(body1.grid.faces[:,0,:].T*2, body1.grid.faces[:,1,:].T*2, conf._plot_color('faces'), linewidth = 0.5,zorder=2)
     if dots:
-        ax1.plot(body1.grid.nodes[:,0]*2, body1.grid.nodes[:,1]*2, 'o', color = _plot_color('nodes'), markersize=3)
+        ax1.plot(body1.grid.nodes[:,0]*2, body1.grid.nodes[:,1]*2, 'o', color = conf._plot_color('nodes'), markersize=3)
     for i in range(body1.grid.N_points):
         cell1.append( [_Polygon(2*body1.grid.faces[i,:,:].T)] )
         patch_cells1.append( _PatchCollection(cell1[i], alpha=1, color=str(body1.grid.shadow[t,i]), edgecolor='none', zorder=1) )
         ax1.add_collection(patch_cells1[i])
-    ax2.plot(body2.grid.faces[:,0,:].T*2, body2.grid.faces[:,1,:].T*2, _plot_color('faces'), linewidth = 0.5,zorder=2)
+    ax2.plot(body2.grid.faces[:,0,:].T*2, body2.grid.faces[:,1,:].T*2, conf._plot_color('faces'), linewidth = 0.5,zorder=2)
     if dots:
-        ax2.plot(body2.grid.nodes[:,0]*2, body2.grid.nodes[:,1]*2, 'o', color = _plot_color('nodes'), markersize=3)
+        ax2.plot(body2.grid.nodes[:,0]*2, body2.grid.nodes[:,1]*2, 'o', color = conf._plot_color('nodes'), markersize=3)
     for i in range(body2.grid.N_points):
         cell2.append( [_Polygon(2*body2.grid.faces[i,:,:].T)] )
         patch_cells2.append( _PatchCollection(cell2[i], alpha=1, color=str(body2.grid.shadow[t,i]), edgecolor='none', zorder=1) )
         ax2.add_collection(patch_cells2[i])
 
     # Body circle
-    circle1 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=10,linewidth = 2.5)
+    circle1 = _plt.Circle((0, 0), 1, color = conf._plot_color('circle'), fill=False, zorder=10,linewidth = 2.5)
     ax1.add_artist(circle1)
-    circle2 = _plt.Circle((0, 0), 1, color = _plot_color('circle'), fill=False, zorder=10,linewidth = 2.5)
+    circle2 = _plt.Circle((0, 0), 1, color = conf._plot_color('circle'), fill=False, zorder=10,linewidth = 2.5)
     ax2.add_artist(circle2)
 
     # Indicators
-    circles1 = _initialize_indicators(ax1)
+    circles1 = _initialize_indicators(ax1, conf)
     _update_indicators(ax1,flags1,t_i, circles1)
-    circles2 = _initialize_indicators(ax2)
+    circles2 = _initialize_indicators(ax2, conf)
     _update_indicators(ax2,flags2,t_i, circles2)
 
     # Sun point
     P1 = [ 1.08*_np.cos(body1.geometry.solar_azimuth_angle[time[0]:time[1]]+_np.pi) , 1.08*_np.sin(body1.geometry.solar_azimuth_angle[time[0]:time[1]]+_np.pi)]
-    circleP1 = _plt.Circle((P1[0][t_i], P1[1][t_i]), 0.03, color = _plot_color('sun'), fill=True, zorder=1)
+    circleP1 = _plt.Circle((P1[0][t_i], P1[1][t_i]), 0.03, color = conf._plot_color('sun'), fill=True, zorder=1)
     ax1.add_artist(circleP1)
     P2 = [ 1.08*_np.cos(body2.geometry.solar_azimuth_angle[time[0]:time[1]]+_np.pi) , 1.08*_np.sin(body2.geometry.solar_azimuth_angle[time[0]:time[1]]+_np.pi)]
-    circleP2 = _plt.Circle((P2[0][t_i], P2[1][t_i]), 0.03, color = _plot_color('sun'), fill=True, zorder=1)
+    circleP2 = _plt.Circle((P2[0][t_i], P2[1][t_i]), 0.03, color = conf._plot_color('sun'), fill=True, zorder=1)
     ax2.add_artist(circleP2)
 
     # Text
@@ -1750,8 +1753,8 @@ def anim_shadow_2(body1, body2, dots = False, time  = 'all', info = [ 15, False]
     ax1.set_title('Discretized '+body1.type+' '+body1.name)
     ax2.set_title('Discretized '+body2.type+' '+body2.name)
 
-    _plot_config(ax1)
-    _plot_config(ax2)
+    _plot_config(ax1,conf)
+    _plot_config(ax2,conf)
 
 
     def animate(t_i):

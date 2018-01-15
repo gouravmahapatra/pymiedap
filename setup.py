@@ -1,3 +1,6 @@
+# This file is part of PyMieDAP, released under GNU General Public License.
+# See license.md or http://gitlab.com/loic.cg.rossi/pymiedap for details.
+
 # File setup.py
 
 import setuptools
@@ -20,7 +23,8 @@ module_mie = Extension(name = 'module_mie',
 
 module_readmie = Extension(name = 'module_readmie',
                             sources=['./readmie_sig.pyf',
-                                     './readmie_source/read_mie_output.f', ])
+                                     './readmie_source/read_mie_output.f',
+                                     './readmie_source/file2coefs.f', ])
 
 module_mieshell = Extension(name = 'module_mieshell',
                             sources=['./mieshell_sig.pyf',

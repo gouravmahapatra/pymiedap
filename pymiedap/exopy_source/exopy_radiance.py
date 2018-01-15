@@ -1,3 +1,6 @@
+# This file is part of PyMieDAP, released under GNU General Public License.
+# See license.md or http://gitlab.com/loic.cg.rossi/pymiedap for details.
+
 # -*- coding: utf-8 -*-
 # ==================================================================
 # EXOPY module: exopy_radiance.py
@@ -85,7 +88,7 @@ def combine(bodies, reference):
     for wvl,j in enumerate(reference.atmosphere.wvl_list):
         for body in bodies:
 
-            size_scale = body.properties.R/reference.properties.R
+            size_scale = (body.properties.R/reference.properties.R)**2
             distance_scale = (reference.ephemeris.r_s/body.ephemeris.r_s)**2
 
             #IQUV = [body.radiance.I[wvl,:], body.radiance.Q[wvl,:], body.radiance.U[wvl,:], body.radiance.V[wvl,:]]
