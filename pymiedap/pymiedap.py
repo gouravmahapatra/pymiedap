@@ -98,7 +98,7 @@ class Layer():
     def mix_aerosols(self):
         """ Mixes the aerosols by combining their scattering matrices"""
         # Checking if there is already a mixed aerosol object
-        if hasattr(self,'mixed_aerosols')==True:
+        if hasattr(self,'mixed_aerosols') is True:
             del(self.mixed_aerosols)
 
         # Preparing some variables
@@ -323,7 +323,7 @@ class Model(object):
                    "dpol={:2.2f}\n".format(self.dpol))
         lays_str = '\n **Layers** \n'
         for layer_name, layer in vars(self.layers).items():
-            if hasattr(layer,'mixed_aerosols')==True:
+            if hasattr(layer,'mixed_aerosols') is True:
                 strout = ('LAYER ' + str(layer_name) +'\n'+
                           ' Type:' + layer.mixed_aerosols.typ +
                           ', P=' + str(layer.press) +
@@ -533,7 +533,7 @@ class Model(object):
                 fich.write(lays_str)
 
                 for layer_name, layer in vars(self.layers).items():
-                    if hasattr(layer,'mixed_aerosols')==True:
+                    if hasattr(layer,'mixed_aerosols') is True:
                         strout = ('LAYER '+str(layer_name) +'\n'+
                                 ' Type:' + layer.mixed_aerosols.typ +
                                 ', P=' + str(layer.press) +
@@ -736,7 +736,7 @@ class Aerosols():
     def __repr__(self):
         """ Displayed informations when the object is printed """
 
-        if self.layered == True:
+        if self.layered is True:
             str0 = "Layered spherical particles\n"
             strA = ("nr_core =" + str(self.nr_core) + " )) nr_mantle = "
                     + str(self.nr) + "))\n")
@@ -1380,7 +1380,7 @@ def dap_code(model, rename=False, output_name='modelA',
             lev = (pres==layer.press)
 
             # force user-define rayleigh opacity
-            if layer.rayscat==False:
+            if layer.rayscat is False:
                 bmsca[lev] = layer.tau_ray[z]
 
             layer.bmsca[z] = bmsca[lev]
@@ -2662,7 +2662,7 @@ def mask_planet(alpha=0, npix=20, cusp=False, thresh_lat=50., patchy=True,
     """
 
     # if no specific pattern, assume full_disk
-    if patchy==False and cusp==False and sscloud==False and bands==False:
+    if patchy is False and cusp is False and sscloud is False and bands is False:
         full_disk=True
 
     # read the pixel geometries
@@ -2702,7 +2702,7 @@ def mask_planet(alpha=0, npix=20, cusp=False, thresh_lat=50., patchy=True,
     xidx = [np.where(X==item)[0][0] for i, item in enumerate(xs) if item in X]
     yidx = [np.where(Y==item)[0][0] for i, item in enumerate(ys) if item in Y]
 
-    if full_disk==True:
+    if full_disk is True:
         # remove outside of disk
         grid_full[xv*xv+yv*yv>1]=np.nan
         # validate pixels lit
@@ -2711,7 +2711,7 @@ def mask_planet(alpha=0, npix=20, cusp=False, thresh_lat=50., patchy=True,
         # wARNING! arrays have shape (nlines, ncols), hence the grid[y,x]!
 
 
-    if sscloud==True:
+    if sscloud is True:
         grid_full[:] = 1.
         # validate pixels lit
         grid_lit[yidx,xidx] = 1. # validate those
@@ -2728,7 +2728,7 @@ def mask_planet(alpha=0, npix=20, cusp=False, thresh_lat=50., patchy=True,
         # wARNING! arrays have shape (nlines, ncols), hence the grid[y,x]!
 
     # If polar cusps
-    if cusp==True:
+    if cusp is True:
         grid_full[:] = 1.
         # validate pixels lit
         grid_lit[yidx,xidx] = 1. # validate those
@@ -2764,7 +2764,7 @@ def mask_planet(alpha=0, npix=20, cusp=False, thresh_lat=50., patchy=True,
 
         # wARNING! arrays have shape (nlines, ncols), hence the grid[y,x]!
 
-    if patchy==True:
+    if patchy is True:
         #if no fixed cover is wanted
         # n types
         ntypes = len(fclouds)
@@ -2809,7 +2809,7 @@ def mask_planet(alpha=0, npix=20, cusp=False, thresh_lat=50., patchy=True,
                     grid_full[xv*xv+yv*yv>1]=np.nan
 
                     # get current cloud coverage at given phase angle
-                    if constant_fcloud==True:
+                    if constant_fcloud is True:
                         cl = np.where(grid_lit>=0)[0].size
                         lit = np.where(~np.isnan(grid_lit))[0].size
                         nb_cloud = float(cl)/(lit)
