@@ -1932,7 +1932,7 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
             if fixed_pattern is False:
                 picture_full=None
 
-            if input_pattern!=None:
+            if input_pattern is not None:
                 picture_full=input_pattern[A,:,:]
 
             if adaptive_pixels is True:
@@ -2309,7 +2309,7 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
         if fixed_pattern is False:
             picture_full=None
 
-        if input_pattern!=None:
+        if input_pattern is not None:
             picture_full=input_pattern[a,:,:]
 
         #Get geom of pixels
@@ -2771,7 +2771,7 @@ def mask_planet(alpha=0, npix=20, cusp=False, thresh_lat=50., patchy=True,
         fclouds = np.array(fclouds).astype(float) #avoids issues if integers are given
         fclouds = fclouds/sum(fclouds) #renormalization
 
-        if fixed_cover==None:
+        if fixed_cover is None:
             #compute a new one
             #starting from a no-type cover (repr. with -1)
 
