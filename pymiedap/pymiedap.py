@@ -1937,6 +1937,7 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
 
             if adaptive_pixels is True:
                 npix2 = np.ceil(npix * (1 + np.sin(np.radians(alph)/2.)**2))
+                npix2 = int(npix2)
                 print('npix=',npix2)
             else:
                 npix2 = npix
@@ -2315,6 +2316,7 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
         #Get geom of pixels
         if adaptive_pixels is True:
             npix2 = np.ceil(npix * (1 + np.sin(np.radians(alph)/2.)**2))
+            npix2 = int(npix2)
             print('npix=',npix2)
         else:
             npix2 = npix
