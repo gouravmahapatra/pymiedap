@@ -98,7 +98,7 @@ class Layer():
     def mix_aerosols(self):
         """ Mixes the aerosols by combining their scattering matrices"""
         # Checking if there is already a mixed aerosol object
-        if hasattr(self,'mixed_aerosols')==True:
+        if hasattr(self,'mixed_aerosols') is True:
             del(self.mixed_aerosols)
 
         # Preparing some variables
@@ -323,7 +323,7 @@ class Model(object):
                    "dpol={:2.2f}\n".format(self.dpol))
         lays_str = '\n **Layers** \n'
         for layer_name, layer in vars(self.layers).items():
-            if hasattr(layer,'mixed_aerosols')==True:
+            if hasattr(layer,'mixed_aerosols') is True:
                 strout = ('LAYER ' + str(layer_name) +'\n'+
                           ' Type:' + layer.mixed_aerosols.typ +
                           ', P=' + str(layer.press) +
@@ -533,7 +533,7 @@ class Model(object):
                 fich.write(lays_str)
 
                 for layer_name, layer in vars(self.layers).items():
-                    if hasattr(layer,'mixed_aerosols')==True:
+                    if hasattr(layer,'mixed_aerosols') is True:
                         strout = ('LAYER '+str(layer_name) +'\n'+
                                 ' Type:' + layer.mixed_aerosols.typ +
                                 ', P=' + str(layer.press) +
@@ -736,7 +736,7 @@ class Aerosols():
     def __repr__(self):
         """ Displayed informations when the object is printed """
 
-        if self.layered == True:
+        if self.layered is True:
             str0 = "Layered spherical particles\n"
             strA = ("nr_core =" + str(self.nr_core) + " )) nr_mantle = "
                     + str(self.nr) + "))\n")
@@ -1380,7 +1380,7 @@ def dap_code(model, rename=False, output_name='modelA',
             lev = (pres==layer.press)
 
             # force user-define rayleigh opacity
-            if layer.rayscat==False:
+            if layer.rayscat is False:
                 bmsca[lev] = layer.tau_ray[z]
 
             layer.bmsca[z] = bmsca[lev]
@@ -1786,7 +1786,7 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
                   xscale=0.1, yscale=0.01,
                   bands=False, bands_lats=[-90,90],
                   fclouds=[0.5,0.5], constant_fcloud=False, sscloud=False,
-                  sigma_c=10., delta_c=[0.], nmug_mie=20, nmug=20., nsubr=50,
+                  sigma_c=10., delta_c=[0.], nmug_mie=20, nmug=20, nsubr=50,
                   nmat=4, pixscaler=1, adaptive_pixels=False):
     """ Generate disk-resolved images of a planet according to model
 
@@ -1932,11 +1932,12 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
             if fixed_pattern is False:
                 picture_full=None
 
-            if input_pattern!=None:
+            if input_pattern is not None:
                 picture_full=input_pattern[A,:,:]
 
             if adaptive_pixels is True:
                 npix2 = np.ceil(npix * (1 + np.sin(np.radians(alph)/2.)**2))
+                npix2 = int(npix2)
                 print('npix=',npix2)
             else:
                 npix2 = npix
@@ -2168,7 +2169,7 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
                       xscale=0.1, yscale=0.01,
                       bands=False, bands_lats=[-90,90],
                       sscloud=False, sigma_c=10., delta_c=[0.], nmug_mie=20,
-                      niter=1, nmug=20., nsubr=50, nmat=4,
+                      niter=1, nmug=20, nsubr=50, nmat=4,
                       adaptive_pixels=False):
 
     """ Function to generate disk-integrated images of a planet according to model
@@ -2309,12 +2310,13 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
         if fixed_pattern is False:
             picture_full=None
 
-        if input_pattern!=None:
+        if input_pattern is not None:
             picture_full=input_pattern[a,:,:]
 
         #Get geom of pixels
         if adaptive_pixels is True:
             npix2 = np.ceil(npix * (1 + np.sin(np.radians(alph)/2.)**2))
+            npix2 = int(npix2)
             print('npix=',npix2)
         else:
             npix2 = npix
@@ -2662,7 +2664,7 @@ def mask_planet(alpha=0, npix=20, cusp=False, thresh_lat=50., patchy=True,
     """
 
     # if no specific pattern, assume full_disk
-    if patchy==False and cusp==False and sscloud==False and bands==False:
+    if patchy is False and cusp is False and sscloud is False and bands is False:
         full_disk=True
 
     # read the pixel geometries
@@ -2702,7 +2704,7 @@ def mask_planet(alpha=0, npix=20, cusp=False, thresh_lat=50., patchy=True,
     xidx = [np.where(X==item)[0][0] for i, item in enumerate(xs) if item in X]
     yidx = [np.where(Y==item)[0][0] for i, item in enumerate(ys) if item in Y]
 
-    if full_disk==True:
+    if full_disk is True:
         # remove outside of disk
         grid_full[xv*xv+yv*yv>1]=np.nan
         # validate pixels lit
@@ -2711,7 +2713,7 @@ def mask_planet(alpha=0, npix=20, cusp=False, thresh_lat=50., patchy=True,
         # wARNING! arrays have shape (nlines, ncols), hence the grid[y,x]!
 
 
-    if sscloud==True:
+    if sscloud is True:
         grid_full[:] = 1.
         # validate pixels lit
         grid_lit[yidx,xidx] = 1. # validate those
@@ -2728,7 +2730,7 @@ def mask_planet(alpha=0, npix=20, cusp=False, thresh_lat=50., patchy=True,
         # wARNING! arrays have shape (nlines, ncols), hence the grid[y,x]!
 
     # If polar cusps
-    if cusp==True:
+    if cusp is True:
         grid_full[:] = 1.
         # validate pixels lit
         grid_lit[yidx,xidx] = 1. # validate those
@@ -2764,14 +2766,14 @@ def mask_planet(alpha=0, npix=20, cusp=False, thresh_lat=50., patchy=True,
 
         # wARNING! arrays have shape (nlines, ncols), hence the grid[y,x]!
 
-    if patchy==True:
+    if patchy is True:
         #if no fixed cover is wanted
         # n types
         ntypes = len(fclouds)
         fclouds = np.array(fclouds).astype(float) #avoids issues if integers are given
         fclouds = fclouds/sum(fclouds) #renormalization
 
-        if fixed_cover==None:
+        if fixed_cover is None:
             #compute a new one
             #starting from a no-type cover (repr. with -1)
 
@@ -2809,7 +2811,7 @@ def mask_planet(alpha=0, npix=20, cusp=False, thresh_lat=50., patchy=True,
                     grid_full[xv*xv+yv*yv>1]=np.nan
 
                     # get current cloud coverage at given phase angle
-                    if constant_fcloud==True:
+                    if constant_fcloud is True:
                         cl = np.where(grid_lit>=0)[0].size
                         lit = np.where(~np.isnan(grid_lit))[0].size
                         nb_cloud = float(cl)/(lit)
