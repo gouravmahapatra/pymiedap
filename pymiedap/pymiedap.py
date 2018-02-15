@@ -1786,7 +1786,7 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
                   xscale=0.1, yscale=0.01,
                   bands=False, bands_lats=[-90,90],
                   fclouds=[0.5,0.5], constant_fcloud=False, sscloud=False,
-                  sigma_c=10., delta_c=[0.], nmug_mie=20, nmug=20., nsubr=50,
+                  sigma_c=10., delta_c=[0.], nmug_mie=20, nmug=20, nsubr=50,
                   nmat=4, pixscaler=1, adaptive_pixels=False):
     """ Generate disk-resolved images of a planet according to model
 
@@ -2168,7 +2168,7 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
                       xscale=0.1, yscale=0.01,
                       bands=False, bands_lats=[-90,90],
                       sscloud=False, sigma_c=10., delta_c=[0.], nmug_mie=20,
-                      niter=1, nmug=20., nsubr=50, nmat=4,
+                      niter=1, nmug=20, nsubr=50, nmat=4,
                       adaptive_pixels=False):
 
     """ Function to generate disk-integrated images of a planet according to model
