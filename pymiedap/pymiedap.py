@@ -2838,8 +2838,8 @@ def mask_planet(alpha=0, npix=20, cusp=False, thresh_lat=50., patchy=True,
 
     #compute asymmetry factor
     #difference north south hemispheres
-    N = max(npix/2, (npix+1)/2) #safety measure to avoid issues with odd npix
-    n = min(npix/2, (npix+1)/2)
+    N = int(max(npix/2, (npix+1)/2)) #safety measure to avoid issues with odd npix
+    n = int(min(npix/2, (npix+1)/2))
     diffgrid = grid_lit[:N,:] - (grid_lit[n:,:])[::-1,:]
     # where is the difference in cloud cover?
     asympix = np.where(diffgrid[~np.isnan(diffgrid)]!=0)[0]
