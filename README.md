@@ -81,8 +81,8 @@ This project is licensed under the GNU GPL and CeCILL-B License - see the [LICEN
 
 If you want to use this code in a scientific publication, it would be
 appreciated if you cite us:
-* PyMieDAP: a Python-Fortran tool for computing fluxes and polarization signals
-  of (exo)planets. Accepted for publication in A&A.
+* Rossi, L., Berzosa-Molina, J., Stam, D. M., _PyMieDAP: a Python-Fortran tool for computing fluxes and polarization signals
+  of (exo)planets_. Accepted for publication in A&A.
   [It is already on arXiv](https://arxiv.org/abs/1804.08357)
 
 ## References
