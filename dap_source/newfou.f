@@ -16,6 +16,7 @@
 
       DOUBLE PRECISION w,t1,t2,t3,t4,tot,tot_eps,
      .       Rmbot(nsupMAX,nsupMAX),smf(nmuMAX)
+      CHARACTER*200 fst
 
       LOGICAL nextm
       nextm= .true.
@@ -37,31 +38,81 @@ Cf2py intent(out) nextm
             jb= (j-1)*nmat
             w=1.D0/(smf(i)*smf(j))
 
+            fst = '(I4,2X,2(I3,2X),'
+
             IF (nmat.EQ.1) THEN
                t1= w*Rmbot(ib+1,jb+1)
-               IF (DABS(t1).LT.eps) t1= 0.D0
+               IF (DABS(t1).LT.eps) THEN
+                   t1= 0.D0
+                   fst = trim(fst) // 'F2.0)'
+               ELSE
+                   fst = trim(fst) // 'E16.8)'
+               ENDIF
 
-               WRITE(iunfou,20) m,i,j,t1
+               WRITE(iunfou,fmt=fst) m,i,j,t1
+
             ELSEIF (nmat.EQ.3) THEN
                t1= w*Rmbot(ib+1,jb+1)
-               IF (DABS(t1).LT.eps) t1= 0.D0
                t2= w*Rmbot(ib+2,jb+1)
-               IF (DABS(t2).LT.eps) t2= 0.D0
                t3= w*Rmbot(ib+3,jb+1)
-               IF (DABS(t3).LT.eps) t3= 0.D0
+               IF (DABS(t1).LT.eps) THEN
+                   t1= 0.D0
+                   fst = trim(fst) // 'F2.0,1X,'
+               ELSE
+                   fst = trim(fst) // 'E16.8,1X,'
+               ENDIF
 
-               WRITE(iunfou,23) m,i,j,t1,t2,t3
+               IF (DABS(t2).LT.eps) THEN
+                   t2= 0.D0
+                   fst = trim(fst) // 'F2.0,1X,'
+               ELSE
+                   fst = trim(fst) // 'E16.8,1X,'
+               ENDIF
+
+               IF (DABS(t3).LT.eps) THEN
+                   t3= 0.D0
+                   fst = trim(fst) // 'F2.0)'
+               ELSE
+                   fst = trim(fst) // 'E16.8)'
+               ENDIF
+
+               WRITE(iunfou,fmt=fst) m,i,j,t1,t2,t3
+
             ELSE
                t1= w*Rmbot(ib+1,jb+1)
-               IF (DABS(t1).LT.eps) t1= 0.D0
                t2= w*Rmbot(ib+2,jb+1)
-               IF (DABS(t2).LT.eps) t2= 0.D0
                t3= w*Rmbot(ib+3,jb+1)
-               IF (DABS(t3).LT.eps) t3= 0.D0
                t4= w*Rmbot(ib+4,jb+1)
-               IF (DABS(t4).LT.eps) t4= 0.D0
+               IF (DABS(t1).LT.eps) THEN
+                   t1= 0.D0
+                   fst = trim(fst) // 'F2.0,1X,'
+               ELSE
+                   fst = trim(fst) // 'E16.8,1X,'
+               ENDIF
 
-               WRITE(iunfou,24) m,i,j,t1,t2,t3,t4
+               IF (DABS(t2).LT.eps) THEN
+                   t2= 0.D0
+                   fst = trim(fst) // 'F2.0,1X,'
+               ELSE
+                   fst = trim(fst) // 'E16.8,1X,'
+               ENDIF
+
+               IF (DABS(t3).LT.eps) THEN
+                   t3= 0.D0
+                   fst = trim(fst) // 'F2.0,1X,'
+               ELSE
+                   fst = trim(fst) // 'E16.8,1X,'
+               ENDIF
+
+               IF (DABS(t4).LT.eps) THEN
+                   t4= 0.D0
+                   fst = trim(fst) // 'F2.0)'
+               ELSE
+                   fst = trim(fst) // 'E16.8)'
+               ENDIF
+
+               WRITE(iunfou,fmt=fst) m,i,j,t1,t2,t3,t4
+
             ENDIF
 
             tot= tot + DABS(w*Rmbot(ib+1,jb+1))
@@ -101,8 +152,18 @@ Cf2py intent(out) nextm
 
 *-----------------------------------------------------------------------
 20    FORMAT(I4,2X,2(I3,2X),E16.8)
-23    FORMAT(I4,2X,2(I3,2X),3(E16.8,1X))
-24    FORMAT(I4,2X,2(I3,2X),4(E16.8,1X))
+21    FORMAT(I4,2X,2(I3,2X),E1.2)
+
+22    FORMAT(I4,2X,2(I3,2X),E1.2,1X,2(E16.8,1X))
+23    FORMAT(I4,2X,2(I3,2X),E16.8,1X,E1.2,1X,E16.8,1X)
+24    FORMAT(I4,2X,2(I3,2X),2(E16.8,1X),F2.0)
+25    FORMAT(I4,2X,2(I3,2X),3(E16.8,1X))
+
+26    FORMAT(I4,2X,2(I3,2X),4(E16.8,1X))
+27    FORMAT(I4,2X,2(I3,2X),E1.2,1X,3(E16.8,1X))
+28    FORMAT(I4,2X,2(I3,2X),E1.2,1X,2(E16.8,1X),E1.2)
+29    FORMAT(I4,2X,2(I3,2X),E1.2,1X,E16.8,1X,2(E1.2,1X))
+30    FORMAT(I4,2X,2(I3,2X),3(E16.8,1X),E1.2)
 
 *-----------------------------------------------------------------------
 999   RETURN
