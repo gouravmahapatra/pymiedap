@@ -1341,6 +1341,6 @@ def fake_data():
     data.geo.phase = np.arange(0.1,90,0.1)
     data.phase = np.arange(0.1,90,0.1)
     data.geo.sza = np.arange(0.1,90,0.1)
-    data.geo.emission = 0.1*np.ones(89.9/0.1)
+    data.geo.emission = 0.1*np.ones_like(data.geo.sza)
 
     return data

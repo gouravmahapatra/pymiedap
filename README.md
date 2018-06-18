@@ -18,6 +18,7 @@ how to deploy the project on a live system.
 ### Prerequisites
 
 PyMieDAP requires 
+* Python (2.7 or 3.x)
 * numpy
 * matplotlib
 * scipy
@@ -25,7 +26,8 @@ PyMieDAP requires
 
 but if you are a scientist, you might already have those installed.
 
-Be careful: this has only been tested for Unices and with Python2.7.
+Be careful: this has only been tested for Unices, Windows systems might face
+issues with compilers.
 
 ### Installing
 
@@ -73,13 +75,15 @@ To know more about how to use PyMieDAP, you can refer to the notebook
 
 ## License
 
-This project is licensed under the CeCILL-B License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the GNU GPL and CeCILL-B License - see the [LICENSE.md](LICENSE.md) file for details
 
 ## Acknowledgments
 
 If you want to use this code in a scientific publication, it would be
 appreciated if you cite us:
-* 
+* Rossi, L., Berzosa-Molina, J., Stam, D. M., _PyMieDAP: a Python-Fortran tool for computing fluxes and polarization signals
+  of (exo)planets_. Accepted for publication in A&A.
+  [It is already on arXiv](https://arxiv.org/abs/1804.08357)
 
 ## References
 
@@ -91,7 +95,10 @@ matrices in generalized spherical functions_, A&A, 1984, 131, 237-248
 For the Doubling-Adding:
 * de Haan, J. F.; Bosma, P. B. & Hovenier, J. W. _The adding method for multiple
  scattering calculations of polarized light_, A&A, 1987, 183, 371-391
-The geometry code is refered to in the following papers:
+
+Some examples of use of PyMieDAP can be found in the following papers:
 * Fauchez, T.; Rossi, L. & Stam, D. M. _The O2 A-Band in the Fluxes and
 Polarization of Starlight Reflected by Earth-Like Exoplanets_, The Astrophysical
 Journal, 2017, 842, 41
+* Rossi, L. and Stam, D. M. _Using polarimetry to retrieve cloud coverage of
+  Earth-like exoplanets_, Astronomy and Astrophysics, 2017, 607, A57
