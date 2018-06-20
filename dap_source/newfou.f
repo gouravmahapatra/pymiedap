@@ -39,6 +39,8 @@ Cf2py intent(out) nextm
             jb= (j-1)*nmat
             w=1.D0/(smf(i)*smf(j))
 
+            fst = '(I4,2X,2(I3,2X),'
+
             IF (nmat.EQ.1) THEN
                t1= w*Rmbot(ib+1,jb+1)
                IF (DABS(t1).LT.eps) THEN
