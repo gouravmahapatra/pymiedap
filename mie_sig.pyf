@@ -3,7 +3,7 @@
 
 python module module_mie ! in 
     interface  ! in :module_mie
-        subroutine anbn(m,x,nmax,psi,chi,d,an,bn) ! in :module_mie:mie_source/anbn.f
+        subroutine anbn(m,x,nmax,psi,chi,d,an,bn) ! in :module_mie:./mie_source/anbn.f
             double complex intent(in) :: m
             double precision intent(in) :: x
             integer intent(in) :: nmax
@@ -13,15 +13,15 @@ python module module_mie ! in
             double complex dimension(30000),intent(out) :: an
             double complex dimension(30000),intent(out) :: bn
         end subroutine anbn
-        subroutine devel(ncoefs,nangle,u,wg,f,coefs) ! in :module_mie:mie_source/devel.f
+        subroutine devel(ncoefs,nangle,u,wg,f,coefs) ! in :module_mie:./mie_source/devel.f
             integer intent(in) :: ncoefs
             integer intent(in) :: nangle
             double precision dimension(10000),intent(in) :: u
             double precision dimension(10000),intent(in) :: wg
             double precision dimension(4,10000),intent(in) :: f
-            double precision dimension(4,4,2001),intent(out) :: coefs
+            double precision dimension(4,4,4001),intent(out) :: coefs
         end subroutine devel
-        subroutine fichid(m,x,nchi,nmax,nd,psi,chi,d) ! in :module_mie:mie_source/fichid.f
+        subroutine fichid(m,x,nchi,nmax,nd,psi,chi,d) ! in :module_mie:./mie_source/fichid.f
             double complex intent(in) :: m
             double precision intent(in) :: x
             integer intent(in) :: nchi
@@ -31,7 +31,7 @@ python module module_mie ! in
             double precision dimension(nmax + 2),intent(out),depend(nmax) :: chi
             double complex dimension(nd),intent(out),depend(nd) :: d
         end subroutine fichid
-        subroutine gauleg(ndim,ngauss,a,b,x,w) ! in :module_mie:mie_source/gauleg.f
+        subroutine gauleg(ndim,ngauss,a,b,x,w) ! in :module_mie:./mie_source/gauleg.f
             integer intent(in) :: ndim
             integer intent(in) :: ngauss
             double precision intent(in) :: a
@@ -39,38 +39,14 @@ python module module_mie ! in
             double precision dimension(ndim),intent(out),depend(ndim) :: x
             double precision dimension(ndim),intent(out),depend(ndim) :: w
         end subroutine gauleg
-        subroutine getin(wavfile,delta,cutoff,thmin,thmax,step,nsubr,ngaur,idis,par1,par2,par3,specie) ! in :module_mie:mie_source/getin.f
-            character*16 :: wavfile
-            double precision :: delta
-            double precision :: cutoff
-            double precision :: thmin
-            double precision :: thmax
-            double precision :: step
-            integer :: nsubr
-            integer :: ngaur
-            integer :: idis
-            double precision :: par1
-            double precision :: par2
-            double precision :: par3
-            character*1 :: specie
-        end subroutine getin
-        subroutine pitau(u,nmax,pi,tau) ! in :module_mie:mie_source/pitau.f
+        subroutine pitau(u,nmax,pi,tau) ! in :module_mie:./mie_source/pitau.f
             double precision intent(in) :: u
             integer intent(in) :: nmax
             double precision dimension(nmax),intent(out),depend(nmax) :: pi
             double precision dimension(nmax),intent(out),depend(nmax) :: tau
         end subroutine pitau
-        subroutine rdwavfile(wavfile,wavels,nr,ni,nwavels) ! in :module_mie:mie_source/rdwavfile.f
-            character*16 :: wavfile
-            double precision dimension(500) :: wavels
-            double precision dimension(500) :: nr
-            double precision dimension(500) :: ni
-            integer :: nwavels
-        end subroutine rdwavfile
-        subroutine rminmax(idis,nsubr,ngaur,par1,par2,par3,weight2,cutoff,rmin,rmax) ! in :module_mie:mie_source/rminmax.f
+        subroutine rminmax(idis,par1,par2,par3,weight2,cutoff,rmin,rmax) ! in :module_mie:./mie_source/rminmax.f
             integer intent(in) :: idis
-            integer intent(in) :: nsubr
-            integer intent(in) :: ngaur
             double precision intent(in) :: par1
             double precision intent(in) :: par2
             double precision intent(in) :: par3
@@ -79,13 +55,10 @@ python module module_mie ! in
             double precision intent(out) :: rmin
             double precision intent(out) :: rmax
         end subroutine rminmax
-        subroutine scatmat(m,wav,idis,thmin,thmax,step,nsubr,ngaur,rmin,rmax,par1,par2,par3,weight2,delta,u,wg,f,miec,nangle) ! in :module_mie:mie_source/scatmat.f
+        subroutine scatmat(m,wav,idis,nsubr,ngaur,rmin,rmax,par1,par2,par3,weight2,delta,u,wg,f,miec,nangle) ! in :module_mie:./mie_source/scatmat.f
             double complex intent(in) :: m
             double precision intent(in) :: wav
             integer intent(in) :: idis
-            double precision intent(in) :: thmin
-            double precision intent(in) :: thmax
-            double precision intent(in) :: step
             integer intent(in) :: nsubr
             integer intent(in) :: ngaur
             double precision intent(in) :: rmin
@@ -101,7 +74,7 @@ python module module_mie ! in
             double precision dimension(13),intent(out) :: miec
             integer intent(out) :: nangle
         end subroutine scatmat
-        subroutine sizedis(idis,par1,par2,par3,weight2,r,numr,nwithr) ! in :module_mie:mie_source/sizedis.f
+        subroutine sizedis(idis,par1,par2,par3,weight2,r,numr,nwithr) ! in :module_mie:./mie_source/sizedis.f
             integer intent(in) :: idis
             double precision intent(in) :: par1
             double precision intent(in) :: par2
@@ -111,16 +84,16 @@ python module module_mie ! in
             integer, optional,intent(in),check(len(r)>=numr),depend(r) :: numr=len(r)
             double precision dimension(numr),intent(out),depend(numr) :: nwithr
         end subroutine sizedis
-        function gammln(xarg) ! in :module_mie:mie_source/sizedis.f
+        function gammln(xarg) ! in :module_mie:./mie_source/sizedis.f
             double precision :: xarg
             double precision :: gammln
         end function gammln
-        subroutine writsc(outfile,idis,nsubr,ngaur,coefs,ncoefs,csth,miec,wav,nr,ni,rmin,rmax,par1,par2,par3) ! in :module_mie:mie_source/writsc.f
+        subroutine writsc(outfile,idis,nsubr,ngaur,coefs,ncoefs,csth,miec,wav,nr,ni,rmin,rmax,par1,par2,par3) ! in :module_mie:./mie_source/writsc.f
             character*16 intent(in) :: outfile
             integer intent(in) :: idis
             integer intent(in) :: nsubr
             integer intent(in) :: ngaur
-            double precision dimension(4,4,2001),intent(in) :: coefs
+            double precision dimension(4,4,4001),intent(in) :: coefs
             integer intent(in) :: ncoefs
             double precision intent(in) :: csth
             double precision dimension(13),intent(in) :: miec

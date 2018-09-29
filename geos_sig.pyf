@@ -3,7 +3,7 @@
 
 python module module_geos ! in 
     interface  ! in :module_geos
-        subroutine bracks(el,array,n,nd,i1,i2) ! in :module_geos:geos_source/bracks.f
+        subroutine bracks(el,array,n,nd,i1,i2) ! in :module_geos:./geos_source/bracks.f
             double precision intent(in) :: el
             double precision dimension(nd),intent(in) :: array
             integer intent(in) :: n
@@ -11,46 +11,46 @@ python module module_geos ! in
             integer intent(out) :: i1
             integer intent(out) :: i2
         end subroutine bracks
-        subroutine getgeos(alpha,npix,ngeos,apix,thet0,theta,phi,beta,lat,long_bn,xs,ys) ! in :module_geos:geos_source/getgeos.f
-            double precision intent(in) :: alpha
-            integer intent(in) :: npix
-            integer intent(out) :: ngeos
-            double precision intent(out) :: apix
-            double precision dimension(200000),intent(out) :: thet0
-            double precision dimension(200000),intent(out) :: theta
-            double precision dimension(200000),intent(out) :: phi
-            double precision dimension(200000),intent(out) :: beta
-            double precision dimension(200000),intent(out) :: lat
-            double precision dimension(200000),intent(out) :: long_bn
-            double precision dimension(200000),intent(out) :: xs
-            double precision dimension(200000),intent(out) :: ys
-        end subroutine getgeos
-        subroutine rdfous(foufile,nfou,nmat,nmugs,xmu,rfou) ! in :module_geos:geos_source/rdfous.f
+        subroutine rdfous(foufile,nfou,nmat,nmugs,xmu,rfou) ! in :module_geos:./geos_source/rdfous.f
             character*50 intent(in) :: foufile
             integer intent(out) :: nfou
             integer intent(out) :: nmat
             integer intent(out) :: nmugs
-            double precision dimension(400),intent(out) :: xmu
-            double precision dimension(1600,400,2001),intent(out) :: rfou
+            double precision dimension(300),intent(out) :: xmu
+            double precision dimension(1200,300,2001),intent(in,out) :: rfou
         end subroutine rdfous
-        subroutine read_dap(foufile,ngeos,alpha,thet0,theta,phi,beta,sv) ! in :module_geos:geos_source/read_dap.f
+        subroutine read_dap(foufile,ngeos,thet0,theta,phi,beta,rfou,sv) ! in :module_geos:./geos_source/read_dap.f
             character*50 intent(in) :: foufile
             integer intent(in) :: ngeos
-            double precision dimension(200000),intent(in) :: alpha
-            double precision dimension(200000),intent(in) :: thet0
-            double precision dimension(200000),intent(in) :: theta
-            double precision dimension(200000),intent(in) :: phi
-            double precision dimension(200000),intent(in) :: beta
-            double precision dimension(4,200000),intent(out) :: sv
+            double precision dimension(100000),intent(in) :: thet0
+            double precision dimension(100000),intent(in) :: theta
+            double precision dimension(100000),intent(in) :: phi
+            double precision dimension(100000),intent(in) :: beta
+            double precision dimension(1200,300,2001),intent(in) :: rfou
+            double precision dimension(4,100000),intent(out) :: sv
         end subroutine read_dap
-        subroutine spline(x,y,n,nmax,y2) ! in :module_geos:geos_source/spline.f
+        subroutine getgeos(alpha,npix,ngeos,apix,thet0,theta,phi,beta,lat,long_bn,xs,ys) ! in :module_geos:./geos_source/getgeos.f
+            double precision intent(in) :: alpha
+            integer intent(in) :: npix
+            integer intent(out) :: ngeos
+            double precision intent(out) :: apix
+            double precision dimension(100000),intent(out) :: thet0
+            double precision dimension(100000),intent(out) :: theta
+            double precision dimension(100000),intent(out) :: phi
+            double precision dimension(100000),intent(out) :: beta
+            double precision dimension(100000),intent(out) :: lat
+            double precision dimension(100000),intent(out) :: long_bn
+            double precision dimension(100000),intent(out) :: xs
+            double precision dimension(100000),intent(out) :: ys
+        end subroutine getgeos
+        subroutine spline(x,y,n,nmax,y2) ! in :module_geos:./geos_source/spline.f
             double precision dimension(nmax),intent(in) :: x
             double precision dimension(nmax),intent(in),depend(nmax) :: y
             integer intent(in) :: n
             integer, optional,intent(in),check(len(x)>=nmax),depend(x) :: nmax=len(x)
             double precision dimension(nmax),intent(out),depend(nmax) :: y2
         end subroutine spline
-        subroutine splint(xa,ya,y2a,n,x,y,nn) ! in :module_geos:geos_source/splint.f
+        subroutine splint(xa,ya,y2a,n,x,y,nn) ! in :module_geos:./geos_source/splint.f
             double precision dimension(nn),intent(in) :: xa
             double precision dimension(nn),intent(in),depend(nn) :: ya
             double precision dimension(nn),intent(in),depend(nn) :: y2a
@@ -59,11 +59,6 @@ python module module_geos ! in
             double precision intent(out) :: y
             integer, optional,intent(in),check(len(xa)>=nn),depend(xa) :: nn=len(xa)
         end subroutine splint
-        subroutine wrout(alpha,nmat,sv) ! in :module_geos:geos_source/wrout.f
-            double precision :: alpha
-            integer :: nmat
-            double precision dimension(4) :: sv
-        end subroutine wrout
     end interface 
 end python module module_geos
 

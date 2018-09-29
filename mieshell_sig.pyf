@@ -3,7 +3,7 @@
 
 python module module_mieshell ! in 
     interface  ! in :module_mieshell
-        subroutine bhcoat(yy,xx,rrfrl2,rrfrl1,anv,bnv) ! in :module_mieshell:mieshell_source/bhcoat.f
+        subroutine bhcoat(yy,xx,rrfrl2,rrfrl1,anv,bnv) ! in :module_mieshell:./mieshell_source/bhcoat.f
             double precision intent(in) :: yy
             double precision intent(in) :: xx
             double complex intent(in) :: rrfrl2
@@ -11,7 +11,7 @@ python module module_mieshell ! in
             double complex dimension(50000),intent(out) :: anv
             double complex dimension(50000),intent(out) :: bnv
         end subroutine bhcoat
-        subroutine gauleg(ndim,ngauss,a,b,x,w) ! in :module_mieshell:mieshell_source/gauleg.f
+        subroutine gauleg(ndim,ngauss,a,b,x,w) ! in :module_mieshell:./mieshell_source/gauleg.f
             integer intent(in) :: ndim
             integer intent(in) :: ngauss
             double precision intent(in) :: a
@@ -19,20 +19,17 @@ python module module_mieshell ! in
             double precision dimension(ndim),intent(out),depend(ndim) :: x
             double precision dimension(ndim),intent(out),depend(ndim) :: w
         end subroutine gauleg
-        subroutine pitau(u,nmax,pi,tau) ! in :module_mieshell:mieshell_source/pitau.f
+        subroutine pitau(u,nmax,pi,tau) ! in :module_mieshell:./mieshell_source/pitau.f
             double precision intent(in) :: u
             integer intent(in) :: nmax
             double precision dimension(nmax),intent(out),depend(nmax) :: pi
             double precision dimension(nmax),intent(out),depend(nmax) :: tau
         end subroutine pitau
-        subroutine scatmat(m1,m2,wav,idis,thmin,thmax,step,nsubr,ngaur,rmin,rmax,par1,par2,par3,ratio,weight2,delta,u,wg,f,miec,nangle) ! in :module_mieshell:mieshell_source/scatmat.f
+        subroutine scatmat(m1,m2,wav,idis,nsubr,ngaur,rmin,rmax,par1,par2,par3,ratio,weight2,delta,u,wg,f,miec,nangle) ! in :module_mieshell:./mieshell_source/scatmat.f
             double complex :: m1
             double complex :: m2
             double precision intent(in) :: wav
             integer intent(in) :: idis
-            double precision intent(in) :: thmin
-            double precision intent(in) :: thmax
-            double precision intent(in) :: step
             integer intent(in) :: nsubr
             integer intent(in) :: ngaur
             double precision intent(in) :: rmin
@@ -49,7 +46,7 @@ python module module_mieshell ! in
             double precision dimension(13),intent(out) :: miec
             integer intent(out) :: nangle
         end subroutine scatmat
-        subroutine sizedis(idis,par1,par2,par3,weight2,r,numr,nwithr) ! in :module_mieshell:mieshell_source/sizedis.f
+        subroutine sizedis(idis,par1,par2,par3,weight2,r,numr,nwithr) ! in :module_mieshell:./mieshell_source/sizedis.f
             integer intent(in) :: idis
             double precision intent(in) :: par1
             double precision intent(in) :: par2
@@ -59,7 +56,7 @@ python module module_mieshell ! in
             integer, optional,intent(in),check(len(r)>=numr),depend(r) :: numr=len(r)
             double precision dimension(numr),intent(out),depend(numr) :: nwithr
         end subroutine sizedis
-        function gammln(xarg) ! in :module_mieshell:mieshell_source/sizedis.f
+        function gammln(xarg) ! in :module_mieshell:./mieshell_source/sizedis.f
             double precision :: xarg
             double precision :: gammln
         end function gammln
