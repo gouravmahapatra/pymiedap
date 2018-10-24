@@ -1310,10 +1310,14 @@ def dap_code(model, rename=False, output_name='modelA',
     nwavels = len(wavels)
     taus = np.zeros(nlaysMAX, order='F')  # all values of tau
     taus_g = np.zeros(nlaysMAX, order='F')  # all values of tau_g at wvl z
+    ssalbs = np.zeros(nlaysMAX, order='F')  # all values of s.scat albedoes
     laylevel = np.zeros(nlaysMAX, order='F')  # level of layers
+    basca = np.zeros(nlaysMAX, order='F')  # all values of basca
+    baabs = np.zeros(nlaysMAX, order='F')  # all values of baabs
 
     # Creating array to receive the coefficients
     coefin = np.zeros((nmatMAX,nmatMAX,ncoefsMAX,nlaysMAX), order='F')
+    coefs = np.zeros((nmatMAX,nmatMAX,ncoefsMAX,nlaysMAX), order='F')
     ncoefin = np.zeros((nlaysMAX), order='F')
     model.name = ['']*len(model.wvl_list)
 
@@ -1348,6 +1352,11 @@ def dap_code(model, rename=False, output_name='modelA',
             if max(layer.tau)!=0:
                 coefin[:,:,:,l] = layer.mixed_aerosols.coefs[z,:,:,:]
                 ncoefin[l] = layer.mixed_aerosols.ncoefs[z]
+                ssalbs[l] = layer.mixed_aerosols.ssalb[z]
+                # Calculate the aerosol scattering and absorption optical
+                # thicknesses,
+                basca[l] = ssalbs[l] * taus[l]
+                baabs[l] = (1. - ssalbs[l]) * taus[l]
 
             print('{}.sc.{:06.7f}'.format(layer.mixed_aerosols.typ, wav))
             l = l + 1
@@ -1359,23 +1368,18 @@ def dap_code(model, rename=False, output_name='modelA',
         taus_g[:l] = taus_g[layorder]  # putting the taus_g in right order
         pres[:l] = pres[layorder]  # putting the pressures in right order
 
+        # More reordering
         coefin[:,:,:,:l] = coefin[:,:,:,layorder]
         ncoefin[:l] = ncoefin[layorder]
+        ssalbs[:l] = ssalbs[layorder]
+        basca[:l] = basca[layorder]
+        baabs[:l] = baabs[layorder]
 
         # Calculate the molecular parameters of the atmosphere:
         ri = model.rindex_gas[z]
         bmsca, bmabs, coefsm = dap.bmolecules(wav, nlays, pres, dpol, ri, mma, gravity)
 
         model.coefsm = coefsm
-        #-----------------------------------------------------------------
-        #     Calculate the aerosol scattering and absorption optical
-        #     thicknesses, and the expansion coefficients:
-        #-----------------------------------------------------------------
-        #basca, baabs, coefs, coefsa, ncoefsa = dap.baerosols(nlays, nmat, taus,
-        baabs, basca, coefs, coefsa, ncoefsa = dap.baerosols(nlays, nmat, taus,
-                                                             coefin, ncoefin)
-        # REM: why are baabs and bsca inverted? should be checked
-        model.coefsa = coefsa
 
         # Storing the effective scattering and absorption opacities
         for layer_name, layer in vars(model.layers).items():
@@ -1412,11 +1416,11 @@ def dap_code(model, rename=False, output_name='modelA',
        #                    coefs[j,k,m,i]= (com+coa)/(bmsca[i]+basca[i])
 
         for i in np.arange(nlays):
-            ncoefs[i] = max(ncoefsa[i], 2)
+            ncoefs[i] = max(ncoefin[i], 2)
             # multiply all coefs by the associated optical thickness
             # in each layer
             com = bmsca[i,np.newaxis,np.newaxis] * coefsm
-            coa = basca[i,np.newaxis,np.newaxis,np.newaxis] * coefsa[:,:,:,i]
+            coa = basca[i,np.newaxis,np.newaxis,np.newaxis] * coefin[:,:,:,i]
             # if the opacities are too small, nullify coefs
             if ((bmsca[i]+basca[i]) < 1e-10):
                 coefs[:,:,:,i]= 0.
