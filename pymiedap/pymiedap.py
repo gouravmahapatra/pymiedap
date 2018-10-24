@@ -144,6 +144,7 @@ class Layer():
         self.mixed_aerosols.col_dens = N
         self.mixed_aerosols.sext = sum_fsext
         self.mixed_aerosols.ssca = sum_fssca
+        self.mixed_aerosols.ssalb = sum_fssca/sum_fsext
         #Warning! Might not be okay!
         #self.mixed_aerosols.nr = aero.nr
         #self.mixed_aerosols.ni = aero.ni
@@ -1018,6 +1019,7 @@ def mie_code(aerosols, wavelengths, output=False, delta=1e-8, cutoff=1e-8, thmin
     aerosols.qext = qexts
     aerosols.ssca = sscas
     aerosols.qsca = qscas
+    aerosols.ssalb = sscas/sexts
 
     print('End of Mie program')
 
@@ -1157,6 +1159,7 @@ def mie_shell(aerosols, wavelengths, output=False, delta=1e-8, cutoff=1e-8, thmi
     aerosols.qext = qexts
     aerosols.ssca = sscas
     aerosols.qsca = qscas
+    aerosols.ssalb = sscas/sexts
 
     print('End of Mie program')
     #return u,F, miec
