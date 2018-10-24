@@ -34,6 +34,7 @@ import os
 import sys
 import os.path
 import matplotlib.pyplot as mpl
+import matplotlib.patches as patches
 from PIL import Image
 
 # ---------
@@ -321,6 +322,7 @@ class Model(object):
                       "surf.alb.={:2.2f}\n \n".format(self.asurf))
         gas_str = ("**Gas data**\n mma={:2.2f} ".format(self.mma) +
                    "dpol={:2.2f}\n".format(self.dpol))
+
         lays_str = '\n **Layers** \n'
         for layer_name, layer in vars(self.layers).items():
             if hasattr(layer,'mixed_aerosols') is True:
@@ -339,6 +341,75 @@ class Model(object):
                 strout += layer.aerosols.__repr__()
             strfin = strfin + strout
         return wvl_str+planet_str+gas_str+lays_str+strfin
+
+    def display(self):
+        """ Display of model parameters in a figure. If model has a name, saves the figure with the model name for reference."""
+
+        wvl_str = ('**Operating wavelengths:\n'+
+                    str(self.wvl_list) + ' microns\n\n')
+        planet_str = ("**Planet data:**\n "+
+                      "g={:2.2f} m/s^2; ".format(self.gravity) +
+                      "surf.alb.={:2.2f}\n \n".format(self.asurf))
+        gas_str = ("**Gas data**\n mma={:2.2f} ".format(self.mma) +
+                   "dpol={:2.2f}\n".format(self.dpol))
+
+        fig,ax = mpl.subplots(1, figsize=(10,8))
+
+        nlays = len(vars(self.layers))
+        nwvl = len(self.wvl_list)
+        taus = np.zeros((nlays,nwvl))
+
+        pressures =np.zeros(nlays+1)
+        names = np.array([])
+        names_aer = np.array([])
+
+        i = 0 #counter
+
+        for layer_name, layer in vars(self.layers).items(): #for each layer
+            pressures[i] = layer.press # get the pressure
+            names = np.append(names,layer_name) #get the name of the layer
+            taus[i,:] = layer.tau
+            aerstr = 'Aerosols: '  # a string to list aerosols types
+
+            for aer_name, aer in vars(layer).items():  #for each aerosol type
+                if isinstance(aer, Aerosols):
+                    if np.max(layer.tau)>0.0:
+                        aerstr = aerstr + aer.typ + ','  #if aerosols is relevant, add it
+                    else:
+                        aerstr = aerstr + 'N/A'
+
+            names_aer = np.append(names_aer, aerstr)
+            i+=1
+
+        pressures[i] = pressures[0]/10.
+        pressures = np.sort(pressures)
+
+        for i,p in enumerate(pressures):  
+            if (i+1<len(pressures)):
+                pp = pressures[i+1]
+                pat = patches.Rectangle([0,p], 5, pp, linewidth=2, edgecolor='k', facecolor=None)
+                ax.add_patch(pat)
+                # add information in the blocks
+                ax.text(0.1, ((p+pp)/2), names[i])
+                ax.text(4, (p+pp)/2, names_aer[i])
+                ax.text(1., (p+pp)/2, 'Tau aerosols = '+str(taus[i,:]))
+
+        ax.semilogy()
+        ax.set_ylabel('Pressure (bars)')
+        mpl.subplots_adjust(left=0.3, top=0.99, bottom=0.04, right=0.965)
+        mpl.figtext(0.01, 0.5, wvl_str+planet_str+gas_str) 
+        ax.invert_yaxis()
+        ax.set_xticks([])
+        mpl.show()
+
+        if self.name==['']:
+            print('Model not titled yet!')
+        else:
+            filename = self.name[0].split('/')[-1]
+            filename = filename.split('.')[:-1]
+            filename = '.'.join(filename)
+            filename += '.png'
+            fig.savefig(filename)
 
 
     def model_atm(self,  H=5., z_top=74., k_max=2., r_c = 1.0, v_c = 0.07,
