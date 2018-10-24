@@ -1403,18 +1403,6 @@ def dap_code(model, rename=False, output_name='modelA',
         #---------------------------------------------------------------
         #     Calculate the combined expansion coefficients
         #---------------------------------------------------------------
-       #for i in np.arange(nlays):
-       #    ncoefs[i] = max(ncoefsa[i], 2)
-       #    for j in np.arange(nmat):
-       #        for k in np.arange(nmat):
-       #            for m in np.arange(ncoefs[i]):
-       #                com = bmsca[i] * coefsm[j,k,m]
-       #                coa = basca[i] * coefsa[j,k,m,i]
-       #                if ((bmsca[i]+basca[i]) < 1e-10):
-       #                    coefs[j,k,m,i]= 0.
-       #                else:
-       #                    coefs[j,k,m,i]= (com+coa)/(bmsca[i]+basca[i])
-
         for i in np.arange(nlays):
             ncoefs[i] = max(ncoefin[i], 2)
             # multiply all coefs by the associated optical thickness
