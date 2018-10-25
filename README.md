@@ -68,8 +68,8 @@ To know more about how to use PyMieDAP, you can refer to the notebook
 
 ## Authors
 
-* **Loïc Rossi** - TU Delft - *Initial work, Python and Fortran interface* -
-    [Gitlab](https://gitlab.com/loic.cg.rossi), [TU Delft](http://homepage.tudelft.nl/k6v71/)
+* **Loïc Rossi** - TU Delft/LATMOS - *Initial work, Python and Fortran interface* -
+    [Gitlab](https://gitlab.com/loic.cg.rossi), [Website](http://loic.cg.rossi.gitlab.io)
 * **Daphne Stam** - TU Delft - *Initial work, Fortran code* -
 * **Javier Bersoza** - TU Delft - *Initial work, Exopy* - 
 
@@ -79,11 +79,20 @@ This project is licensed under the GNU GPL and CeCILL-B License - see the [LICEN
 
 ## Acknowledgments
 
-If you want to use this code in a scientific publication, it would be
-appreciated if you cite us:
+If you want to use this code in a scientific publication, please cite:
 * Rossi, L., Berzosa-Molina, J., Stam, D. M., _PyMieDAP: a Python-Fortran tool for computing fluxes and polarization signals
-  of (exo)planets_. Accepted for publication in A&A.
-  [It is already on arXiv](https://arxiv.org/abs/1804.08357)
+  of (exo)planets_. Astronomy & Astrophysics, Vol. 616, A147.
+
+  Link is [here](https://doi.org/10.1051/0004-6361/201832859), and
+  [also on arXiv](https://arxiv.org/abs/1804.08357)
+
+If you use Exopy, please refer to:
+* Berzosa-Molina, J., Rossi, L. and Stam, D. M.; _Traces of exomoons in
+  computed flux and polarization phase curves of starlight reflected by
+exoplanets_. Astronomy & Astrophysics, in press.
+        [Link here](https://doi.org/10.1051/0004-6361/201833320).
+
+
 
 ## References
 
