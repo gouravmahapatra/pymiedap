@@ -1,0 +1,171 @@
+* This file is part of PyMieDAP, released under GNU General Public License.
+* See license.md or http://gitlab.com/loic.cg.rossi/pymiedap for details.
+
+      SUBROUTINE newfouascii(m,Rmbot,smf,iunfou,nmat,M0,nmu,nsup,
+     .                  nlays,nextm)
+
+*----------------------------------------------------------------------
+*     Write the Fourier-coefficients to file:
+*----------------------------------------------------------------------
+      IMPLICIT NONE
+
+      INCLUDE 'max_incl'
+
+      INTEGER iunfou,nmat,nmu,ib,jb,i,j,m,nlays,maxM,nsup
+
+      INTEGER M0(nlays)
+
+      DOUBLE PRECISION w,t1,t2,t3,t4,tot,tot_eps,
+     .       Rmbot(nsup,nsup),smf(nmu)
+      CHARACTER*200 fst
+
+      LOGICAL nextm
+      nextm= .true.
+
+Cf2py intent(in) Rmbot,smf,m,iunfou,nmat,nmu,nsup,M0,nlays
+Cf2py intent(out) nextm
+
+*----------------------------------------------------------------------
+*     Write the supermatrix elements to file: 
+*
+*     Note: the supermatrix factors are removed before writing!
+*-----------------------------------------------------------------------
+      tot= 0.D0
+      tot_eps= 0.D0
+      fst = '(I4,2X,2(I3,2X),'
+
+      DO i=1,nmu
+         ib= (i-1)*nmat
+         DO j=1,nmu
+            jb= (j-1)*nmat
+            w=1.D0/(smf(i)*smf(j))
+
+            fst = '(I4,2X,2(I3,2X),'
+
+            IF (nmat.EQ.1) THEN
+               t1= w*Rmbot(ib+1,jb+1)
+               IF (DABS(t1).LT.eps) THEN
+                   t1= 0.D0
+                   fst = trim(fst) // 'F2.0)'
+               ELSE
+                   fst = trim(fst) // 'E16.8)'
+               ENDIF
+
+               WRITE(iunfou,fmt=fst) m,i,j,t1
+
+            ELSEIF (nmat.EQ.3) THEN
+               t1= w*Rmbot(ib+1,jb+1)
+               t2= w*Rmbot(ib+2,jb+1)
+               t3= w*Rmbot(ib+3,jb+1)
+               IF (DABS(t1).LT.eps) THEN
+                   t1= 0.D0
+                   fst = trim(fst) // 'F2.0,1X,'
+               ELSE
+                   fst = trim(fst) // 'E16.8,1X,'
+               ENDIF
+
+               IF (DABS(t2).LT.eps) THEN
+                   t2= 0.D0
+                   fst = trim(fst) // 'F2.0,1X,'
+               ELSE
+                   fst = trim(fst) // 'E16.8,1X,'
+               ENDIF
+
+               IF (DABS(t3).LT.eps) THEN
+                   t3= 0.D0
+                   fst = trim(fst) // 'F2.0)'
+               ELSE
+                   fst = trim(fst) // 'E16.8)'
+               ENDIF
+
+               WRITE(iunfou,fmt=fst) m,i,j,t1,t2,t3
+
+            ELSE
+               t1= w*Rmbot(ib+1,jb+1)
+               t2= w*Rmbot(ib+2,jb+1)
+               t3= w*Rmbot(ib+3,jb+1)
+               t4= w*Rmbot(ib+4,jb+1)
+               IF (DABS(t1).LT.eps) THEN
+                   t1= 0.D0
+                   fst = trim(fst) // 'F2.0,1X,'
+               ELSE
+                   fst = trim(fst) // 'E16.8,1X,'
+               ENDIF
+
+               IF (DABS(t2).LT.eps) THEN
+                   t2= 0.D0
+                   fst = trim(fst) // 'F2.0,1X,'
+               ELSE
+                   fst = trim(fst) // 'E16.8,1X,'
+               ENDIF
+
+               IF (DABS(t3).LT.eps) THEN
+                   t3= 0.D0
+                   fst = trim(fst) // 'F2.0,1X,'
+               ELSE
+                   fst = trim(fst) // 'E16.8,1X,'
+               ENDIF
+
+               IF (DABS(t4).LT.eps) THEN
+                   t4= 0.D0
+                   fst = trim(fst) // 'F2.0)'
+               ELSE
+                   fst = trim(fst) // 'E16.8)'
+               ENDIF
+
+               WRITE(iunfou,fmt=fst) m,i,j,t1,t2,t3,t4
+
+            ENDIF
+
+            tot= tot + DABS(w*Rmbot(ib+1,jb+1))
+            tot_eps= tot_eps + eps
+
+         ENDDO
+      ENDDO
+*----------------------------------------------------------------------
+*     Test whether any of the coefficients is larger than zero:
+*----------------------------------------------------------------------
+      IF (tot.LT.tot_eps) THEN
+         nextm= .false.
+         GOTO 999
+      ENDIF
+
+*----------------------------------------------------------------------
+*     Test whether nfouMAX has been reached:
+*----------------------------------------------------------------------
+      IF (m.GE.nfouMAX) THEN
+         nextm= .false.
+         GOTO 999
+      ENDIF
+
+*----------------------------------------------------------------------
+*     Else, we must sum the Fourier series all the way to M0:
+*----------------------------------------------------------------------
+      maxM=0
+      DO i=1,nlays
+         IF (maxM.LT.M0(i)) maxM= M0(i)
+      ENDDO
+
+      IF (m.GE.maxM) THEN
+         nextm= .false.
+         GOTO 999
+      ENDIF
+
+*-----------------------------------------------------------------------
+C20    FORMAT(I4,2X,2(I3,2X),E16.8)
+C21    FORMAT(I4,2X,2(I3,2X),E1.2)
+
+C22    FORMAT(I4,2X,2(I3,2X),E1.2,1X,2(E16.8,1X))
+C23    FORMAT(I4,2X,2(I3,2X),E16.8,1X,E1.2,1X,E16.8,1X)
+C24    FORMAT(I4,2X,2(I3,2X),2(E16.8,1X),F2.0)
+C25    FORMAT(I4,2X,2(I3,2X),3(E16.8,1X))
+
+C26    FORMAT(I4,2X,2(I3,2X),4(E16.8,1X))
+C27    FORMAT(I4,2X,2(I3,2X),E1.2,1X,3(E16.8,1X))
+C28    FORMAT(I4,2X,2(I3,2X),E1.2,1X,2(E16.8,1X),E1.2)
+C29    FORMAT(I4,2X,2(I3,2X),E1.2,1X,E16.8,1X,2(E1.2,1X))
+C30    FORMAT(I4,2X,2(I3,2X),3(E16.8,1X),E1.2)
+
+*-----------------------------------------------------------------------
+999   RETURN
+      END
