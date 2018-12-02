@@ -1,7 +1,7 @@
 * This file is part of PyMieDAP, released under GNU General Public License.
 * See license.md or http://gitlab.com/loic.cg.rossi/pymiedap for details.
 
-      SUBROUTINE star(A,B,nmat,nmu)
+      SUBROUTINE star(A,B,nmat,nmu,nsup)
 
 *----------------------------------------------------------------------
 *  Calculate A = B* where B stands for a reflection or transmission    
@@ -15,17 +15,14 @@
 
       INCLUDE 'max_incl'
 
-C      INTEGER nmat, nmu
-C      DOUBLE PRECISION A, B
-      DIMENSION A(nsupMAX,nsupMAX),B(nsupMAX,nsupMAX)
+      REAL*8, DIMENSION(nsup,nsup) :: A,B !rank 2
 
 Cf2py intent(in,out) A, B
 Cf2py intent(in) nmat, nmu
 
 *----------------------------------------------------------------------
-      nsup= nmu*nmat
 
-      CALL assign(A,B,nmat,nmu)
+      A=B
 
       IF (nmat.GE.3) THEN
          DO mu=1,nmu

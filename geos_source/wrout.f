@@ -17,7 +17,7 @@
 
       DOUBLE PRECISION pol,alpha,Sv(nmatMAX) 
 
-      CHARACTER outfile*16
+C      CHARACTER outfile*16
 
 *----------------------------------------------------------------------------
 *     Open the output file:

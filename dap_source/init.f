@@ -8,10 +8,11 @@
 *
 * AUTHOR: D. M. Stam
 *
+*  Edited by: Ashwyn Groot
+*  Date: November 2018
+*  Introduced matrix operations with f95<
 ************************************************************************
       INCLUDE 'max_incl'
-
-      INTEGER i,j,m,k
  
       DOUBLE PRECISION coefs(nmatMAX,nmatMAX,0:ncoefsMAX,nlaysMAX),
      .                 coefsa(nmatMAX,nmatMAX,0:ncoefsMAX,nlaysMAX),
@@ -20,24 +21,9 @@
 Cf2py intent(in,out) coefs, coefsm, coefsa
 
 *-----------------------------------------------------------------------
-      DO i=1,4
-         DO j=1,4
-            DO k=0,ncoefsMAX
-               coefsm(i,j,k)= 0.D0
-            ENDDO
-         ENDDO
-      ENDDO
-
-      DO i=1,nmatMAX
-         DO j=1,nmatMAX
-            DO k=0,ncoefsMAX
-               DO m=1,nlaysMAX
-                  coefs(i,j,k,m)= 0.D0
-                  coefsa(i,j,k,m)= 0.D0
-               ENDDO
-            ENDDO
-         ENDDO
-      ENDDO
+      coefsm=0.D0
+      coefs=0.D0
+      coefsa=0.D0
 
 ************************************************************************
       RETURN

@@ -1236,7 +1236,7 @@ def read_mie_output(filename, full_output=False, nameout='stuff.dat'):
 def dap_code(model, rename=False, output_name='modelA',
              path_output='./dap_database/',
              nlaysMAX=50, ncoefsMAX=4001, nfouMAX=4001,
-             nmuMAX=201, nmatMAX=4, nmat=4, nmug=20):
+             nmuMAX=201, nmatMAX=4, nmat=4, nmug=20,filetype=1):
     """ This function launches the DAP code to calculate the supermatrices
     produced by the doubling-adding code. Reads input from a model class.
     Requires the module module_dap.
@@ -1398,7 +1398,16 @@ def dap_code(model, rename=False, output_name='modelA',
         #---------------------------------------------------------------------
         #     Open the Fourier coefficients output file:
         #---------------------------------------------------------------------
-        outputname = 'fou_' + '{:4.3f}'.format(wav) + '.dat'
+        if filetype==1 or filetype==2:
+              if rename==True:
+                  outputname = output_name + '_{:4.3f}'.format(wav) + '.hdf5'
+              elif rename==False:
+                  outputname = 'fou_' + '{:4.3f}'.format(wav) + '.hdf5'
+        else:
+              if rename==True:
+                    outputname = output_name + '_{:4.3f}'.format(wav) + '.dat'
+              elif rename==False:
+                    outputname = 'fou_' + '{:4.3f}'.format(wav) + '.dat'
 
         #---------------------------------------------------------------
         #     Calculate the combined expansion coefficients
@@ -1434,27 +1443,41 @@ def dap_code(model, rename=False, output_name='modelA',
         a[b!=0] = (bmsca[b!=0]+basca[b!=0])/b[b!=0]
         model.a = a
 
+        a=a[:nlays]
+        b=b[:nlays]
+        ncoefs=ncoefs[:nlays]
+        max_ncoefs=max(ncoefs)
         #-----------------------------------------------------------------------
         #     Call the doubling-adding routine:
         #-----------------------------------------------------------------------
-        dap.adding(outputname,a,b,coefs,ncoefs,nlays,nmug,nmat,surfmat)
+        if filetype==1 or filetype==2:
+              dap.adding(outputname,a,b,coefs,ncoefs,max_ncoefs,nmug,nmat,surfmat,
+                         len(outputname),filetype,nlays)
+        else:
+            dap.addingascii(outputname,a,b,coefs,ncoefs,max_ncoefs,nmug,nmat,surfmat,len(outputname),nlays)
 
         # Naming the model with check for Windows paths
-        print('fou_{:4.7f}.dat'.format(wav))
+        print ('File: ' + outputname)
         if rename is True:
-            output_file = path_output + output_name + '_{:4.7f}.dat'.format(wav)
+            if filetype==1 or filetype==2:
+                 output_file = path_output + output_name + '_{:4.7f}'.format(wav) + '.hdf5'
+            else:
+                 output_file = path_output + output_name + '_{:4.7f}'.format(wav) + '.dat'
             output_file = os.path.normpath(output_file)
             model.name[z] = output_file
-            os.rename('fou_{:4.3f}.dat'.format(wav),output_file)
+            os.rename(outputname,output_file)
         else:
-            output_file = path_output + 'fou_{:4.7f}.dat'.format(wav)
+            if filetype==1 or filetype==2:
+                  output_file = path_output + 'fou_{:4.7f}'.format(wav) + '.hdf5'
+            else:
+                  output_file = path_output + 'fou_{:4.7f}'.format(wav) + '.dat'
             output_file = os.path.normpath(output_file)
             model.name[z] = output_file
             os.rename('fou_{:4.3f}.dat'.format(wav),output_file)
         print('End of DAP program')
 
 
-def read_dap_output(phase, sza, emission, filename, beta=None, phi=None,
+def read_dap_output(phase, sza, emission, filename='ModelA', filetype=1, beta=None, phi=None,
                     ngeosMAX=100000, nmuMAX=300, nfouMAX=2000, nmatMAX=4):
     """ Reads the supermatrices coefficients for given geometry
 
@@ -1532,11 +1555,13 @@ def read_dap_output(phase, sza, emission, filename, beta=None, phi=None,
     szaF[:ngeos] = sza
     emissionF[:ngeos] = emission
     # make sure all input angles are in degrees
-
     # Reading Stoke vector
-    rfou = np.zeros((nmatMAX*nmuMAX,nmuMAX,nfouMAX+1), order='F')
-    Sv = geos.read_dap(filename, ngeos, szaF, emissionF, azimuthF, betaF, rfou)
-    del(rfou)
+    if filetype==1 or filetype==2:
+        Sv = geos.read_dap(filename, ngeos, szaF, emissionF, azimuthF, betaF, filetype)
+    else:
+        rfou = np.zeros((nmatMAX*nmuMAX,nmuMAX,nfouMAX+1), order='F')
+        Sv = geos.read_dapascii(filename, ngeos, szaF, emissionF, azimuthF, betaF, rfou)
+        del(rfou)
 
     # storing output in proper Stokes elements
     I = Sv[0,:ngeos]
@@ -1555,7 +1580,8 @@ def read_dap_output(phase, sza, emission, filename, beta=None, phi=None,
 
 def compute_model(atm_model, force=False,
                path_input='./dap_database/', set_taus=False, rename=False,
-               output_name='modelA', nmug_mie=20, nmug=20, nsubr=50, nmat=4):
+               output_name='modelA', filetype=1, nmug_mie=20, nmug=20,
+               nsubr=50, nmat=4):
     """
     Compute the Fourier files associated with a Model object.
 
@@ -1626,10 +1652,10 @@ def compute_model(atm_model, force=False,
         # making sure that the directory we write to is the same we'll read
         # from
         dap_code(atm_model, rename=rename, output_name=output_name, nmug=nmug,
-                 nmat=nmat, path_output=path_input)
+                 nmat=nmat, path_output=path_input, filetype=filetype)
 
 
-def read_model(atm_model,data,step=20, force=False,
+def read_model(atm_model,data,step=20, force=False,filetype=1,
                path_input='./dap_database/', set_taus=False, rename=False,
                output_name='modelA', nmug_mie=20, nmug=20, nsubr=50, nmat=4):
     """ to read the files associated with a model.
@@ -1671,12 +1697,14 @@ def read_model(atm_model,data,step=20, force=False,
     # compute Fourier file
     compute_model(atm_model, force=force, path_input=path_input,
                   set_taus=set_taus, rename=rename, output_name=output_name,
-                  nmug_mie=nmug_mie, nmug=nmug, nsubr=nsubr, nmat=nmat)
+                  nmug_mie=nmug_mie, nmug=nmug, nsubr=nsubr, nmat=nmat,
+                  filetype=filetype)
 
     #read files and store result
     for j,w in enumerate(wvl):
         print('Reading {}'.format(atm_model.name[j]))
-        I,Q,U,V = read_dap_output(data.phase[::step],data.geo.sza[::step],data.geo.emission[::step],atm_model.name[j],beta=atm_model.geom.beta, phi=atm_model.geom.azimuth)
+        I,Q,U,V = read_dap_output(data.phase[::step],data.geo.sza[::step],data.geo.emission[::step],atm_model.name[j],beta=atm_model.geom.beta, phi=atm_model.geom.azimuth,
+                                  filetype=filetype)
         It[j,:] = I*np.cos(np.radians(atm_model.geom.sza))
         Qt[j,:] = Q*np.cos(np.radians(atm_model.geom.sza))
         Ut[j,:] = U*np.cos(np.radians(atm_model.geom.sza))
@@ -1776,7 +1804,7 @@ def binned_average(x,y,xbins, errmean=True, weighted=True, sigmas=1.):
 
 
 def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rename=True,
-                  output_names=['modelA','modelB'], fixed_pattern=False,
+                  output_names=['modelA','modelB'], filetype=1, fixed_pattern=False,
                   input_pattern=None, cusp=False, thresh_lat=50., patchy=True,
                   xscale=0.1, yscale=0.01,
                   bands=False, bands_lats=[-90,90],
@@ -1801,6 +1829,10 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
         if True, model output files will be renamed
     output_names : list of strings
         list of names of the models, used for the name of the Fourier files
+    filetype : Integer
+        Fourier file format and structure: 1-> .hdf5, fourier terms+derivatives,
+        2-> .hdf5, fourier terms,
+        3-> .dat, fourier terms
     fixed_pattern : bool, optional
         if True, a cloud pattern is generated at start and then
         reused for all phase angle after.
@@ -1889,7 +1921,8 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
     for M, model in enumerate(models):
         compute_model(model, force=force,
                       set_taus=set_taus, rename=rename, output_name=output_names[M],
-                      nmug_mie=nmug_mie, nmug=nmug, nsubr=nsubr, nmat=nmat)
+                      nmug_mie=nmug_mie, nmug=nmug, nsubr=nsubr, nmat=nmat,
+                      filetype=filetype)
 
     #At start, no specific cloud cover
     picture_full = None
@@ -1995,7 +2028,8 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
                 phiB = phi[mask==pixtype]
                 betaB = beta[mask==pixtype]
 
-                IB,QB,UB,VB = read_dap_output(phaseB,theta0B,thetaB,model.name[j],phi=phiB, beta=betaB)
+                IB,QB,UB,VB = read_dap_output(phaseB,theta0B,thetaB,model.name[j],phi=phiB, beta=betaB,
+                                              filetype=filetype)
 
                 model.picture = np.copy(picture_full)
 
@@ -2158,7 +2192,7 @@ def plot_pixels(model, wvl_idx=0, display='grid', stokes='Ps', phase_idx=0,
 
 
 def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
-                      rename=True, output_names=['modelA','modelB'], fixed_pattern=False,
+                      rename=True, output_names=['modelA','modelB'], filetype=1, fixed_pattern=False,
                       input_pattern=None, cusp=False, thresh_lat=50., full_disk=False,
                       patchy=True, fclouds=[0.5,0.5], constant_fcloud=False,
                       xscale=0.1, yscale=0.01,
@@ -2185,6 +2219,10 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
         if True, model output files will be renamed
     output_names : list of strings
         list of names of the models, used for the name of the Fourier files
+    filetype : Integer
+        Fourier file format and structure: 1-> .hdf5, fourier terms+derivatives,
+                                           2-> .hdf5, fourier terms,
+                                           3-> .dat, fourier terms
     fixed_pattern : bool
         if True, a cloud pattern is generated at start and then
         reused for all phase angle after.
@@ -2285,7 +2323,8 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
     for M, model in enumerate(models):
         compute_model(model, force=force,
                       set_taus=set_taus, rename=rename, output_name=output_names[M],
-                      nmug_mie=nmug_mie, nmug=nmug, nsubr=nsubr, nmat=nmat)
+                      nmug_mie=nmug_mie, nmug=nmug, nsubr=nsubr, nmat=nmat,
+                      filetype=filetype)
 
 
     #At start, no specific cloud cover
@@ -2374,7 +2413,8 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
                         phiB = phi[mask==pixtype]
                         betaB = beta[mask==pixtype]
                         print('Reading {}'.format(model.name[j]))
-                        I,Q,U,V = read_dap_output(phaseB,theta0B,thetaB,model.name[j],phi=phiB, beta=betaB)
+                        I,Q,U,V = read_dap_output(phaseB,theta0B,thetaB,model.name[j],phi=phiB, beta=betaB,
+                                                  filetype=filetype)
                         Is[pixtype,j,mask==pixtype] = I*np.cos(np.radians(theta0B))
                         Qs[pixtype,j,mask==pixtype] = Q*np.cos(np.radians(theta0B))
                         Us[pixtype,j,mask==pixtype] = U*np.cos(np.radians(theta0B))
@@ -2384,7 +2424,8 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
                 else:
                     # if multiple patterns read all pixels
                     print('Reading {}'.format(model.name[j]))
-                    I,Q,U,V = read_dap_output(phase,theta0,theta,model.name[j],phi=phi, beta=beta)
+                    I,Q,U,V = read_dap_output(phase,theta0,theta,model.name[j],phi=phi, beta=beta,
+                                              filetype=filetype)
                     Is[pixtype,j,:] = I*np.cos(np.radians(theta0))
                     Qs[pixtype,j,:] = Q*np.cos(np.radians(theta0))
                     Us[pixtype,j,:] = U*np.cos(np.radians(theta0))
@@ -2681,15 +2722,15 @@ def mask_planet(alpha=0, npix=20, cusp=False, thresh_lat=50., patchy=True,
     phase = np.ones(ngeos)*alpha
     xs = xs[:ngeos]
     ys = ys[:ngeos]
-    xs = xs.round(2)
-    ys = ys.round(2)
+    xs = xs.round(12)
+    ys = ys.round(12)
 
     # X and Y axis
     step = 2./npix
     X = -1 + 0.5*step + np.arange(0,npix)*step
     Y = -1 + 0.5*step + np.arange(0,npix)*step
-    X = X.round(2)
-    Y = Y.round(2)
+    X = X.round(12)
+    Y = Y.round(12)
     xv, yv = np.meshgrid(X,Y)
     # remove outside of disk
     grid_full[xv*xv+yv*yv>1]=np.nan

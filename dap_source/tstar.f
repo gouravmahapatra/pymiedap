@@ -1,7 +1,7 @@
 * This file is part of PyMieDAP, released under GNU General Public License.
 * See license.md or http://gitlab.com/loic.cg.rossi/pymiedap for details.
 
-      SUBROUTINE tstar(Ts,T,nmat,nmu)
+      SUBROUTINE tstar(T,nmat,nsup,Ts)
 
 *----------------------------------------------------------------------*
 *  Calculate the transmission supermatrix Ts for illumination from     *
@@ -16,22 +16,13 @@
       IMPLICIT DOUBLE PRECISION (a-h,o-z)
       INCLUDE 'max_incl'
 
-C      INTEGER nmat, nmu
-C      DOUBLE PRECISION T, Ts
-      DIMENSION T(nsupMAX,nsupMAX),Ts(nsupMAX,nsupMAX)
+      REAL*8, DIMENSION(nsup,nsup) :: T, Ts
 
 Cf2py intent(out) Ts
-
-      nsup= nmu*nmat
-
 *----------------------------------------------------------------------*
 *  Transpose T and put it in Ts                                        *
 *----------------------------------------------------------------------*
-      DO j=1,nsup
-         DO i=1,nsup
-            Ts(i,j) = T(j,i)
-         ENDDO
-      ENDDO
+      Ts=Transpose(T)
 
 *----------------------------------------------------------------------*
 *  Put a minus sign in every third row and in every third column       *

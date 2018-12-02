@@ -16,16 +16,16 @@ Cf2py intent(out) y
 *----------------------------------------------------------------------------
       IMPLICIT NONE 
 
-      INTEGER n, nn, klo, khi
+      INTEGER n, nn, klo, khi,k
       DOUBLE PRECISION xa(nn),ya(nn),y2a(nn)
-      DOUBLE PRECISION x, y, a, b, h, k
+      DOUBLE PRECISION x, y, a, b, h
 
 *----------------------------------------------------------------------------
       klo=1
       khi=n
 
 1     IF (khi-klo.GT.1) THEN
-        k= (klo+khi)/2.D0  
+        k= (klo+khi)/2  
          IF (xa(k).GT.x) THEN
              khi= k
          ELSE

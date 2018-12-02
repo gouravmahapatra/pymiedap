@@ -1,8 +1,8 @@
 * This file is part of PyMieDAP, released under GNU General Public License.
 * See license.md or http://gitlab.com/loic.cg.rossi/pymiedap for details.
 
-      SUBROUTINE ord2m(xmu,smf,nmu,nmat,
-     .                 Zmplus,Zmmin,a,b,ebmu,Rm,Tm)
+      SUBROUTINE ord2m(xmu,smf,nmat,
+     .                 Zmplus,Zmmin,a,b,ebmu,nmu,nsup,Rm,Tm)
 
 *----------------------------------------------------------------------*
 *  Calculate second order scattering contribution to the m-th Fourier  *
@@ -16,17 +16,11 @@
 
       INCLUDE 'max_incl'
 
-      INTEGER nmu,nmum
-C      INTEGER nmu,nmum, nmat
+      INTEGER nmu,nmum,nsup
 
-      DIMENSION xmu(nmuMAX),smf(nmuMAX),ebmu(nmuMAX),
-     .          Zmmin(nsupMAX,nsupMAX),Zmplus(nsupMAX,nsupMAX),
-     .          Rm(nsupMAX,nsupMAX),Tm(nsupMAX,nsupMAX)
+      REAL*8, DIMENSION(nmu) :: xmu, smf, ebmu !rank 1
 
-C      DOUBLE PRECISION a, b
-C      DOUBLE PRECISION xmu(nmuMAX),smf(nmuMAX),ebmu(nmuMAX),
-C     .          Zmmin(nsupMAX,nsupMAX),Zmplus(nsupMAX,nsupMAX),
-C     .          Rm(nsupMAX,nsupMAX),Tm(nsupMAX,nsupMAX)
+      REAL*8, DIMENSION(nsup,nsup) :: Zmmin, Zmplus, Rm, Tm !rank 2
 
       DIMENSION yik(4,4)
 
@@ -225,7 +219,7 @@ Cf2py intent(out) Rm, Tm
 *  End of loop over row index i                                        *
 *  Fill upper triangle of the supermatrices using symmetry relations.  *
 *----------------------------------------------------------------------*
-      CALL fillup(Rm,Tm,nmat,nmu)
+      CALL fillup(Rm,Tm,nmat,nmu,nsup)
 
 *-----------------------------------------------------------------------
       RETURN

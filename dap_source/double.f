@@ -1,34 +1,32 @@
 * This file is part of PyMieDAP, released under GNU General Public License.
 * See license.md or http://gitlab.com/loic.cg.rossi/pymiedap for details.
 
-      SUBROUTINE double(Rm,Tm,ebmu,nmu,nmat)
+      SUBROUTINE double(Rm,Tm,ebmu,nmu,nmat,nsup)
 
 *----------------------------------------------------------------------*
 *  Calculate the m-th Fourier term of reflection ans transmission of   *
 *  a homogeneous layer from the reflection and transmission of a layer *
 *  with only half the optical thickness.                               *
+*  Edited by: Ashwyn Groot                                             *
+*  Date: November 2018                                                 *
+*  Introduced matrix operations with f95<                              *
 *----------------------------------------------------------------------*
       IMPLICIT DOUBLE PRECISION (a-h,o-z)
 
       INCLUDE 'max_incl'
 
-      INTEGER nmu,nmum,nmat
+      INTEGER nmu,nmum,nmat,nsup
 
       PARAMETER(maxrep=15,trmin=1.D-8)
 
-C      DOUBLE PRECISION X(nsupMAX,nsupMAX),Y(nsupMAX,nsupMAX),
-C     .          Z(nsupMAX,nsupMAX),Rm(nsupMAX,nsupMAX),
-C     .          Tm(nsupMAX,nsupMAX),ebmu(nmuMAX),
-C     .          E(nsupMAX)
-
-
-      DIMENSION X(nsupMAX,nsupMAX),Y(nsupMAX,nsupMAX),
-     .          Z(nsupMAX,nsupMAX),Rm(nsupMAX,nsupMAX),
-     .          Tm(nsupMAX,nsupMAX),ebmu(nmuMAX),
-     .          E(nsupMAX)
+      REAL*8, DIMENSION(:,:), ALLOCATABLE :: X, Y, Z, E !rank 2
+      REAL*8, DIMENSION(nsup,nsup) :: Rm, Tm !rank 2
+      REAL*8, DIMENSION(nmu) :: ebmu !rank 1
 
       LOGICAL verbo
       verbo = .false.
+      ALLOCATE( X(nsup,nsup), Y(nsup,nsup), Z(nsup,nsup),
+     .          E(nsup,nsup))
 
 Cf2py intent(in,out) Rm,Tm,ebmu
 
@@ -39,25 +37,25 @@ Cf2py intent(in,out) Rm,Tm,ebmu
 *  Use the product method to calculate the repeated reflections        *
 *  between the layers, se de Haan et al. (1987) Eqs. (111)-(115)       *
 *----------------------------------------------------------------------*
-      CALL star(X,Rm,nmat,nmu)
+      CALL star(X,Rm,nmat,nmu,nsup)
 *                                                    X = R*
       CALL prod(Y,X,Rm,nmat,nmu,nmum)
 *                                                    Y = R*R = C1
-      CALL assign(Z,Y,nmat,nmu)
+      Z=Y
 *                                                    Z = C1 = S1
       ir= 0
   100     ir= ir+1
           CALL prod(X,Y,Y,nmat,nmu,nmum)
 *                                                    X = Cr Cr = Cr+1
-          CALL assign(Y,X,nmat,nmu)
+          Y=X
 *                                                    Y = Cr+1
           CALL prod(X,Z,Y,nmat,nmu,nmum)
 *                                                    X = Sr Cr+1
-          CALL addsm(Z,Z,X,nmat,nmu)
+          Z=Z+X
 *                                                    Z = Sr + Sr Cr+1
-          CALL addsm(Z,Z,Y,nmat,nmu)
+          Z=Z+Y
 *                                         Z = Sr + Sr Cr+1 + Cr+1 = Sr+1
-          CALL trace(Y,trC,nmat,nmum)
+          CALL trace(Y,nmat,nmum,nsup,trC)
 *                                                    trC = trace(Cr+1)
           IF (verbo) PRINT *,' double: r = ',ir,' trace = ',trC
           IF ((trC.GT.trmin) .AND. (ir.LE.maxrep)) GOTO 100
@@ -73,54 +71,55 @@ Cf2py intent(in,out) Rm,Tm,ebmu
 *  Now Z contains the matrix Q Eq. (115)                               *
 *  Use the adding Eqs. (85)-(91) with identical layers                 *
 *----------------------------------------------------------------------*
+      E=0.D0
       DO i=1,nmu
          DO k=1,nmat
-            E((i-1)*nmat+k)= ebmu(i)
+            E((i-1)*nmat+k,(i-1)*nmat+k)= ebmu(i)
          ENDDO
       ENDDO
 
       CALL prod(X,Z,Tm,nmat,nmu,nmum)
 *                                              X = QT
-      CALL rdiapr(Z,Z,E,nmat,nmu)
+      Z=MATMUL(Z,E)
 *                                              Z = QE
-      CALL addsm(X,X,Z,nmat,nmu)
+      X=X+Z
 *                                              X = QT + QE
-      CALL addsm(X,X,Tm,nmat,nmu)
+      X=X+Tm
 *                                              X = T + QT +QE = D
 *-----------------------------------------------------------------------
       CALL prod(Z,Rm,X,nmat,nmu,nmum)
 *                                              Z = RD
-      CALL rdiapr(Y,Rm,E,nmat,nmu)
+      Y=MATMUL(Rm,E)
 *                                              Y = RE
-      CALL addsm(Z,Z,Y,nmat,nmu)
+      Z=Z+Y
 *                                              Z = RE + RD = U
 *-----------------------------------------------------------------------
       CALL prod(Y,Tm,X,nmat,nmu,nmum)
 *                                              Y = TD
-      CALL ldiapr(X,E,X,nmat,nmu)
+      X=MATMUL(E,X)
 *                                              X = ED
-      CALL addsm(Y,Y,X,nmat,nmu)
+      Y=Y+X
 *                                              Y = TD + ED
-      CALL rdiapr(X,Tm,E,nmat,nmu)
+      X=MATMUL(Tm,E)
 *                                              X = TE
-      CALL addsm(Y,Y,X,nmat,nmu)
+      Y=Y+X
 *                                              Y = TD + ED + TE = Ttot
 *-----------------------------------------------------------------------
-      CALL star(Tm,Tm,nmat,nmu)
+      CALL star(Tm,Tm,nmat,nmu,nsup)
 *                                              Tm = T*
       CALL prod(X,Tm,Z,nmat,nmu,nmum)
 *                                              X = T*U
-      CALL addsm(Rm,Rm,X,nmat,nmu)
+      Rm=Rm+X
 *                                              Rm = R + T*U
-      CALL ldiapr(Z,E,Z,nmat,nmu)
+      Z=MATMUL(E,Z)
 *                                              Z = EU
-      CALL addsm(Rm,Rm,Z,nmat,nmu)
+      Rm=Rm+Z
 *                                              Rm = R + T*U + EU = Rtot
 
 *-----------------------------------------------------------------------
 *     Tm= Ttot :
 *-----------------------------------------------------------------------
-      CALL assign(Tm,Y,nmat,nmu)
+      Tm=Y
 
 *-----------------------------------------------------------------------
       RETURN

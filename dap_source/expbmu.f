@@ -6,27 +6,29 @@
 *----------------------------------------------------------------------
 *     Calculate dexp(-b/mu) for all mu in xmu and put the 
 *     result in array ebmu:
+*  Edited by: Ashwyn Groot                                             *
+*  Date: November 2018                                                 *
+*  Introduced matrix operations with f95<                              *
 *----------------------------------------------------------------------
       IMPLICIT NONE 
 
       INCLUDE 'max_incl'
 
-      INTEGER i,nmu
+      INTEGER nmu
 
-      DOUBLE PRECISION b,xmu(nmuMAX),ebmu(nmuMAX)
+      REAL*8 :: b
+
+      REAL*8, DIMENSION(nmu) :: xmu, ebmu !rank 1
 
 Cf2py intent(in) b, xmu, nmu
 Cf2py intent(out) ebmu
 
 *----------------------------------------------------------------------
-      DO i=1,nmu
-         IF (xmu(i).GT.(b/100.D0)) THEN
-            ebmu(i)= DEXP(-b/xmu(i))
-         ELSE
-            ebmu(i)= 0.D0
-         ENDIF
-      ENDDO
-
+      WHERE (xmu.GT.(b/100.D0))
+         ebmu= DEXP(-b/xmu)
+      ELSEWHERE
+         ebmu=0.D0
+      ENDWHERE
 *----------------------------------------------------------------------
       RETURN
       END

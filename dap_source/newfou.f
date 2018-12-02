@@ -1,171 +1,156 @@
 * This file is part of PyMieDAP, released under GNU General Public License.
 * See license.md or http://gitlab.com/loic.cg.rossi/pymiedap for details.
 
-      SUBROUTINE newfou(m,Rmbot,smf,iunfou,nmat,nmu,M0,nlays,nextm)
+      SUBROUTINE newfou(nmat,xmu,rfou,outputname,lg,nfou,nmu)
+      USE HDF5
+Cf2py intent(in) nmat,xmu,rfou,outputname,lg,nfou,nmu
+      IMPLICIT NONE
+
+      INCLUDE 'max_incl'
+      INTEGER nfou,nmat,nmu,lg
+      DOUBLE PRECISION xmu(nmu),rfou(nmu*nmat,nmu,0:nfou)
+      CHARACTER(len=200) :: outputname
 
 *----------------------------------------------------------------------
 *     Write the Fourier-coefficients to file:
 *----------------------------------------------------------------------
-      IMPLICIT NONE
+! Names (file and HDF5 objects)
+      CHARACTER(LEN=5), PARAMETER :: groupname1 = "props" ! Sub-Group 1 name
+      CHARACTER(LEN=4), PARAMETER :: groupname2 = "rfou" ! Sub-Group 1 name
+! Dataset 1 name
+      CHARACTER(LEN=12), PARAMETER :: dsetname1 = "Array-counts"
+! Dataset 2 name
+      CHARACTER(LEN=9), PARAMETER :: dsetname2 = "XMU-array"
+! Dataset 3 name
+      CHARACTER(LEN=10), PARAMETER :: dsetname3 = "RFOU-array"
 
-      INCLUDE 'max_incl'
+! Identifiers
+      INTEGER(HID_T) :: file_id = 0      ! File identifier
+      INTEGER(HID_T) :: group1_id = 1    ! Group 1 identifier
+      INTEGER(HID_T) :: group2_id = 2    ! Group 2 identifier
+      INTEGER(HID_T) :: dspace1_id = 3   ! Dataspace 1 identifier
+      INTEGER(HID_T) :: dspace2_id = 4   ! Dataspace 2 identifier
+      INTEGER(HID_T) :: dspace3_id = 5   ! Dataspace 2 identifier
+      INTEGER(HID_T) :: dset1_id = 6     ! Dataset 1 identifier
+      INTEGER(HID_T) :: dset2_id = 7     ! Dataset 2 identifier
+      INTEGER(HID_T) :: dset3_id = 8     ! Dataset 3 identifier
 
-      INTEGER iunfou,nmat,nmu,ib,jb,i,j,m,nlays,maxM
 
-      INTEGER M0(nlaysMAX)
+! Dimension array (nfou,nmat,nmugs)
+      INTEGER :: rank                 ! Dataset rank
+      INTEGER(HSIZE_T), DIMENSION(1) :: dims1 = (/3/) ! Dataset dimensions
+      INTEGER(HSIZE_T), DIMENSION(1) :: data_dims1
+      INTEGER, DIMENSION(3) :: dset_data1   ! Data buffers
 
-      DOUBLE PRECISION w,t1,t2,t3,t4,tot,tot_eps,
-     .       Rmbot(nsupMAX,nsupMAX),smf(nmuMAX)
-      CHARACTER*200 fst
+! xmu array
+      INTEGER(HSIZE_T), DIMENSION(1) :: dims2
+      INTEGER(HSIZE_T), DIMENSION(1) :: data_dims2
+      REAL*8, DIMENSION(nmu) :: dset_data2
 
-      LOGICAL nextm
-      nextm= .true.
+! Rfou array
+      INTEGER(HSIZE_T), DIMENSION(3) :: dims3
+      INTEGER(HSIZE_T), DIMENSION(3) :: data_dims3
+      REAL*8, DIMENSION(nmu*nmat,nmu,0:nfou) :: dset_data3
 
-Cf2py intent(in) Rmbot, smf, m, iunfou, nmat, nmu, M0, nlays
-Cf2py intent(out) nextm
 
-*----------------------------------------------------------------------
-*     Write the supermatrix elements to file: 
-*
-*     Note: the supermatrix factors are removed before writing!
-*-----------------------------------------------------------------------
-      tot= 0.D0
-      tot_eps= 0.D0
-      fst = '(I4,2X,2(I3,2X),'
+! Misc variables (e.g. loop counters)
+      INTEGER :: error ! Error flag
+! =====================================================================
 
-      DO i=1,nmu
-         ib= (i-1)*nmat
-         DO j=1,nmu
-            jb= (j-1)*nmat
-            w=1.D0/(smf(i)*smf(j))
-
-            fst = '(I4,2X,2(I3,2X),'
-
-            IF (nmat.EQ.1) THEN
-               t1= w*Rmbot(ib+1,jb+1)
-               IF (DABS(t1).LT.eps) THEN
-                   t1= 0.D0
-                   fst = trim(fst) // 'F2.0)'
-               ELSE
-                   fst = trim(fst) // 'E16.8)'
-               ENDIF
-
-               WRITE(iunfou,fmt=fst) m,i,j,t1
-
-            ELSEIF (nmat.EQ.3) THEN
-               t1= w*Rmbot(ib+1,jb+1)
-               t2= w*Rmbot(ib+2,jb+1)
-               t3= w*Rmbot(ib+3,jb+1)
-               IF (DABS(t1).LT.eps) THEN
-                   t1= 0.D0
-                   fst = trim(fst) // 'F2.0,1X,'
-               ELSE
-                   fst = trim(fst) // 'E16.8,1X,'
-               ENDIF
-
-               IF (DABS(t2).LT.eps) THEN
-                   t2= 0.D0
-                   fst = trim(fst) // 'F2.0,1X,'
-               ELSE
-                   fst = trim(fst) // 'E16.8,1X,'
-               ENDIF
-
-               IF (DABS(t3).LT.eps) THEN
-                   t3= 0.D0
-                   fst = trim(fst) // 'F2.0)'
-               ELSE
-                   fst = trim(fst) // 'E16.8)'
-               ENDIF
-
-               WRITE(iunfou,fmt=fst) m,i,j,t1,t2,t3
-
-            ELSE
-               t1= w*Rmbot(ib+1,jb+1)
-               t2= w*Rmbot(ib+2,jb+1)
-               t3= w*Rmbot(ib+3,jb+1)
-               t4= w*Rmbot(ib+4,jb+1)
-               IF (DABS(t1).LT.eps) THEN
-                   t1= 0.D0
-                   fst = trim(fst) // 'F2.0,1X,'
-               ELSE
-                   fst = trim(fst) // 'E16.8,1X,'
-               ENDIF
-
-               IF (DABS(t2).LT.eps) THEN
-                   t2= 0.D0
-                   fst = trim(fst) // 'F2.0,1X,'
-               ELSE
-                   fst = trim(fst) // 'E16.8,1X,'
-               ENDIF
-
-               IF (DABS(t3).LT.eps) THEN
-                   t3= 0.D0
-                   fst = trim(fst) // 'F2.0,1X,'
-               ELSE
-                   fst = trim(fst) // 'E16.8,1X,'
-               ENDIF
-
-               IF (DABS(t4).LT.eps) THEN
-                   t4= 0.D0
-                   fst = trim(fst) // 'F2.0)'
-               ELSE
-                   fst = trim(fst) // 'E16.8)'
-               ENDIF
-
-               WRITE(iunfou,fmt=fst) m,i,j,t1,t2,t3,t4
-
-            ENDIF
-
-            tot= tot + DABS(w*Rmbot(ib+1,jb+1))
-            tot_eps= tot_eps + eps
-
-         ENDDO
-      ENDDO
-
-*----------------------------------------------------------------------
-*     Test whether any of the coefficients is larger than zero:
-*----------------------------------------------------------------------
-      IF (tot.LT.tot_eps) THEN
-         nextm= .false.
-         GOTO 999
-      ENDIF
-
-*----------------------------------------------------------------------
-*     Test whether nfouMAX has been reached:
-*----------------------------------------------------------------------
-      IF (m.GE.nfouMAX) THEN
-         nextm= .false.
-         GOTO 999
-      ENDIF
-
-*----------------------------------------------------------------------
-*     Else, we must sum the Fourier series all the way to M0:
-*----------------------------------------------------------------------
-      maxM=0
-      DO i=1,nlays
-         IF (maxM.LT.M0(i)) maxM= M0(i)
-      ENDDO
-
-      IF (m.GE.maxM) THEN
-         nextm= .false.
-         GOTO 999
-      ENDIF
+! Initialize Fortran interface
+      CALL h5open_f(error)
+! Create a new file
+      CALL h5fcreate_f(outputname, H5F_ACC_TRUNC_F, file_id, error)
 
 *-----------------------------------------------------------------------
-20    FORMAT(I4,2X,2(I3,2X),E16.8)
-21    FORMAT(I4,2X,2(I3,2X),E1.2)
+* Put nfou,nmat,nmugs,xmu in group 1:
+*-----------------------------------------------------------------------
+! Create a group in the HDF5 file: properties group
+      CALL h5gcreate_f(file_id, groupname1, group1_id, error)
 
-22    FORMAT(I4,2X,2(I3,2X),E1.2,1X,2(E16.8,1X))
-23    FORMAT(I4,2X,2(I3,2X),E16.8,1X,E1.2,1X,E16.8,1X)
-24    FORMAT(I4,2X,2(I3,2X),2(E16.8,1X),F2.0)
-25    FORMAT(I4,2X,2(I3,2X),3(E16.8,1X))
+*********************************************
+! Create dataspace: counts (the dataset is next)
+*********************************************
+      data_dims1(1) = 3
+      rank = 1
+      dset_data1(:) = (/nfou+1,nmat,nmu/)
+! Create dataspace 1
+      CALL h5screate_simple_f(rank, dims1, dspace1_id, error)
+! Create dataset 1 with default properties
+      CALL h5dcreate_f(file_id, dsetname1, H5T_NATIVE_INTEGER,
+     .            dspace1_id,dset1_id, error)
+! Write dataset 1
+      CALL h5dwrite_f(dset1_id, H5T_NATIVE_INTEGER, dset_data1,
+     .            data_dims1,error)
+! Close access to dataset 1
+      CALL h5dclose_f(dset1_id, error)
+! Close access to data space 1
+      CALL h5sclose_f(dspace1_id, error)
 
-26    FORMAT(I4,2X,2(I3,2X),4(E16.8,1X))
-27    FORMAT(I4,2X,2(I3,2X),E1.2,1X,3(E16.8,1X))
-28    FORMAT(I4,2X,2(I3,2X),E1.2,1X,2(E16.8,1X),E1.2)
-29    FORMAT(I4,2X,2(I3,2X),E1.2,1X,E16.8,1X,2(E1.2,1X))
-30    FORMAT(I4,2X,2(I3,2X),3(E16.8,1X),E1.2)
+*********************************************
+! Create dataspace: xmu (the dataset is next)
+*********************************************
+      data_dims2(1) = nmu
+      dims2(1)=nmu
+      rank = 1
+      dset_data2 = xmu
+! Create dataspace 2
+      CALL h5screate_simple_f(rank, dims2, dspace2_id, error)
+! Create dataset 2 with default properties
+      CALL h5dcreate_f(file_id, dsetname2, H5T_NATIVE_DOUBLE,
+     .            dspace2_id,dset2_id, error)
+! Write dataset 2
+      CALL h5dwrite_f(dset2_id, H5T_NATIVE_DOUBLE, dset_data2,
+     .            data_dims2,error)
+! Close access to dataset 2
+      CALL h5dclose_f(dset2_id, error)
+! Close access to data space 2
+      CALL h5sclose_f(dspace2_id, error)
+*********************************************
+
+! Close the group
+      CALL h5gclose_f(group1_id, error)
+*-----------------------------------------------------------------------
 
 *-----------------------------------------------------------------------
-999   RETURN
+* Put rfou in group 2:
+*-----------------------------------------------------------------------
+! Create a group in the HDF5 file: rfou group
+      CALL h5gcreate_f(file_id, groupname2, group2_id, error)
+
+*********************************************
+! Create dataspace: rfou (the dataset is next)
+*********************************************
+      data_dims3(1) = nmu*nmat
+      data_dims3(2) = nmu
+      data_dims3(3) = nfou+1
+      dims3(1)=nmu*nmat
+      dims3(2)=nmu
+      dims3(3)=nfou+1
+      rank = 3
+      dset_data3 = rfou
+! Create dataspace 1
+      CALL h5screate_simple_f(rank, dims3, dspace3_id, error)
+! Create dataset 1 with default properties
+      CALL h5dcreate_f(file_id, dsetname3, H5T_NATIVE_DOUBLE,
+     .            dspace3_id,dset3_id, error)
+! Write dataset 1
+      CALL h5dwrite_f(dset3_id, H5T_NATIVE_DOUBLE, dset_data3,
+     .            data_dims3,error)
+! Close access to dataset 1
+      CALL h5dclose_f(dset3_id, error)
+! Close access to data space 1
+      CALL h5sclose_f(dspace3_id, error)
+*********************************************
+
+! Close the group
+      CALL h5gclose_f(group2_id, error)
+*-----------------------------------------------------------------------
+! Close the file
+      CALL h5fclose_f(file_id, error)
+! Close FORTRAN interface
+      CALL h5close_f(error)
+
+*-----------------------------------------------------------------------
+      RETURN
       END

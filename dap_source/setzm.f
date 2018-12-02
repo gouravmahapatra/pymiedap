@@ -2,7 +2,7 @@
 * See license.md or http://gitlab.com/loic.cg.rossi/pymiedap for details.
 
       SUBROUTINE setzm(m,layer,coefs,ncoefs,xmu,binfac,binfad,
-     .                 nmu,nmat,Zmmin,Zmplus)
+     .              nsup,nlays,max_ncoefs,nmu,nmat,Zmmin,Zmplus)
 
 **********************************************************************
 *  Calculate the m-th Fourier component of the phase matrix 
@@ -44,22 +44,24 @@
 
       INCLUDE 'max_incl'
 
+      INTEGER max_ncoefs,nsup,nlays
+
 C      INTEGER m, layer, nmu, nmat
 C      INTEGER ncoefs
       DOUBLE PRECISION binfac,binfad
 C      DOUBLE PRECISION coefs, xmu, Zmmin, Zmplus
 
-      DIMENSION coefs(nmatMAX,nmatMAX,0:ncoefsMAX,nlaysMAX),
-     .          cs(4,4,0:ncoefsMAX),
-     .          ncoefs(nlaysMAX), 
-     .          xmu(nmuMAX),
-     .          Zmmin(nsupMAX,nsupMAX),
-     .          Zmplus(nsupMAX,nsupMAX)
+      DIMENSION coefs(nmat,nmat,0:max_ncoefs,nlays),
+     .          cs(4,4,0:max_ncoefs),
+     .          ncoefs(nlays),
+     .          xmu(nmu),
+     .          Zmmin(nsup,nsup),
+     .          Zmplus(nsup,nsup)
 
-      DIMENSION Plm(nmuMAX,3,2),DPDpl(nsupMAX),
-     .          DPDmi(nsupMAX),DSD(4,4),
-     .          sqlm(0:ncoefsMAX),sql4(ncoefsMAX),
-     .          rootu(nmuMAX)
+      DIMENSION Plm(nmu,3,2),DPDpl(nsup),
+     .          DPDmi(nsup),DSD(4,4),
+     .          sqlm(0:max_ncoefs),sql4(max_ncoefs),
+     .          rootu(nmu)
 
       LOGICAL verbo 
       verbo = .false.
@@ -104,14 +106,8 @@ Cf2py intent(out) Zmmin,Zmplus
 *---------------------------------------------------------------------
 *     Initialize phase matrix to zero:
 *---------------------------------------------------------------------
-      nsup= nmat*nmu
-      DO j=1,nsup
-         DO i=1,nsup
-            Zmplus(i,j)= 0.D0
-            Zmmin(i,j) = 0.D0
-         ENDDO
-      ENDDO
-
+      Zmplus=0.D0
+      Zmmin=0.D0
 *---------------------------------------------------------------------
 *     Initialize Plm0 for l=m, Eq.(77), and for l=m-1 Eq. (76):
 *---------------------------------------------------------------------
@@ -131,12 +127,10 @@ Cf2py intent(out) Zmmin,Zmplus
 *     Set Plm2 and Plm-2 to zero: initialization will be done 
 *     inside loop 
 *---------------------------------------------------------------------
-      DO i=1,nmu
-         Plm(i,2,lnew) = 0.D0
-         Plm(i,2,lold) = 0.D0
-         Plm(i,3,lnew) = 0.D0
-         Plm(i,3,lold) = 0.D0
-      ENDDO
+      Plm(:,2,lnew) = 0.D0
+      Plm(:,2,lold) = 0.D0
+      Plm(:,3,lnew) = 0.D0
+      Plm(:,3,lold) = 0.D0
 
 *---------------------------------------------------------------------
 *     Start loop over l (summation index in Eq. (66))             
@@ -286,8 +280,8 @@ Cf2py intent(out) Zmmin,Zmplus
 *     End of summation loop over l                 
 *     Calculate D1 * sum * D1                  
 *---------------------------------------------------------------------
-      CALL transf(Zmmin,nsup,nmat)
-      CALL transf(Zmplus,nsup,nmat)
+      CALL transf(Zmmin,nmat,nsup)
+      CALL transf(Zmplus,nmat,nsup)
 
 *---------------------------------------------------------------------
 999   RETURN

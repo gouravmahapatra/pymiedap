@@ -1,7 +1,7 @@
 * This file is part of PyMieDAP, released under GNU General Public License.
 * See license.md or http://gitlab.com/loic.cg.rossi/pymiedap for details.
 
-      SUBROUTINE top2bot(nmat,nmu,ebtop,ebbot,Rmtop,Tmtop,
+      SUBROUTINE top2bot(nmat,ebtop,ebbot,Rmtop,Tmtop,nmu,nsup,
      .                   Rmbot,Tmbot,Rmsbot)
 
 *----------------------------------------------------------------------
@@ -11,25 +11,23 @@
 
       INCLUDE 'max_incl'
 
-      INTEGER i,nmat,nmu
+      INTEGER nmat,nmu, nsup
 
-      DOUBLE PRECISION Rmtop(nsupMAX,nsupMAX),Rmbot(nsupMAX,nsupMAX),
-     .                 Tmtop(nsupMAX,nsupMAX),Tmbot(nsupMAX,nsupMAX),
-     .                 Rmsbot(nsupMAX,nsupMAX)
+      REAL*8, DIMENSION(nsup,nsup) :: Rmtop,Tmtop,Rmbot,
+     .          Tmbot,Rmsbot
 
-      DOUBLE PRECISION ebtop(nmuMAX),ebbot(nmuMAX)
+      REAL*8, DIMENSION(nmu) :: ebtop, ebbot
 
 Cf2py intent(in) ebtop,ebbot,Rmtop,Tmtop
 Cf2py intent(out) Rmbot,Tmbot,Rmsbot
 
 *----------------------------------------------------------------------
-      CALL assign(Rmbot,Rmtop,nmat,nmu)
-      CALL assign(Tmbot,Tmtop,nmat,nmu)
-      CALL star(Rmsbot,Rmbot,nmat,nmu)
+      Rmbot=Rmtop
+      Tmbot=Tmtop
 
-      DO i=1,nmu
-         ebbot(i)= ebtop(i)
-      ENDDO
+      CALL star(Rmsbot,Rmbot,nmat,nmu,nsup)
+
+      ebbot=ebtop
 
 *----------------------------------------------------------------------
       RETURN

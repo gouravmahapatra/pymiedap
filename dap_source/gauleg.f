@@ -16,10 +16,11 @@
 **********************************************************************
 C      IMPLICIT DOUBLE PRECISION (a-h,o-z)
 
+      INTEGER ndim, ngauss, i
+      DOUBLE PRECISION a,b,xm,xl,z,p1,p2,p3,pp,z1,pi,eps
       PARAMETER (eps= 1.d-14)
-C      INTEGER ndim, ngauss
-      DOUBLE PRECISION x(ndim),w(ndim),
-     .                 a,b,xm,xl,z,p1,p2,p3,pp,z1,pi
+
+      REAL*8, DIMENSION(ndim) :: x, w
 
 Cf2py intent(in) ndim,ngauss,a,b
 Cf2py intent(out) x, w

@@ -1,7 +1,7 @@
 * This file is part of PyMieDAP, released under GNU General Public License.
 * See license.md or http://gitlab.com/loic.cg.rossi/pymiedap for details.
 
-      SUBROUTINE ord1m(xmu,smf,nmu,nmat,Zmplus,Zmmin,a,b,ebmu,
+      SUBROUTINE ord1m(xmu,smf,nmat,Zmplus,Zmmin,a,b,ebmu,nmu,nsup,
      .                 Rm1,Tm1)
 
 *----------------------------------------------------------------------
@@ -16,16 +16,11 @@
 
       INCLUDE 'max_incl'
 
-C      INTEGER nmu,nmat
+      INTEGER nsup
 
-C      DOUBLE PRECISION a, b
-C      DOUBLE PRECISION xmu(nmuMAX),smf(nmuMAX),ebmu(nmuMAX),
-C     .          Zmmin(nsupMAX,nsupMAX),Zmplus(nsupMAX,nsupMAX),
-C     .          Rm1(nsupMAX,nsupMAX),Tm1(nsupMAX,nsupMAX)
+      REAL*8, DIMENSION(nmu) :: xmu, smf, ebmu
 
-      DIMENSION xmu(nmuMAX),smf(nmuMAX),ebmu(nmuMAX),
-     .          Zmmin(nsupMAX,nsupMAX),Zmplus(nsupMAX,nsupMAX),
-     .          Rm1(nsupMAX,nsupMAX),Tm1(nsupMAX,nsupMAX)
+      REAL*8, DIMENSION(nsup,nsup) :: Zmmin, Zmplus, Rm1, Tm1
 
 Cf2py intent(out) Rm1,Tm1
 

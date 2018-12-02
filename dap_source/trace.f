@@ -1,7 +1,7 @@
 * This file is part of PyMieDAP, released under GNU General Public License.
 * See license.md or http://gitlab.com/loic.cg.rossi/pymiedap for details.
 
-      SUBROUTINE trace(A,trA,nmat,nmum)
+      SUBROUTINE trace(A,nmat,nmum,nsup,trA)
 
 *---------------------------------------------------------------------
 *  Calculate the truncated supermatrix trace(A).                    
@@ -12,9 +12,12 @@
 
       INCLUDE 'max_incl'
 
-      INTEGER i,ng,nmum,nmat
+      INTEGER i,ng,nmum,nmat,nsup
+      REAL*8 trA
 
-      DOUBLE PRECISION trA,A(nsupMAX,nsupMAX)
+      REAL*8, DIMENSION(nsup,nsup) :: A !rank 2
+
+      nsup= (nmum+1)*nmat
 
 Cf2py intent(out) trA
 

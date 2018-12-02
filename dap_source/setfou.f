@@ -1,8 +1,8 @@
 * This file is part of PyMieDAP, released under GNU General Public License.
 * See license.md or http://gitlab.com/loic.cg.rossi/pymiedap for details.
 
-      SUBROUTINE setfou(coefs,ncoefs,nlays,a,b,xmu,nmug,
-     .                  M0,M1,M2,iadd)
+      SUBROUTINE setfou(coefs,ncoefs,a,b,xmu,nmug,
+     .                  max_ncoefs,nlays,nmat,nmu,M0,M1,M2,iadd)
 
 **********************************************************************
 *  Calculate bounds M0, M1 and M2 on the Fourier index m such that
@@ -27,15 +27,15 @@
 
       INCLUDE 'max_incl'
 
-      INTEGER i,nmug,M0bot,m,nlays
+      INTEGER i,nmug,M0bot,m,nlays,nmat,nmu,max_ncoefs
 
-      INTEGER ncoefs(nlaysMAX)
+      INTEGER ncoefs(nlays)
 
-      DOUBLE PRECISION coefs(nmatMAX,nmatMAX,0:ncoefsMAX,nlaysMAX),
-     .                 xmu(nmuMAX),a(nlaysMAX),b(nlaysMAX)
+      REAL*8 coefs(nmat,nmat,0:max_ncoefs,nlays),
+     .                 xmu(nmu),a(nlays),b(nlays)
 
-      INTEGER M0(nlaysMAX),M1(nlaysMAX),M2(nlaysMAX),
-     .        iadd(nlaysMAX,0:nfouMAX)
+      INTEGER M0(nlays),M1(nlays),M2(nlays),
+     .        iadd(nlays,0:nfouMAX)
 
       DOUBLE PRECISION xmumin,qf,qff,qff2,fbmu,f3b,am,h
 

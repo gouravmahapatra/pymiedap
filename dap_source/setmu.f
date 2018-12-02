@@ -1,7 +1,7 @@
 * This file is part of PyMieDAP, released under GNU General Public License.
 * See license.md or http://gitlab.com/loic.cg.rossi/pymiedap for details.
 
-      SUBROUTINE setmu(nmat,nmug,iunfou,nmu,xmu,smf)
+      SUBROUTINE setmu(nmug,nmu,xmu,smf)
 
 **********************************************************************
 *  Initialize the mu-values and the supermatrixfactors.         
@@ -19,43 +19,30 @@
 
       INCLUDE 'max_incl'
 
-      INTEGER iunfou,nmug,nmat,nmu
+      INTEGER nmug,nmu
 
-      DOUBLE PRECISION xmu(nmuMAX),smf(nmuMAX),wmu(nmuMAX)
-C      DIMENSION xmu(nmuMAX),smf(nmuMAX),wmu(nmuMAX)
+      REAL*8, DIMENSION(nmug+1) :: xmu, smf, wmu
 
-Cf2py intent(in) nmat,nmug,iunfou
+Cf2py intent(in) nmug
 Cf2py intent(out) nmu,xmu,smf
+
+      nmu= nmug+1
 
 *---------------------------------------------------------------------
 *     Get the nmug Gaussian points and weights:
 *---------------------------------------------------------------------
-      CALL gauleg(nmuMAX,nmug,0.D0,1.D0,xmu,wmu)
+      CALL gauleg(nmu,nmug,0.D0,1.D0,xmu,wmu)
 
 *----------------------------------------------------------------------
 *     Add the extra mu value for the nadir direction:
 *----------------------------------------------------------------------
-      nmu= nmug+1
       xmu(nmu)= 1.D0
       wmu(nmu)= 0.5D0
 
 *----------------------------------------------------------------------
 *     Change the Gaussian weights into supermatrix weights:
 *----------------------------------------------------------------------
-      DO i=1,nmu
-         smf(i) = DSQRT(2.D0*wmu(i)*xmu(i))
-      ENDDO
-
-*----------------------------------------------------------------------
-*     Write the angles to the Fourier output file,
-*     and also the accuracy eps:
-*----------------------------------------------------------------------
-*      WRITE(iunfou,'(E12.6)') eps
-      WRITE(iunfou,'(I3)') nmat
-      WRITE(iunfou,'(I3)') nmu
-      DO i=1,nmu
-         WRITE(iunfou,'(E16.8,3X,E16.8)') xmu(i),wmu(i)
-      ENDDO
+      smf=DSQRT(2.D0*wmu*xmu)
 
 **********************************************************************
       RETURN

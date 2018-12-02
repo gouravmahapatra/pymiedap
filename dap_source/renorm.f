@@ -1,7 +1,7 @@
 * This file is part of PyMieDAP, released under GNU General Public License.
 * See license.md or http://gitlab.com/loic.cg.rossi/pymiedap for details.
 
-      SUBROUTINE renorm(Zmmin,Zmplus,nmu,nmat,xmu,smf)
+      SUBROUTINE renorm(Zmmin,Zmplus,nmat,xmu,smf,nmu,nsup)
 
 *----------------------------------------------------------------------*
 *  Renormalize the phase matrix by updating the diagonal elements      *
@@ -12,15 +12,11 @@
 
       INCLUDE 'max_incl'
 
-C      INTEGER nmum,nmu, nmat
-      INTEGER nmum,nmu
+      INTEGER nmum,nmu,nmat
 
-C      DOUBLE PRECISION Zmmin(nsupMAX,nsupMAX),Zmplus(nsupMAX,nsupMAX),
-C     .          xmu(nmuMAX),smf(nmuMAX), w(nmuMAX)
+      REAL*8, DIMENSION(nmu) :: xmu, smf, w !rank 1
 
-      DIMENSION Zmmin(nsupMAX,nsupMAX),Zmplus(nsupMAX,nsupMAX),
-     .          xmu(nmuMAX),smf(nmuMAX)
-      DIMENSION w(nmuMAX)
+      REAL*8, DIMENSION(nsup,nsup) :: Zmmin, Zmplus !rank 2
 
       LOGICAL verbo
       verbo = .false.
@@ -65,7 +61,7 @@ Cf2py intent(in,out) Zmmin, Zmplus
                 Zmplus(jsup+k-1,jsup+k-1)=fac*Zmplus(jsup+k-1,jsup+k-1)
              ENDDO
           ELSE
-             CALL brack(xmu(j),xmu,nmum,nmuMAX,i1,i2)
+             CALL brack(xmu(j),xmu,nmum,nmu,i1,i2)
              IF (i1.NE.i2) THEN
                 relw1= (xmu(i2)-xmu(j))/(xmu(i2)-xmu(i1))
                 relw2= (xmu(j)-xmu(i1))/(xmu(i2)-xmu(i1))

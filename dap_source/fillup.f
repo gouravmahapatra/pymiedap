@@ -1,7 +1,7 @@
 * This file is part of PyMieDAP, released under GNU General Public License.
 * See license.md or http://gitlab.com/loic.cg.rossi/pymiedap for details.
 
-      SUBROUTINE fillup(Rm,Tm,nmat,nmu)
+      SUBROUTINE fillup(Rm,Tm,nmat,nmu,nsup)
 
 *----------------------------------------------------------------------*
 *  Fill the upper triangle of a supermatrix using symmetry relations   *
@@ -17,10 +17,8 @@
 
       INCLUDE 'max_incl'
 
-C      INTEGER nmat, nmu
-C      DOUBLE PRECISION Rm(nsupMAX,nsupMAX),Tm(nsupMAX,nsupMAX),
-C     .                 q3(4),q4(4)
-      DIMENSION Rm(nsupMAX,nsupMAX),Tm(nsupMAX,nsupMAX),q3(4),q4(4)
+      REAL*8, DIMENSION(nsup,nsup) :: Rm, Tm
+      REAL*8, DIMENSION(4) :: q3, q4
 
 Cf2py intent(in,out) Rm, Tm
       

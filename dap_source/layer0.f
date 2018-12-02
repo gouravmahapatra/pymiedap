@@ -1,60 +1,50 @@
 * This file is part of PyMieDAP, released under GNU General Public License.
 * See license.md or http://gitlab.com/loic.cg.rossi/pymiedap for details.
 
-      SUBROUTINE layer0(surfmat,smf,nmu,nmat,ebbot,Rmbot,Tmbot,Rmsbot)
-
+      SUBROUTINE layer0(surfmat,smf,nmat,ebbot,Rmbot,Tmbot,
+     .              Rmsbot,nmu,nsup)
 *----------------------------------------------------------------------
       IMPLICIT NONE
 
       INCLUDE 'max_incl'
 
-      INTEGER i,j,nsup,nmu,nmat,ibase,jbase
+      INTEGER nsup,nmu,nmat,z
+      INTEGER, DIMENSION(nmu) :: i, j, ibase, jbase
 
-      DOUBLE PRECISION w
+      REAL*8, DIMENSION(nmu) :: ebbot, smf, w
 
-      DOUBLE PRECISION ebbot(nmuMAX),smf(nmuMAX),
-     .                 Rmbot(nsupMAX,nsupMAX),Tmbot(nsupMAX,nsupMAX),
-     .                 Rmsbot(nsupMAX,nsupMAX),
-     .                 surfmat(nsupMAX,nsupMAX)
+      REAL*8, DIMENSION(nsup,nsup) :: Rmbot, Tmbot, Rmsbot, surfmat
 
-Cf2py intent(in) surfmat,smf,nmu,nmat
+Cf2py intent(in) surfmat,smf,nmu,nmat,nsup
 Cf2py intent(out) ebbot
 Cf2py intent(in,out) Rmbot,Tmbot,Rmsbot
 
 *-----------------------------------------------------------------------
-      nsup= nmu*nmat
-
-*-----------------------------------------------------------------------
 *     Fill the reflection arrays with Lambertian reflection, and 
 *     the transmission arrays with zero's:
+*  Edited by: Ashwyn Groot
+*  Date: November 2018
+*  Introduced matrix operations with f95<
 *-----------------------------------------------------------------------
-      DO i=1,nsup
-         DO j=1,nsup
-            Rmbot(i,j)= 0.D0
-            Tmbot(i,j)= 0.D0
-            Rmsbot(i,j)= 0.D0
-         ENDDO
-      ENDDO
 
-      DO i=1,nmu
-         ibase= (i-1)*nmat
-         DO j=1,nmu
-            jbase= (j-1)*nmat
-            w= smf(i)*smf(j)
-            Rmbot(ibase+1,jbase+1)= surfmat(ibase+1,jbase+1)
-         ENDDO
-      ENDDO
+      Rmbot=0.D0
+      Tmbot=0.D0
+      Rmsbot=0.D0
 
-      CALL star(Rmsbot,Rmbot,nmat,nmu)
+      i = (/(z, z=1,nmu, 1)/)
+      j = i
+      ibase = (i-1)*nmat
+      jbase = (j-1)*nmat
+      w = smf(i)*smf(j)
+      Rmbot(ibase+1,jbase+1)= surfmat(ibase+1,jbase+1)
+
+      CALL star(Rmsbot,Rmbot,nmat,nmu,nsup)
 
 *-----------------------------------------------------------------------
 *     Fill array ebbot (the direct transmission through the surface),
 *     which equals zero, but is needed anyway:
 *-----------------------------------------------------------------------
-      DO i=1,nmu
-         ebbot(i)= 0.D0
-      ENDDO
-
+      ebbot=0.D0
 *-----------------------------------------------------------------------
       RETURN
       END

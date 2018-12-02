@@ -1,8 +1,8 @@
 * This file is part of PyMieDAP, released under GNU General Public License.
 * See license.md or http://gitlab.com/loic.cg.rossi/pymiedap for details.
 
-      SUBROUTINE bstart(m,layer,coefs,ncoef,M0,xmumin,
-     .                  a,b,b0,ndoubl)
+      SUBROUTINE bstart(m,layer,coefs,ncoef,M0,
+     .                  xmumin,a,b,nlays,max_ncoefs,nmat,b0,ndoubl)
 
 *----------------------------------------------------------------------*
 *  Calculate the optical thickness b0 at which doubling should be      *
@@ -10,6 +10,9 @@
 *  with thickness b. This is done for the m-th Fourier component.      *
 *  The values of b0 and ndoubl returned are such that b = b0*2**ndoubl *
 *  The algorithm is described in de Haan et al. (1987).                *
+*  Edited by: Ashwyn Groot                                             *
+*  Date: November 2018                                                 *
+*  Introduced matrix operations with f95<                              *
 *----------------------------------------------------------------------*
       IMPLICIT DOUBLE PRECISION (a-h,o-z)
 
@@ -19,9 +22,12 @@ C      INTEGER m, layer
 C      INTEGER M0(nlaysMAX), ncoef(nlaysMAX)
 C      DOUBLE PRECISION coefs 
 C      DOUBLE PRECISION xmumin, a, b, b0, ndoubl
+      INTEGER nmat,layer
+      INTEGER, DIMENSION(nlays) :: M0, ncoef
+      REAL*8, DIMENSION(nmat,nmat,0:max_ncoefs,nlays) :: coefs
 
-      DIMENSION coefs(nmatMAX,nmatMAX,0:ncoefsMAX,nlaysMAX), 
-     .          ncoef(nlaysMAX),M0(nlaysMAX)
+C      DIMENSION coefs(nmatMAX,nmatMAX,0:ncoefsMAX,nlaysMAX),
+C     .          ncoef(nlaysMAX),M0(nlaysMAX)
       LOGICAL verbo
 
 Cf2py intent(out) b0, ndoubl

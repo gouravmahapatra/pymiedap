@@ -1,7 +1,7 @@
 * This file is part of PyMieDAP, released under GNU General Public License.
 * See license.md or http://gitlab.com/loic.cg.rossi/pymiedap for details.
 
-      SUBROUTINE transf(S,nsup,nmat)
+      SUBROUTINE transf(S,nmat,nsup)
 
 ************************************************************
 *  Calculate the product D1 * SM * D1 where D1 is a 
@@ -15,9 +15,7 @@
  
       INCLUDE 'max_incl'
 
-C      INTEGER nmat, nsup
-C      DOUBLE PRECISION S(nsupMAX,nsupMAX)
-      DIMENSION S(nsupMAX,nsupMAX)
+      DIMENSION S(nsup,nsup)
 
 Cf2py intent(in) nsup, nmat
 Cf2py intent(in,out) S
