@@ -273,7 +273,8 @@ C      CALL h5sclose_f(dspace3_id, error)
       CALL h5fclose_f(file_id, error)
 ! Close FORTRAN interface
       CALL h5close_f(error)
-
+      DEALLOCATE(ki,xmu_out,rfou_out,PDD,dset_data2,
+     .                                  dset_data3,dset_data4)
 *-----------------------------------------------------------------------
       RETURN
       END

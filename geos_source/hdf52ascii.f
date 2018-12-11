@@ -213,6 +213,7 @@ C      CALL h5sclose_f(dspace3_id, error)
       ENDDO
 
       CLOSE(iunfou)
+      DEALLOCATE(xmu_out,rfou_out)
       GOTO 1000
 *-----------------------------------------------------------------------
 *     Formats:

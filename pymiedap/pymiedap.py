@@ -35,6 +35,7 @@ import sys
 import os.path
 import matplotlib.pyplot as mpl
 from PIL import Image
+import deepdish as dd
 
 # ---------
 # CLASSES DEFINITION
@@ -1403,12 +1404,18 @@ def dap_code(model, rename=False, output_name='modelA',
                   outputname = output_name + '_{:4.3f}'.format(wav) + '.hdf5'
               elif rename==False:
                   outputname = 'fou_' + '{:4.3f}'.format(wav) + '.hdf5'
+              #-------------------------------------------------------
+              #     Save the model class in the hdf5 file:
+              #     Can be read in a TERMINAL with:
+              #         ddls OUTPUT_FILE -i /model
+              #-------------------------------------------------------
+              dd.io.save(outputname, dict(model=model))
         else:
               if rename==True:
                     outputname = output_name + '_{:4.3f}'.format(wav) + '.dat'
               elif rename==False:
                     outputname = 'fou_' + '{:4.3f}'.format(wav) + '.dat'
-
+    
         #---------------------------------------------------------------
         #     Calculate the combined expansion coefficients
         #---------------------------------------------------------------
@@ -1647,12 +1654,13 @@ def compute_model(atm_model, force=False,
         if set_taus is True:
             for lay, layer in vars(atm_model.layers).items():
                 layer.tau = layer.col_dens * layer.mixed_aerosols.sext
-
+    
         #execute DAP
         # making sure that the directory we write to is the same we'll read
         # from
         dap_code(atm_model, rename=rename, output_name=output_name, nmug=nmug,
                  nmat=nmat, path_output=path_input, filetype=filetype)
+
 
 
 def read_model(atm_model,data,step=20, force=False,filetype=1,

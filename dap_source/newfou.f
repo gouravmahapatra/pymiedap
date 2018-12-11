@@ -60,7 +60,8 @@ Cf2py intent(in) nmat,xmu,rfou,outputname,lg,nfou,nmu
 ! Initialize Fortran interface
       CALL h5open_f(error)
 ! Create a new file
-      CALL h5fcreate_f(outputname, H5F_ACC_TRUNC_F, file_id, error)
+C      CALL h5fcreate_f(outputname, H5F_ACC_TRUNC_F, file_id, error)
+      CALL h5fopen_f (outputname, H5F_ACC_RDWR_F, file_id, error)
 
 *-----------------------------------------------------------------------
 * Put nfou,nmat,nmugs,xmu in group 1:

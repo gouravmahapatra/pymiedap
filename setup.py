@@ -72,6 +72,7 @@ module_dap = Extension(name = 'module_dap',
 module_geos = Extension(name = 'module_geos',
                         sources=['./geos_source/bracks.f',
                                  './geos_source/getgeos.f',
+                                 './geos_source/obsmask.f',
                                  './geos_source/rdfousascii.f',
                                  './geos_source/rdfous.f',
                                  './geos_source/rdfousderiv.f',
@@ -83,14 +84,14 @@ module_geos = Extension(name = 'module_geos',
                                  './geos_source/RGBI3P.f',
                                  './geos_source/RGLCTN.f',
                                  './geos_source/RGPLNL.f',
+                                 './geos_source/gauleg.f',
                                  './geos_source/wrout.f',
                                  './geos_source/ascii2hdf5.f',
                                  './geos_source/ascii2hdf5deriv.f',
                                  './geos_source/hdf5deriv2ascii.f',
                                  './geos_source/hdf5deriv2hdf5.f',
                                  './geos_source/hdf52ascii.f',
-                                 './geos_source/hdf52hdf5deriv.f',
-                                 './geos_source/gauleg.f'
+                                 './geos_source/hdf52hdf5deriv.f'
                                  ])
 
 longdescp = '''Python Mie DAP package: radiative transfer model and tools to

@@ -264,7 +264,7 @@ Cf2py intent(in) foufile,rfou,outputname
 ! Close FORTRAN interface
       CALL h5close_f(error)
 
-      DEALLOCATE(dset_data2,dset_data3)
+      DEALLOCATE(ki,dset_data2,dset_data3,PDD,dset_data4)
 
       GOTO 1000
 
