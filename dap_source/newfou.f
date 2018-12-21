@@ -15,8 +15,10 @@ Cf2py intent(in) nmat,xmu,rfou,outputname,lg,nfou,nmu
 *     Write the Fourier-coefficients to file:
 *----------------------------------------------------------------------
 ! Names (file and HDF5 objects)
-      CHARACTER(LEN=5), PARAMETER :: groupname1 = "props" ! Sub-Group 1 name
-      CHARACTER(LEN=4), PARAMETER :: groupname2 = "rfou" ! Sub-Group 1 name
+      CHARACTER(LEN=5), PARAMETER :: groupname1 = "props"
+! Sub-Group 1 name
+      CHARACTER(LEN=4), PARAMETER :: groupname2 = "rfou"
+! Sub-Group 1 name
 ! Dataset 1 name
       CHARACTER(LEN=12), PARAMETER :: dsetname1 = "Array-counts"
 ! Dataset 2 name
@@ -25,22 +27,34 @@ Cf2py intent(in) nmat,xmu,rfou,outputname,lg,nfou,nmu
       CHARACTER(LEN=10), PARAMETER :: dsetname3 = "RFOU-array"
 
 ! Identifiers
-      INTEGER(HID_T) :: file_id = 0      ! File identifier
-      INTEGER(HID_T) :: group1_id = 1    ! Group 1 identifier
-      INTEGER(HID_T) :: group2_id = 2    ! Group 2 identifier
-      INTEGER(HID_T) :: dspace1_id = 3   ! Dataspace 1 identifier
-      INTEGER(HID_T) :: dspace2_id = 4   ! Dataspace 2 identifier
-      INTEGER(HID_T) :: dspace3_id = 5   ! Dataspace 2 identifier
-      INTEGER(HID_T) :: dset1_id = 6     ! Dataset 1 identifier
-      INTEGER(HID_T) :: dset2_id = 7     ! Dataset 2 identifier
-      INTEGER(HID_T) :: dset3_id = 8     ! Dataset 3 identifier
+      INTEGER(HID_T) :: file_id = 0
+! File identifier
+      INTEGER(HID_T) :: group1_id = 1
+! Group 1 identifier
+      INTEGER(HID_T) :: group2_id = 2
+! Group 2 identifier
+      INTEGER(HID_T) :: dspace1_id = 3
+! Dataspace 1 identifier
+      INTEGER(HID_T) :: dspace2_id = 4
+! Dataspace 2 identifier
+      INTEGER(HID_T) :: dspace3_id = 5
+! Dataspace 2 identifier
+      INTEGER(HID_T) :: dset1_id = 6
+! Dataset 1 identifier
+      INTEGER(HID_T) :: dset2_id = 7
+! Dataset 2 identifier
+      INTEGER(HID_T) :: dset3_id = 8
+! Dataset 3 identifier
 
 
 ! Dimension array (nfou,nmat,nmugs)
-      INTEGER :: rank                 ! Dataset rank
-      INTEGER(HSIZE_T), DIMENSION(1) :: dims1 = (/3/) ! Dataset dimensions
+      INTEGER :: rank
+! Dataset rank
+      INTEGER(HSIZE_T), DIMENSION(1) :: dims1 = (/3/)
+! Dataset dimensions
       INTEGER(HSIZE_T), DIMENSION(1) :: data_dims1
-      INTEGER, DIMENSION(3) :: dset_data1   ! Data buffers
+      INTEGER, DIMENSION(3) :: dset_data1
+! Data buffers
 
 ! xmu array
       INTEGER(HSIZE_T), DIMENSION(1) :: dims2
@@ -54,7 +68,8 @@ Cf2py intent(in) nmat,xmu,rfou,outputname,lg,nfou,nmu
 
 
 ! Misc variables (e.g. loop counters)
-      INTEGER :: error ! Error flag
+      INTEGER :: error
+! Error flag
 ! =====================================================================
 
 ! Initialize Fortran interface

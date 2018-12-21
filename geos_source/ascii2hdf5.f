@@ -9,6 +9,8 @@ Cf2py intent(in) foufile,rfou,outputname
 *
 *     Author: Ashwyn Groot
 *     Date: November 2018
+!     NOTE: When using this routine outside the python rewrite function,
+!           the model class with information is not rewritten in the new file
 *----------------------------------------------------------------------------
 *----------------------------------------------------------------------------
 *     Open and read and re-write the Fourier coefficients file:
@@ -27,35 +29,47 @@ Cf2py intent(in) foufile,rfou,outputname
       CHARACTER(len=200) :: foufile
       CHARACTER(len=200) :: outputname
 ! Names (file and HDF5 objects)
-      CHARACTER(LEN=5), PARAMETER :: groupname1 = "props" ! Sub-Group 1 name
-      CHARACTER(LEN=4), PARAMETER :: groupname2 = "rfou" ! Sub-Group 2 name
-      CHARACTER(LEN=6), PARAMETER :: groupname3 = "derivs" ! Sub-Group 3 name
+      CHARACTER(LEN=5), PARAMETER :: groupname1 = "props"
+! Sub-Group 1 name
+      CHARACTER(LEN=4), PARAMETER :: groupname2 = "rfou"
+! Sub-Group 2 name
+
 ! Dataset 1 name
       CHARACTER(LEN=12), PARAMETER :: dsetname1 = "Array-counts"
 ! Dataset 2 name
       CHARACTER(LEN=9), PARAMETER :: dsetname2 = "XMU-array"
 ! Dataset 3 name
       CHARACTER(LEN=10), PARAMETER :: dsetname3 = "RFOU-array"
-! Dataset 4 name
-      CHARACTER(LEN=12), PARAMETER :: dsetname4 = "DERIVS-array"
 
 ! Identifiers
-      INTEGER(HID_T) :: file_id = 0      ! File identifier
-      INTEGER(HID_T) :: group1_id = 1    ! Group 1 identifier
-      INTEGER(HID_T) :: group2_id = 2    ! Group 2 identifier
-      INTEGER(HID_T) :: dspace1_id = 4   ! Dataspace 1 identifier
-      INTEGER(HID_T) :: dspace2_id = 5   ! Dataspace 2 identifier
-      INTEGER(HID_T) :: dspace3_id = 6   ! Dataspace 3 identifier
-      INTEGER(HID_T) :: dset1_id = 8     ! Dataset 1 identifier
-      INTEGER(HID_T) :: dset2_id = 9     ! Dataset 2 identifier
-      INTEGER(HID_T) :: dset3_id = 10     ! Dataset 3 identifier
+      INTEGER(HID_T) :: file_id = 0
+! File identifier
+      INTEGER(HID_T) :: group1_id = 1
+! Group 1 identifier
+      INTEGER(HID_T) :: group2_id = 2
+! Group 2 identifier
+      INTEGER(HID_T) :: dspace1_id = 4
+! Dataspace 1 identifier
+      INTEGER(HID_T) :: dspace2_id = 5
+! Dataspace 2 identifier
+      INTEGER(HID_T) :: dspace3_id = 6
+! Dataspace 3 identifier
+      INTEGER(HID_T) :: dset1_id = 8
+! Dataset 1 identifier
+      INTEGER(HID_T) :: dset2_id = 9
+! Dataset 2 identifier
+      INTEGER(HID_T) :: dset3_id = 10
+! Dataset 3 identifier
 
 
 ! Dimension array (nfou,nmat,nmugs)
-      INTEGER :: rank                 ! Dataset rank
-      INTEGER(HSIZE_T), DIMENSION(1) :: dims1 = (/3/) ! Dataset dimensions
+      INTEGER :: rank
+! Dataset rank
+      INTEGER(HSIZE_T), DIMENSION(1) :: dims1 = (/3/)
+! Dataset dimensions
       INTEGER(HSIZE_T), DIMENSION(1) :: data_dims1
-      INTEGER, DIMENSION(3) :: dset_data1   ! Data buffers
+      INTEGER, DIMENSION(3) :: dset_data1
+! Data buffers
 
 ! xmu array
       INTEGER(HSIZE_T), DIMENSION(1) :: dims2
@@ -68,7 +82,8 @@ Cf2py intent(in) foufile,rfou,outputname
       REAL*8, DIMENSION(:,:,:), ALLOCATABLE :: dset_data3
 
 ! Misc variables (e.g. loop counters)
-      INTEGER :: error ! Error flag
+      INTEGER :: error
+! Error flag
       rfou=0.D0
       OPEN(unit=iunf,file=foufile,status='old',err=999)
 
@@ -101,13 +116,16 @@ Cf2py intent(in) foufile,rfou,outputname
       GOTO 20
 21    CLOSE(iunf)
 
+! Size of nfou's:
+      nfou= nfou+1
 *----------------------------------------------------------------------
 *     Re-write the Fourier-coefficients to hdf5 file:
 *----------------------------------------------------------------------
 ! Initialize Fortran interface
       CALL h5open_f(error)
 ! Create a new file
-      CALL h5fcreate_f(outputname, H5F_ACC_TRUNC_F, file_id, error)
+C      CALL h5fcreate_f(outputname, H5F_ACC_TRUNC_F, file_id, error)
+      CALL h5fopen_f (outputname, H5F_ACC_RDWR_F, file_id, error)
 
 *-----------------------------------------------------------------------
 * Put nfou,nmat,nmugs,xmu in group 1:
@@ -137,10 +155,10 @@ Cf2py intent(in) foufile,rfou,outputname
 *********************************************
 ! Create dataspace: xmu (the dataset is next)
 *********************************************
-      ALLOCATE(dset_data2(nmugs),dset_data3(nmugs*nmat,nmugs,0:nfou))
       data_dims2(1) = nmugs
       dims2(1)=nmugs
       rank = 1
+      ALLOCATE(dset_data2(nmugs))
       dset_data2 = xmu(:nmugs)
 ! Create dataspace 2
       CALL h5screate_simple_f(rank, dims2, dspace2_id, error)
@@ -154,6 +172,7 @@ Cf2py intent(in) foufile,rfou,outputname
       CALL h5dclose_f(dset2_id, error)
 ! Close access to data space 2
       CALL h5sclose_f(dspace2_id, error)
+      DEALLOCATE(dset_data2)
 *********************************************
 
 ! Close the group
@@ -171,12 +190,13 @@ Cf2py intent(in) foufile,rfou,outputname
 *********************************************
       data_dims3(1) = nmugs*nmat
       data_dims3(2) = nmugs
-      data_dims3(3) = nfou+1
+      data_dims3(3) = nfou
       dims3(1)=nmugs*nmat
       dims3(2)=nmugs
-      dims3(3)=nfou+1
+      dims3(3)=nfou
       rank = 3
-      dset_data3 = rfou(:nmat*nmugs,:nmugs,:nfou)
+      ALLOCATE(dset_data3(nmugs*nmat,nmugs,0:nfou-1))
+      dset_data3 = rfou(:nmat*nmugs,:nmugs,0:nfou-1)
 ! Create dataspace 1
       CALL h5screate_simple_f(rank, dims3, dspace3_id, error)
 ! Create dataset 1 with default properties
@@ -189,6 +209,7 @@ Cf2py intent(in) foufile,rfou,outputname
       CALL h5dclose_f(dset3_id, error)
 ! Close access to data space 1
       CALL h5sclose_f(dspace3_id, error)
+      DEALLOCATE(dset_data3)
 *********************************************
 
 ! Close the group
@@ -198,8 +219,6 @@ Cf2py intent(in) foufile,rfou,outputname
       CALL h5fclose_f(file_id, error)
 ! Close FORTRAN interface
       CALL h5close_f(error)
-
-      DEALLOCATE(dset_data2,dset_data3)
 
       GOTO 1000
 

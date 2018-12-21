@@ -13,9 +13,9 @@
 *  one should be aware of the difference between Hovenier's operator   *
 *  T(mu,mu0,phi-phi0) and our supermatrix Tm(mu,mu0) !!                *
 *----------------------------------------------------------------------*
-      IMPLICIT DOUBLE PRECISION (a-h,o-z)
-      INCLUDE 'max_incl'
 
+      INCLUDE 'max_incl'
+      INTEGER nmat,nsup
       REAL*8, DIMENSION(nsup,nsup) :: T, Ts
 
 Cf2py intent(out) Ts

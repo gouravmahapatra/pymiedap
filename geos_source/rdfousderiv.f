@@ -25,16 +25,16 @@ Cf2py intent(in,out) rfou,derivs
       INTEGER nfou,nmat,nmugs
 
       REAL*8 xmu(nmuMAX),rfou(nmatMAX*nmuMAX,nmuMAX,0:nfouMAX)
-
-      DOUBLE PRECISION, DIMENSION(:), ALLOCATABLE :: xmu_out
-      DOUBLE PRECISION, DIMENSION(:,:,:), ALLOCATABLE :: rfou_out
       REAL*8 derivs(0:nfouMAX,nmatMAX,3,nmuMAX,nmuMAX)
 
       CHARACTER(len=200) :: foufile
 ! Names (HDF5 objects)
-      CHARACTER(LEN=5), PARAMETER :: groupname1 = "props" ! Sub-Group 1 name
-      CHARACTER(LEN=4), PARAMETER :: groupname2 = "rfou" ! Sub-Group 2 name
-      CHARACTER(LEN=6), PARAMETER :: groupname3 = "derivs" ! Sub-Group 3 name
+      CHARACTER(LEN=5), PARAMETER :: groupname1 = "props"
+! Sub-Group 1 name
+      CHARACTER(LEN=4), PARAMETER :: groupname2 = "rfou"
+! Sub-Group 2 name
+      CHARACTER(LEN=6), PARAMETER :: groupname3 = "derivs"
+! Sub-Group 3 name
 ! Dataset 1 name
       CHARACTER(LEN=12), PARAMETER :: dsetname1 = "Array-counts"
 ! Dataset 2 name
@@ -46,19 +46,27 @@ Cf2py intent(in,out) rfou,derivs
 
 
 ! Identifiers
-      INTEGER(HID_T) :: file_id = 0      ! File identifier
-      INTEGER(HID_T) :: group1_id = 1    ! Group 1 identifier
-      INTEGER(HID_T) :: group2_id = 2    ! Group 2 identifier
-      INTEGER(HID_T) :: group3_id = 3    ! Group 3 identifier
-      INTEGER(HID_T) :: dset1_id = 8     ! Dataset 1 identifier
-      INTEGER(HID_T) :: dset2_id = 9     ! Dataset 2 identifier
-      INTEGER(HID_T) :: dset3_id = 10     ! Dataset 3 identifier
-      INTEGER(HID_T) :: dset4_id = 11     ! Dataset 4 identifier
+      INTEGER(HID_T) :: file_id = 0
+! File identifier
+      INTEGER(HID_T) :: group1_id = 1
+! Group 1 identifier
+      INTEGER(HID_T) :: group2_id = 2
+! Group 2 identifier
+      INTEGER(HID_T) :: group3_id = 3
+! Group 3 identifier
+      INTEGER(HID_T) :: dset1_id = 8
+! Dataset 1 identifier
+      INTEGER(HID_T) :: dset2_id = 9
+! Dataset 2 identifier
+      INTEGER(HID_T) :: dset3_id = 10
+! Dataset 3 identifier
+      INTEGER(HID_T) :: dset4_id = 11
+! Dataset 4 identifier
 
 ! Dimension array (nfou,nmat,nmugs)
-      INTEGER :: rank                 ! Dataset rank
       INTEGER(HSIZE_T), DIMENSION(1) :: data_dims1
-      INTEGER, DIMENSION(3) :: counts   ! Data buffers
+      INTEGER, DIMENSION(3) :: counts
+! Data buffers
 
 ! xmu array
       INTEGER(HSIZE_T), DIMENSION(1) :: data_dims2
@@ -70,12 +78,8 @@ Cf2py intent(in,out) rfou,derivs
       INTEGER(HSIZE_T), DIMENSION(5) :: data_dims4
 
 ! Misc variables (e.g. loop counters)
-      INTEGER :: error ! Error flag
-*----------------------------------------------------------------------------
-*     Get the input file with the Fourier coefficients:
-*----------------------------------------------------------------------------
-C      WRITE(*,*) 'Give the name of the Fourier coefficients file',
-C     .           ' (max. 20):'
+      INTEGER :: error
+! Error flag
 
 *----------------------------------------------------------------------------
 *     Open the Fourier coefficients file:
@@ -84,39 +88,41 @@ C     .           ' (max. 20):'
       CALL h5fopen_f (foufile, H5F_ACC_RDONLY_F, file_id, error)
 
       CALL h5gopen_f(file_id, groupname1, group1_id, error)
-      rank=1
       CALL h5dopen_f(file_id, dsetname1, dset1_id, error)
+      data_dims1(1)=3
       CALL h5dread_f(dset1_id, H5T_NATIVE_INTEGER, counts, data_dims1,
      .                  error)
       CALL h5dclose_f(dset1_id, error)
       nfou=counts(1)
       nmat=counts(2)
       nmugs=counts(3)
-      ALLOCATE(xmu_out(nmugs),rfou_out(nmugs*nmat,nmugs,nfou+1))
-C     .                        derivs(0:nfou,nmat,3,nmugs,nmugs))
+      data_dims2(1) = nmugs
       CALL h5dopen_f(file_id, dsetname2, dset2_id, error)
-      CALL h5dread_f(dset2_id, H5T_NATIVE_DOUBLE, xmu_out, data_dims2,
-     .                  error)
+      CALL h5dread_f(dset2_id, H5T_NATIVE_DOUBLE, xmu(:nmugs),
+     .                  data_dims2,error)
       CALL h5dclose_f(dset2_id, error)
       CALL h5gclose_f(group1_id, error)
 
-      xmu(:nmugs)=xmu_out
-
       CALL h5gopen_f(file_id, groupname2, group2_id, error)
-      rank=3
+      data_dims3(1) = nmugs*nmat
+      data_dims3(2) = nmugs
+      data_dims3(3) = nfou
       CALL h5dopen_f(file_id, dsetname3, dset3_id, error)
-      CALL h5dread_f(dset3_id, H5T_NATIVE_DOUBLE, rfou_out, data_dims3,
-     .                  error)
+      CALL h5dread_f(dset3_id, H5T_NATIVE_DOUBLE,
+     .             rfou(:nmat*nmugs,:nmugs,0:nfou-1), data_dims3,
+     .             error)
       CALL h5dclose_f(dset3_id, error)
       CALL h5gclose_f(group2_id, error)
 
-      rfou(:nmat*nmugs,:nmugs,0:nfou)=rfou_out
-
       CALL h5gopen_f(file_id, groupname3, group3_id, error)
-      rank=5
+      data_dims4(1) = nfou
+      data_dims4(2) = nmat
+      data_dims4(3) = 3
+      data_dims4(4) = nmugs
+      data_dims4(5) = nmugs
       CALL h5dopen_f(file_id, dsetname4, dset4_id, error)
       CALL h5dread_f(dset4_id, H5T_NATIVE_DOUBLE,
-     .            derivs(0:nfou,:nmat,:,:nmugs,:nmugs), data_dims4,
+     .            derivs(0:nfou-1,:nmat,:,:nmugs,:nmugs), data_dims4,
      .            error)
       CALL h5dclose_f(dset4_id, error)
       CALL h5gclose_f(group3_id, error)

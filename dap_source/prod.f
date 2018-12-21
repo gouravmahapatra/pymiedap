@@ -11,11 +11,10 @@
 *  Date: November 2018
 *  Introduced matrix operations with f95<
 *--------------------------------------------------------------------
-      IMPLICIT DOUBLE PRECISION (a-h,o-z)
 
       INCLUDE 'max_incl'
 
-      INTEGER nsup,ng,nmu,nmum
+      INTEGER nsup,ng,nmu,nmum,nmat
 
       REAL*8, DIMENSION(:,:), ALLOCATABLE :: Bsub,Csub !rank 2
 

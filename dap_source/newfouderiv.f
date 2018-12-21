@@ -9,7 +9,7 @@ Cf2py intent(in) nmat,xmu,rfou,outputname,lg,nfou,nmu
 
       INCLUDE 'max_incl'
       INTEGER nfou,nmat,nmu,lg,ki(nmu),i,m,k
-      DOUBLE PRECISION xmu(nmu),rfou(nmu*nmat,nmu,0:nfou),
+      REAL*8 xmu(nmu),rfou(nmu*nmat,nmu,0:nfou),
      .                              PDD(3,nmu,nmu)
       REAL*8  eps1
       CHARACTER(len=200) :: outputname
@@ -18,9 +18,12 @@ Cf2py intent(in) nmat,xmu,rfou,outputname,lg,nfou,nmu
 *     Write the Fourier-coefficients to file:
 *----------------------------------------------------------------------
 ! Names (file and HDF5 objects)
-      CHARACTER(LEN=5), PARAMETER :: groupname1 = "props" ! Sub-Group 1 name
-      CHARACTER(LEN=4), PARAMETER :: groupname2 = "rfou" ! Sub-Group 2 name
-      CHARACTER(LEN=6), PARAMETER :: groupname3 = "derivs" ! Sub-Group 3 name
+      CHARACTER(LEN=5), PARAMETER :: groupname1 = "props"
+! Sub-Group 1 name
+      CHARACTER(LEN=4), PARAMETER :: groupname2 = "rfou"
+! Sub-Group 2 name
+      CHARACTER(LEN=6), PARAMETER :: groupname3 = "derivs"
+! Sub-Group 3 name
 ! Dataset 1 name
       CHARACTER(LEN=12), PARAMETER :: dsetname1 = "Array-counts"
 ! Dataset 2 name
@@ -31,25 +34,40 @@ Cf2py intent(in) nmat,xmu,rfou,outputname,lg,nfou,nmu
       CHARACTER(LEN=12), PARAMETER :: dsetname4 = "DERIVS-array"
 
 ! Identifiers
-      INTEGER(HID_T) :: file_id = 0      ! File identifier
-      INTEGER(HID_T) :: group1_id = 1    ! Group 1 identifier
-      INTEGER(HID_T) :: group2_id = 2    ! Group 2 identifier
-      INTEGER(HID_T) :: group3_id = 3    ! Group 3 identifier
-      INTEGER(HID_T) :: dspace1_id = 4   ! Dataspace 1 identifier
-      INTEGER(HID_T) :: dspace2_id = 5   ! Dataspace 2 identifier
-      INTEGER(HID_T) :: dspace3_id = 6   ! Dataspace 3 identifier
-      INTEGER(HID_T) :: dspace4_id = 7   ! Dataspace 4 identifier
-      INTEGER(HID_T) :: dset1_id = 8     ! Dataset 1 identifier
-      INTEGER(HID_T) :: dset2_id = 9     ! Dataset 2 identifier
-      INTEGER(HID_T) :: dset3_id = 10     ! Dataset 3 identifier
-      INTEGER(HID_T) :: dset4_id = 11     ! Dataset 4 identifier
+      INTEGER(HID_T) :: file_id = 0
+! File identifier
+      INTEGER(HID_T) :: group1_id = 1
+! Group 1 identifier
+      INTEGER(HID_T) :: group2_id = 2
+! Group 2 identifier
+      INTEGER(HID_T) :: group3_id = 3
+! Group 3 identifier
+      INTEGER(HID_T) :: dspace1_id = 4
+! Dataspace 1 identifier
+      INTEGER(HID_T) :: dspace2_id = 5
+! Dataspace 2 identifier
+      INTEGER(HID_T) :: dspace3_id = 6
+! Dataspace 3 identifier
+      INTEGER(HID_T) :: dspace4_id = 7
+! Dataspace 4 identifier
+      INTEGER(HID_T) :: dset1_id = 8
+! Dataset 1 identifier
+      INTEGER(HID_T) :: dset2_id = 9
+! Dataset 2 identifier
+      INTEGER(HID_T) :: dset3_id = 10
+! Dataset 3 identifier
+      INTEGER(HID_T) :: dset4_id = 11
+! Dataset 4 identifier
 
 
 ! Dimension array (nfou,nmat,nmu)
-      INTEGER :: rank                 ! Dataset rank
-      INTEGER(HSIZE_T), DIMENSION(1) :: dims1 = (/3/) ! Dataset dimensions
+      INTEGER :: rank
+! Dataset rank
+      INTEGER(HSIZE_T), DIMENSION(1) :: dims1 = (/3/)
+! Dataset dimensions
       INTEGER(HSIZE_T), DIMENSION(1) :: data_dims1
-      INTEGER, DIMENSION(3) :: dset_data1   ! Data buffers
+      INTEGER, DIMENSION(3) :: dset_data1
+! Data buffers
 
 ! xmu array
       INTEGER(HSIZE_T), DIMENSION(1) :: dims2
@@ -68,7 +86,8 @@ Cf2py intent(in) nmat,xmu,rfou,outputname,lg,nfou,nmu
 
 
 ! Misc variables (e.g. loop counters)
-      INTEGER :: error ! Error flag
+      INTEGER :: error
+! Error flag
       eps1=1.D-100
 ! =====================================================================
 
@@ -177,11 +196,11 @@ C      CALL h5fcreate_f(outputname, H5F_ACC_TRUNC_F, file_id, error)
       data_dims4(3) = 3
       data_dims4(4) = nmu
       data_dims4(5) = nmu
-      dims4(1)=nfou+1
-      dims4(2)=nmat
-      dims4(3)=3
-      dims4(4)=nmu
-      dims4(5)=nmu
+      dims4(1) = nfou+1
+      dims4(2) = nmat
+      dims4(3) = 3
+      dims4(4) = nmu
+      dims4(5) = nmu
       rank = 5
       WHERE (abs(rfou).LT.eps1)
          rfou=0.D0

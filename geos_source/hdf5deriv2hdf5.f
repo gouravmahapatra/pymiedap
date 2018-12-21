@@ -8,6 +8,8 @@ Cf2py intent(in) foufile,outputname
 *
 *     Author: Ashwyn Groot
 *     Date: November 2018
+!     NOTE: When using this routine outside the python rewrite function,
+!           the model class with information is not rewritten in the new file
 *----------------------------------------------------------------------------
 *----------------------------------------------------------------------------
 *     Open and read and re-write the Fourier coefficients file:
@@ -25,9 +27,12 @@ Cf2py intent(in) foufile,outputname
 *     Write the Fourier-coefficients to file:
 *----------------------------------------------------------------------
 ! Names (file and HDF5 objects)
-      CHARACTER(LEN=5), PARAMETER :: groupname1 = "props" ! Sub-Group 1 name
-      CHARACTER(LEN=4), PARAMETER :: groupname2 = "rfou" ! Sub-Group 2 name
-      CHARACTER(LEN=6), PARAMETER :: groupname3 = "derivs" ! Sub-Group 3 name
+      CHARACTER(LEN=5), PARAMETER :: groupname1 = "props"
+! Sub-Group 1 name
+      CHARACTER(LEN=4), PARAMETER :: groupname2 = "rfou"
+! Sub-Group 2 name
+      CHARACTER(LEN=6), PARAMETER :: groupname3 = "derivs"
+! Sub-Group 3 name
 ! Dataset 1 name
       CHARACTER(LEN=12), PARAMETER :: dsetname1 = "Array-counts"
 ! Dataset 2 name
@@ -38,22 +43,34 @@ Cf2py intent(in) foufile,outputname
       CHARACTER(LEN=12), PARAMETER :: dsetname4 = "DERIVS-array"
 
 ! Identifiers
-      INTEGER(HID_T) :: file_id = 0      ! File identifier
-      INTEGER(HID_T) :: group1_id = 1    ! Group 1 identifier
-      INTEGER(HID_T) :: group2_id = 2    ! Group 2 identifier
-      INTEGER(HID_T) :: dspace1_id = 4   ! Dataspace 1 identifier
-      INTEGER(HID_T) :: dspace2_id = 5   ! Dataspace 2 identifier
-      INTEGER(HID_T) :: dspace3_id = 6   ! Dataspace 3 identifier
-      INTEGER(HID_T) :: dset1_id = 8     ! Dataset 1 identifier
-      INTEGER(HID_T) :: dset2_id = 9     ! Dataset 2 identifier
-      INTEGER(HID_T) :: dset3_id = 10     ! Dataset 3 identifier
+      INTEGER(HID_T) :: file_id = 0
+! File identifier
+      INTEGER(HID_T) :: group1_id = 1
+! Group 1 identifier
+      INTEGER(HID_T) :: group2_id = 2
+! Group 2 identifier
+      INTEGER(HID_T) :: dspace1_id = 4
+! Dataspace 1 identifier
+      INTEGER(HID_T) :: dspace2_id = 5
+! Dataspace 2 identifier
+      INTEGER(HID_T) :: dspace3_id = 6
+! Dataspace 3 identifier
+      INTEGER(HID_T) :: dset1_id = 8
+! Dataset 1 identifier
+      INTEGER(HID_T) :: dset2_id = 9
+! Dataset 2 identifier
+      INTEGER(HID_T) :: dset3_id = 10
+! Dataset 3 identifier
 
 
 ! Dimension array (nfou,nmat,nmu)
-      INTEGER :: rank                 ! Dataset rank
-      INTEGER(HSIZE_T), DIMENSION(1) :: dims1 = (/3/) ! Dataset dimensions
+      INTEGER :: rank
+! Dataset rank
+      INTEGER(HSIZE_T), DIMENSION(1) :: dims1 = (/3/)
+! Dataset dimensions
       INTEGER(HSIZE_T), DIMENSION(1) :: data_dims1
-      INTEGER, DIMENSION(3) :: dset_data1   ! Data buffers
+      INTEGER, DIMENSION(3) :: dset_data1
+! Data buffers
 
 ! xmu array
       INTEGER(HSIZE_T), DIMENSION(1) :: dims2
@@ -72,35 +89,26 @@ Cf2py intent(in) foufile,outputname
       CALL h5fopen_f (foufile, H5F_ACC_RDONLY_F, file_id, error)
 
       CALL h5gopen_f(file_id, groupname1, group1_id, error)
-      rank=1
-C      CALL h5sopen_f(rank, dims1, dspace1_id, error)
       CALL h5dopen_f(file_id, dsetname1, dset1_id, error)
       CALL h5dread_f(dset1_id, H5T_NATIVE_INTEGER, dset_data1,
      .                  data_dims1,error)
       CALL h5dclose_f(dset1_id, error)
-C      CALL h5sclose_f(dspace1_id, error)
       nfou=dset_data1(1)
       nmat=dset_data1(2)
       nmu=dset_data1(3)
-      ALLOCATE(xmu_out(nmu),rfou_out(nmu*nmat,nmu,nfou+1),
-     .                  dset_data2(nmu),
-     .                  dset_data3(nmu*nmat,nmu,0:nfou))
-C      CALL h5sopen_f(rank, dims2, dspace2_id, error)
+      ALLOCATE(xmu_out(nmu))
       CALL h5dopen_f(file_id, dsetname2, dset2_id, error)
       CALL h5dread_f(dset2_id, H5T_NATIVE_DOUBLE, xmu_out, data_dims2,
      .                  error)
       CALL h5dclose_f(dset2_id, error)
-C      CALL h5sclose_f(dspace2_id, error)
       CALL h5gclose_f(group1_id, error)
 
+      ALLOCATE(rfou_out(nmu*nmat,nmu,0:nfou-1))
       CALL h5gopen_f(file_id, groupname2, group2_id, error)
-      rank=3
-C      CALL h5sopen_f(rank, dims3, dspace3_id, error)
       CALL h5dopen_f(file_id, dsetname3, dset3_id, error)
       CALL h5dread_f(dset3_id, H5T_NATIVE_DOUBLE, rfou_out, data_dims3,
      .                  error)
       CALL h5dclose_f(dset3_id, error)
-C      CALL h5sclose_f(dspace3_id, error)
       CALL h5gclose_f(group2_id, error)
 
       CALL h5fclose_f(file_id, error)
@@ -112,8 +120,8 @@ C      CALL h5sclose_f(dspace3_id, error)
 ! Initialize Fortran interface
       CALL h5open_f(error)
 ! Create a new file
-      CALL h5fcreate_f(outputname, H5F_ACC_TRUNC_F, file_id, error)
-
+C      CALL h5fcreate_f(outputname, H5F_ACC_TRUNC_F, file_id, error)
+      CALL h5fopen_f (outputname, H5F_ACC_RDWR_F, file_id, error)
 *-----------------------------------------------------------------------
 * Put nfou,nmat,nmu,xmu in group 1:
 *-----------------------------------------------------------------------
@@ -145,7 +153,9 @@ C      CALL h5sclose_f(dspace3_id, error)
       data_dims2(1) = nmu
       dims2(1)=nmu
       rank = 1
+      ALLOCATE(dset_data2(nmu))
       dset_data2 = xmu_out
+      DEALLOCATE(xmu_out)
 ! Create dataspace 2
       CALL h5screate_simple_f(rank, dims2, dspace2_id, error)
 ! Create dataset 2 with default properties
@@ -158,6 +168,7 @@ C      CALL h5sclose_f(dspace3_id, error)
       CALL h5dclose_f(dset2_id, error)
 ! Close access to data space 2
       CALL h5sclose_f(dspace2_id, error)
+      DEALLOCATE(dset_data2)
 *********************************************
 
 ! Close the group
@@ -175,12 +186,14 @@ C      CALL h5sclose_f(dspace3_id, error)
 *********************************************
       data_dims3(1) = nmu*nmat
       data_dims3(2) = nmu
-      data_dims3(3) = nfou+1
+      data_dims3(3) = nfou
       dims3(1)=nmu*nmat
       dims3(2)=nmu
-      dims3(3)=nfou+1
+      dims3(3)=nfou
       rank = 3
+      ALLOCATE(dset_data3(nmu*nmat,nmu,0:nfou-1))
       dset_data3 = rfou_out
+      DEALLOCATE(rfou_out)
 ! Create dataspace 1
       CALL h5screate_simple_f(rank, dims3, dspace3_id, error)
 ! Create dataset 1 with default properties
@@ -193,6 +206,7 @@ C      CALL h5sclose_f(dspace3_id, error)
       CALL h5dclose_f(dset3_id, error)
 ! Close access to data space 1
       CALL h5sclose_f(dspace3_id, error)
+      DEALLOCATE(dset_data3)
 *********************************************
 
 ! Close the group
@@ -202,7 +216,7 @@ C      CALL h5sclose_f(dspace3_id, error)
       CALL h5fclose_f(file_id, error)
 ! Close FORTRAN interface
       CALL h5close_f(error)
-      DEALLOCATE(xmu_out,rfou_out,dset_data2,dset_data3)
+
 *-----------------------------------------------------------------------
       RETURN
       END

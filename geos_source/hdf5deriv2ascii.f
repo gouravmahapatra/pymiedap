@@ -9,6 +9,8 @@ Cf2py intent(in) foufile,rfou,outputname
 *
 *     Author: Ashwyn Groot
 *     Date: November 2018
+!     NOTE: When using this routine outside the python rewrite function,
+!           the model class with information is not rewritten in the new file
 *----------------------------------------------------------------------------
 *----------------------------------------------------------------------------
 *     Open and read and re-write the Fourier coefficients file:
@@ -32,8 +34,10 @@ Cf2py intent(in) foufile,rfou,outputname
       CHARACTER(len=200) :: foufile
       CHARACTER(len=200) :: outputname
 ! Names (file and HDF5 objects)
-      CHARACTER(LEN=5), PARAMETER :: groupname1 = "props" ! Sub-Group 1 name
-      CHARACTER(LEN=4), PARAMETER :: groupname2 = "rfou" ! Sub-Group 1 name
+      CHARACTER(LEN=5), PARAMETER :: groupname1 = "props"
+! Sub-Group 1 name
+      CHARACTER(LEN=4), PARAMETER :: groupname2 = "rfou"
+! Sub-Group 1 name
 ! Dataset 1 name
       CHARACTER(LEN=12), PARAMETER :: dsetname1 = "Array-counts"
 ! Dataset 2 name
@@ -42,18 +46,24 @@ Cf2py intent(in) foufile,rfou,outputname
       CHARACTER(LEN=10), PARAMETER :: dsetname3 = "RFOU-array"
 
 ! Identifiers
-      INTEGER(HID_T) :: file_id = 0      ! File identifier
-      INTEGER(HID_T) :: group1_id = 1    ! Group 1 identifier
-      INTEGER(HID_T) :: group2_id = 2    ! Group 2 identifier
-      INTEGER(HID_T) :: dset1_id = 6     ! Dataset 1 identifier
-      INTEGER(HID_T) :: dset2_id = 7     ! Dataset 2 identifier
-      INTEGER(HID_T) :: dset3_id = 8     ! Dataset 3 identifier
+      INTEGER(HID_T) :: file_id = 0
+! File identifier
+      INTEGER(HID_T) :: group1_id = 1
+! Group 1 identifier
+      INTEGER(HID_T) :: group2_id = 2
+! Group 2 identifier
+      INTEGER(HID_T) :: dset1_id = 6
+! Dataset 1 identifier
+      INTEGER(HID_T) :: dset2_id = 7
+! Dataset 2 identifier
+      INTEGER(HID_T) :: dset3_id = 8
+! Dataset 3 identifier
 
 
 ! Dimension array (nfou,nmat,nmugs)
-      INTEGER :: rank                 ! Dataset rank
       INTEGER(HSIZE_T), DIMENSION(1) :: data_dims1
-      INTEGER, DIMENSION(3) :: counts  ! Data buffers
+      INTEGER, DIMENSION(3) :: counts
+! Data buffers
 
 ! xmu array
       INTEGER(HSIZE_T), DIMENSION(1) :: data_dims2
@@ -62,46 +72,44 @@ Cf2py intent(in) foufile,rfou,outputname
       INTEGER(HSIZE_T), DIMENSION(3) :: data_dims3
 
 ! Misc variables (e.g. loop counters)
-      INTEGER :: error ! Error flag
+      INTEGER :: error
+! Error flag
       rfou=0.D0
 
+*----------------------------------------------------------------------------
+*     Open and read the Fourier coefficients hdf5 file:
+*----------------------------------------------------------------------------
       CALL h5open_f(error)
       CALL h5fopen_f (foufile, H5F_ACC_RDONLY_F, file_id, error)
 
       CALL h5gopen_f(file_id, groupname1, group1_id, error)
-      rank=1
-C      CALL h5sopen_f(rank, dims1, dspace1_id, error)
       CALL h5dopen_f(file_id, dsetname1, dset1_id, error)
       CALL h5dread_f(dset1_id, H5T_NATIVE_INTEGER, counts, data_dims1,
      .                  error)
       CALL h5dclose_f(dset1_id, error)
-C      CALL h5sclose_f(dspace1_id, error)
       nfou=counts(1)
       nmat=counts(2)
       nmugs=counts(3)
-      ALLOCATE(xmu_out(nmugs),rfou_out(nmugs*nmat,nmugs,nfou+1))
-C      CALL h5sopen_f(rank, dims2, dspace2_id, error)
+
+      ALLOCATE(xmu_out(nmugs))
       CALL h5dopen_f(file_id, dsetname2, dset2_id, error)
       CALL h5dread_f(dset2_id, H5T_NATIVE_DOUBLE, xmu_out, data_dims2,
      .                  error)
       CALL h5dclose_f(dset2_id, error)
-C      CALL h5sclose_f(dspace2_id, error)
       CALL h5gclose_f(group1_id, error)
 
       xmu(:nmugs)=xmu_out
-
+      DEALLOCATE(xmu_out)
       CALL h5gopen_f(file_id, groupname2, group2_id, error)
-      rank=3
-C      CALL h5sopen_f(rank, dims3, dspace3_id, error)
+      ALLOCATE(rfou_out(nmugs*nmat,nmugs,0:nfou-1))
       CALL h5dopen_f(file_id, dsetname3, dset3_id, error)
       CALL h5dread_f(dset3_id, H5T_NATIVE_DOUBLE, rfou_out, data_dims3,
      .                  error)
       CALL h5dclose_f(dset3_id, error)
-C      CALL h5sclose_f(dspace3_id, error)
       CALL h5gclose_f(group2_id, error)
 
-      rfou(:nmat*nmugs,:nmugs,0:nfou)=rfou_out
-
+      rfou(:nmat*nmugs,:nmugs,0:nfou-1)=rfou_out
+      DEALLOCATE(rfou_out)
       CALL h5fclose_f(file_id, error)
       CALL h5close_f(error)
 
@@ -125,7 +133,7 @@ C      CALL h5sclose_f(dspace3_id, error)
          WRITE(iunfou,'(E16.8,3X,E16.8)') xmu(i),wmu(i)
       ENDDO
 
-      DO m=0,nfou
+      DO m=0,nfou-1
          fst = '(I4,2X,2(I3,2X),'
          DO i=1,nmugs
             ibase= (i-1)*nmat
@@ -212,7 +220,7 @@ C      CALL h5sclose_f(dspace3_id, error)
       ENDDO
 
       CLOSE(iunfou)
-      DEALLOCATE(xmu_out,rfou_out)
+
       GOTO 1000
 *-----------------------------------------------------------------------
 *     Formats:

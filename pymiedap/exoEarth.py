@@ -75,7 +75,7 @@ def model_generator(force=False, wvl=0.550, mma=29, dpol=0.03, tau=[0.0], tau_g=
         model_codeuniq=model_codeuniq_new
 
     for model_code in list(model_codeuniq):
-        while 'model_'+model_code+'_{:4.3f}'.format(wvl) +'.dat' or model_code+'_{:4.3f}'.format(wvl) +'.hdf5' in os.listdir('./'):
+        while not 'model_'+model_code+'_{:4.3f}'.format(wvl) +'.dat' or 'model_'+model_code+'_{:4.3f}'.format(wvl) +'.hdf5' in os.listdir('./'):
             sleep(600)
         file_indir=[str('model_'+model_code) + '_{:4.7f}.dat'.format(wvl) in os.listdir(paths) for paths in dap_output_path]
         file_indirhdf5=[str('model_'+model_code) + '_{:4.7f}.hdf5'.format(wvl) in os.listdir(paths) for paths in dap_output_path]
@@ -750,31 +750,31 @@ def plot_Earth(model, wvl_idx=0, display='grid', stokes=['Ps'], phase_idx=0,titl
         Z=np.nan*np.zeros(model.phase.shape[1])
         for phase_idx,alph in enumerate(model.phase[wvl_idx,:,0]):
                 ngeos, apix, theta0, theta, phi, beta, lats, longs, xs, ys = pmd.geos.getgeos(alph, npix)
-                if stoke=='F':
+                if stokes=='F':
                     Ix=model.I[wvl_idx,phase_idx,:]*apix
                     Z[phase_idx] = np.nansum(Ix)
-                if stoke=='Q':
+                if stokes=='Q':
                     Qx=model.Q[wvl_idx,phase_idx,:]*apix
                     Z[phase_idx] = np.nansum(Qx)
-                if stoke=='U':
+                if stokes=='U':
                     Ux=model.U[wvl_idx,phase_idx,:]*apix
                     Z[phase_idx] = np.nansum(Ux)
-                if stoke=='V':
+                if stokes=='V':
                     Vx=model.V[wvl_idx,phase_idx,:]*apix
                     Z[phase_idx] = np.nansum(Vx)
-                if stoke=='Ps':
+                if stokes=='Ps':
                     Psx=-np.nansum(model.Q[wvl_idx,phase_idx,:])/(np.nansum(model.I[wvl_idx,phase_idx,:])+1e-40)
                     Z[phase_idx] = Psx
-                if stoke=='Pl':
+                if stokes=='Pl':
                     Plx=np.sqrt(np.nansum(model.Q[wvl_idx,phase_idx,:])**2 + np.nansum(model.U[wvl_idx,phase_idx,:])**2)/(np.nansum(model.I[wvl_idx,phase_idx,:])+1e-40)
                     Z[phase_idx] = Plx
-                if stoke=='Pt':
+                if stokes=='Pt':
                     Ptx=np.sqrt(np.nansum(model.Q[wvl_idx,phase_idx,:])**2 + np.nansum(model.U[wvl_idx,phase_idx,:])**2 + np.nansum(model.V[wvl_idx,phase_idx,:])**2)/(np.nansum(model.I[wvl_idx,phase_idx,:])+1e-40)
                     Z[phase_idx] = Ptx
-                if stoke=='Pv':
+                if stokes=='Pv':
                     Pvx=np.nansum(model.V[wvl_idx,phase_idx,:])/(np.nansum(model.I[wvl_idx,phase_idx,:])+1e-40)
                     Z[phase_idx] = Pvx
-                if stoke=='Pu':
+                if stokes=='Pu':
                     Pux=np.nansum(model.U[wvl_idx,phase_idx,:])/(np.nansum(model.I[wvl_idx,phase_idx,:])+1e-40)
                     Z[phase_idx] = Pux
         x=model.phase[wvl_idx,:,0]

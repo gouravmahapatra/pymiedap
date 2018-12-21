@@ -9,9 +9,8 @@
 *  illumination from below :  A = q4q3 B q3q4.                        
 *  Eqs. (98)-(99) of de Haan et al. (1987)                            
 *----------------------------------------------------------------------
-      IMPLICIT DOUBLE PRECISION (a-h,o-z)
 
-      INTEGER nsup
+      INTEGER nsup, nmat, nmu
 
       INCLUDE 'max_incl'
 

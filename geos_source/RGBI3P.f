@@ -95,7 +95,7 @@ Cf2py intent(out) ZI,IER
       PARAMETER        (NIPIMX=51)
 
 *     .. Scalar Arguments ..
-      INTEGER          IER,MD,NIP,NXD,NYD
+      INTEGER          IER,MD,NIP,NXD,NYD,filetype
 
 *     .. Array Arguments ..
       REAL*8           WK(3,NXD,NYD),XD(NXD),XI(NIP),YD(NYD),YI(NIP),

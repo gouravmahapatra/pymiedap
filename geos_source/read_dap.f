@@ -56,9 +56,9 @@ Cf2py intent(out) Sv
       ELSEIF (filetype.EQ.2) THEN
          CALL rdfous(foufile,rfou,nfou,nmat,nmugs,xmuin)
       ENDIF
-      ALLOCATE(derivs(0:nfou,nmat,3,nmugs,nmugs))
+      ALLOCATE(derivs(0:nfou-1,nmat,3,nmugs,nmugs))
       If (filetype.EQ.1) THEN
-         derivs=derivsin(0:nfou,:nmat,:3,:nmugs,:nmugs)
+         derivs=derivsin(0:nfou-1,:nmat,:3,:nmugs,:nmugs)
       ELSEIF (filetype.GT.1) THEN
          DEALLOCATE(derivs)
       ENDIF
@@ -94,11 +94,23 @@ Cf2py intent(out) Sv
       yi=mu0
       xd_1d=xmu
       yd_1d=xmu
+      If (filetype.EQ.1) THEN
+         WHERE (abs(derivs).LT.eps1)
+            derivs=0.D0
+         ENDWHERE
+         IF (sum(derivs).LT.eps1) THEN
+            STOP 'USE OTHER FILETYPE: NO DERIVATIVES IN FILE!'
+         ENDIF
+      ENDIF
 *----------------------------------------------------------------------------
 *        Loop over the Fourier coefficients:
 *----------------------------------------------------------------------------
-      DO m=0,nfou
-         print *, 'Progress: ',100.*m/nfou,'%'
+!  NOTE: be very carefull with the meaning of nfou in this routine and
+!       read_dapascii.f. nfou is used here, in the hdf5 rdfous and hdf5
+!       newfou routines as the dimension of all fourier coefficients, hence
+!       why we use nfou-1 here.
+      DO m=0,nfou-1
+         print *, 'Progress: ',100.*(m+1)/nfou,'%'
          fac=1.D0
          IF (m.EQ.0) fac=0.5D0
 

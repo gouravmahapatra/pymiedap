@@ -2,7 +2,7 @@
 * See license.md or http://gitlab.com/loic.cg.rossi/pymiedap for details.
 
       SUBROUTINE scalzm(m,layer,coefs,ncoefs,xmu,binfac,
-     .                  nmu,Zmmin,Zmplus)
+     .             nsup,nmu,nmat,nlays,max_ncoefs,Zmmin,Zmplus)
 
 **********************************************************************
 *  Calculate the m-th Fourier component of the phase matrix
@@ -27,8 +27,8 @@
 
       INCLUDE 'max_incl'
 
-C      INTEGER m, layer, nmu
-C      INTEGER ncoefs(nlaysMAX)
+C      INTEGER m, layer, nmu, nsup, nmat, nlays, max_ncoefs
+C      INTEGER ncoefs(nlays)
       DOUBLE PRECISION binfac
 
 C      DOUBLE PRECISION Plm(nmuMAX,3,2),sqlm(0:ncoefsMAX),
@@ -36,9 +36,9 @@ C     .          coefs(nmatMAX,nmatMAX,0:ncoefsMAX,nlaysMAX),
 C     .          xmu(nmuMAX),
 C     .          Zmmin(nsupMAX,nsupMAX),Zmplus(nsupMAX,nsupMAX)
       DIMENSION Plm(nmuMAX,3,2),sqlm(0:ncoefsMAX),
-     .          coefs(nmatMAX,nmatMAX,0:ncoefsMAX,nlaysMAX),
-     .          ncoefs(nlaysMAX),xmu(nmuMAX),
-     .          Zmmin(nsupMAX,nsupMAX),Zmplus(nsupMAX,nsupMAX)
+     .          coefs(nmat,nmat,0:max_ncoefs,nlays),
+     .          ncoefs(nlays),xmu(nmu),
+     .          Zmmin(nsup,nsup),Zmplus(nsup,nsup)
 
       LOGICAL odd
 

@@ -46,8 +46,8 @@
 
       INTEGER max_ncoefs,nsup,nlays
 
-C      INTEGER m, layer, nmu, nmat
-C      INTEGER ncoefs
+      INTEGER m, layer, nmu, nmat
+      INTEGER ncoefs
       DOUBLE PRECISION binfac,binfad
 C      DOUBLE PRECISION coefs, xmu, Zmmin, Zmplus
 
@@ -86,8 +86,8 @@ Cf2py intent(out) Zmmin,Zmplus
       qroot6 = -0.25D0*DSQRT(6.D0)
       IF (nmat.EQ.1) THEN
           IF (verbo) print *,' setzm: use scalar phase matrix'
-          CALL scalzm(m,layer,coefs,ncoefs,xmu,binfac,
-     .                nmu,nmat,Zmmin,Zmplus)
+             CALL scalzm(m,layer,coefs,ncoefs,xmu,binfac,
+     .             nsup,nmu,nmat,nlays,max_ncoefs,Zmmin,Zmplus)
           GOTO 999
       ENDIF
 

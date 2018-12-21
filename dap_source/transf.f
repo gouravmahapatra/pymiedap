@@ -14,7 +14,7 @@
       IMPLICIT DOUBLE PRECISION (a-h,o-z)
  
       INCLUDE 'max_incl'
-
+      INTEGER nmat,nsup
       DIMENSION S(nsup,nsup)
 
 Cf2py intent(in) nsup, nmat
