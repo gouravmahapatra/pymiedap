@@ -1307,7 +1307,6 @@ def dap_code(model, rename=False, output_name='modelA',
     ncoefs = np.zeros(nlaysMAX, order='F')
     wavels = model.wvl_list
     nwavels = len(wavels)
-    laylevel = np.zeros(nlaysMAX, order='F')  # level of layers
 
     # Creating array to receive the coefficients
     coefin = np.zeros((nmatMAX,nmatMAX,ncoefsMAX,nlaysMAX), order='F')
