@@ -1304,16 +1304,10 @@ def dap_code(model, rename=False, output_name='modelA',
     nlays = len(vars(model.layers))  # number of atmospheric layers
     nwvl = len(model.wvl_list)
 
-    pres = np.zeros(nlaysMAX, order='F')  # pressure levels for each layer
     ncoefs = np.zeros(nlaysMAX, order='F')
     wavels = model.wvl_list
     nwavels = len(wavels)
-    taus = np.zeros(nlaysMAX, order='F')  # all values of tau
-    taus_g = np.zeros(nlaysMAX, order='F')  # all values of tau_g at wvl z
-    ssalbs = np.zeros(nlaysMAX, order='F')  # all values of s.scat albedoes
     laylevel = np.zeros(nlaysMAX, order='F')  # level of layers
-    basca = np.zeros(nlaysMAX, order='F')  # all values of basca
-    baabs = np.zeros(nlaysMAX, order='F')  # all values of baabs
 
     # Creating array to receive the coefficients
     coefin = np.zeros((nmatMAX,nmatMAX,ncoefsMAX,nlaysMAX), order='F')
@@ -1334,6 +1328,11 @@ def dap_code(model, rename=False, output_name='modelA',
     for z, wav in enumerate(wavels):
         #get coefs for each wavelength
         taus = np.zeros(nlaysMAX, order='F')  # all values of tau at wvl z
+        taus_g = np.zeros(nlaysMAX, order='F')  # all values of tau_g at wvl z
+        basca = np.zeros(nlaysMAX, order='F')  # all values of basca
+        baabs = np.zeros(nlaysMAX, order='F')  # all values of baabs
+        ssalbs = np.zeros(nlaysMAX, order='F')  # all values of s.scat albedoes
+        pres = np.zeros(nlaysMAX, order='F')  # pressure levels for each layer
 
         print('Wavelength {:06.7f} microns'.format(wav))
 
