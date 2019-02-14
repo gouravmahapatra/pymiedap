@@ -1,10 +1,11 @@
 * This file is part of PyMieDAP, released under GNU General Public License.
 * See license.md or http://gitlab.com/loic.cg.rossi/pymiedap for details.
 
-      SUBROUTINE READ_DAP(foufile,ngeos,thet0,theta,phi,beta,
-     .                  filetype,Sv)
+      SUBROUTINE READ_DAP(foufile,derivs,rfou,xmu,thet0,theta,phi,beta,
+     .                  filetype,nfou,nmat,nmugs,ngeos,Sv)
 
-Cf2py intent(in) foufile,ngeos,thet0,theta,phi,beta,filetype
+Cf2py intent(in) foufile,rfou,derivs,thet0,theta,phi,beta,filetype
+Cf2py intent(in) nfou,nmat,nmugs,ngeos
 Cf2py intent(out) Sv
 
 *----------------------------------------------------------------------------
@@ -26,58 +27,46 @@ Cf2py intent(out) Sv
      .          ier,filetype
 
       INTEGER, DIMENSION(:), ALLOCATABLE :: ki
-      REAL*8, DIMENSION(:), ALLOCATABLE :: xd_1d,yd_1d,xmu
+      REAL*8, DIMENSION(:), ALLOCATABLE :: xd_1d,yd_1d
       REAL*8, DIMENSION(:,:), ALLOCATABLE :: rfm,RM,zd
       REAL*8, DIMENSION(:,:,:), ALLOCATABLE :: WK
-      REAL*8,DIMENSION(:,:,:,:,:),ALLOCATABLE::derivsin,derivs
 
-      REAL*8, DIMENSION(ngeos) :: mu,mu0,be,SvQ,SvU,xi,yi,zi
-      REAL*8 :: fac,eps,eps1
+      REAL*8, DIMENSION(ngeos) :: mu,mu0,be,SvQ,SvU,xi,yi,zi,beta,thet0,
+     .                  theta,phi
 
-      DOUBLE PRECISION xmuin(nmuMAX),beta(ngeosMAX),
-     .                 thet0(ngeosMAX),theta(ngeosMAX),phi(ngeosMAX),
-     .                 rfou(nmatMAX*nmuMAX,nmuMAX,0:nfouMAX),
-     .                 Bplus(4,ngeos),Sv(nmatMAX,ngeosMAX)
+      REAL*8 xmu(nmugs)
+      REAL*8 Bplus(4,ngeos)
+      REAL*8 Sv(nmat,ngeos)
 
-      DOUBLE PRECISION pi,radfac
+      REAL*8 derivs(0:nfou-1,nmat,3,nmugs,nmugs)
+      REAL*8 rfou(nmat*nmugs,nmugs,0:nfou-1)
+      REAL*8 pi,radfac,fac,eps,eps1,Sv0
       PARAMETER (pi=3.141592653589793D0,radfac=pi/180.D0)
 
-      DOUBLE PRECISION Sv0
       PARAMETER (Sv0=1.D0)
 
       CHARACTER(len=200) :: foufile
 *----------------------------------------------------------------------------
 *     Open and read the Fourier coefficients file:
 *----------------------------------------------------------------------------
-      rfou=0.D0
-      ALLOCATE(derivsin(0:nfouMAX,nmatMAX,3,nmuMAX,nmuMAX))
-      IF (filetype.EQ.1) THEN
-         CALL rdfousderiv(foufile,rfou,derivsin,nfou,nmat,nmugs,xmuin)
-      ELSEIF (filetype.EQ.2) THEN
-         CALL rdfous(foufile,rfou,nfou,nmat,nmugs,xmuin)
-      ENDIF
-      ALLOCATE(derivs(0:nfou-1,nmat,3,nmugs,nmugs))
-      If (filetype.EQ.1) THEN
-         derivs=derivsin(0:nfou-1,:nmat,:3,:nmugs,:nmugs)
-      ELSEIF (filetype.GT.1) THEN
-         DEALLOCATE(derivs)
-      ENDIF
-      DEALLOCATE(derivsin)
+C      IF (filetype.EQ.1) THEN
+C         CALL rdfousderiv(foufile,nfou,nmat,nmugs,rfou,derivs,xmu)
+C      ELSEIF (filetype.EQ.2) THEN
+C         CALL rdfous(foufile,nfou,nmat,nmugs,rfou,xmu)
+C      ENDIF
 
 *----------------------------------------------------------------------------
 *     Allocate new variables:
 *----------------------------------------------------------------------------
       ALLOCATE(xd_1d(nmugs),yd_1d(nmugs),ki(nmugs),rfm(nmat,ngeos),
-     .              RM(nmat,ngeos),zd(nmugs,nmugs),xmu(nmugs),
+     .              RM(nmat,ngeos),zd(nmugs,nmugs),
      .              WK(3,nmugs,nmugs))
 
-      xmu=xmuin(:nmugs)
 *----------------------------------------------------------------------------
 *     Initialize the Stokes vector of the whole planet:
 *----------------------------------------------------------------------------
       eps= 1.D-10
       eps1= 1.D-100
-      Sv=0.D0
 
 *----------------------------------------------------------------------------
 *     Initialize mu values for all ngeos:
@@ -110,7 +99,7 @@ Cf2py intent(out) Sv
 !       newfou routines as the dimension of all fourier coefficients, hence
 !       why we use nfou-1 here.
       DO m=0,nfou-1
-         print *, 'Progress: ',100.*(m+1)/nfou,'%'
+C         print *, 'Progress: ',100.*(m+1)/nfou,'%'
          fac=1.D0
          IF (m.EQ.0) fac=0.5D0
 
@@ -141,9 +130,7 @@ Cf2py intent(out) Sv
             RM(k,:)= RM(k,:) + 2.D0*Bplus(k,:)*fac*rfm(k,:)
          ENDDO
       ENDDO
-      If (filetype.EQ.1) THEN
-         DEALLOCATE(derivs)
-      ENDIF
+      DEALLOCATE(xd_1d,yd_1d,ki,rfm,zd,WK)
 *----------------------------------------------------------------------------
 *        Calculate the locally reflected Stokes vector with the matrix:
 *----------------------------------------------------------------------------
@@ -155,6 +142,7 @@ C         SvR(k,:)= RM(k,:)
             Sv(k,:)=0.D0
          ENDWHERE
       ENDDO
+      DEALLOCATE(RM)
 *----------------------------------------------------------------------------
 *        Rotate Stokes elements Q and U to the actual reference plane:
 *----------------------------------------------------------------------------

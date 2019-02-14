@@ -17,9 +17,9 @@
 # de Haan et al. 1987, A&A
 # Stam et al. 2006, A&A
 """
-import pymiedap.pymiedap as pmd
 import matplotlib
 matplotlib.use('Agg')
+import pymiedap.pymiedap as pmd
 #==============================================================================
 # Customized by Ashwyn Groot to incorporate Earth as a model planet
 #==============================================================================
@@ -27,13 +27,14 @@ matplotlib.use('Agg')
 # IMPORT MODULES
 # ==============
 import numpy as np
-import os, time, pickle, sys, os.path, rasterio, glob
+import os, time, pickle, sys, os.path, rasterio, glob, h5py
 from datetime import date, timedelta
 from dateutil import relativedelta
 import matplotlib.pyplot as mpl
 from matplotlib import colors
 from pyhdf.SD import SD, SDC
 from time import sleep
+import deepdish as dd
 
 # ---------
 # CLASSES DEFINITION
@@ -43,7 +44,7 @@ if __name__ == "__main__":
 
 
 def model_generator(force=False, wvl=0.550, mma=29, dpol=0.03, tau=[0.0], tau_g=[0.0], rayscat=True, set_taus=False,
-                    v_eff=0.1, psd='2', nr=[1.33], ni=[1e-08], layered=False, nmug_mie=100, nmug=150, nsubr=50, nmat=3,
+                    v_eff=0.1, psd='2', nr=[1.33], ni=[1e-08], layered=False, nmug_mie=100, nmug=150, nsubr=50, nmat=4,
                     dap_output_path=['./dap_database_0.550/'], data_output_path='./PyMieDAP_Data/', modelfile="modelcodes.txt",
                     bin_surfalb=np.array([0.0278,0.10936,0.98969,0.139387]),bin_surf=np.array([0,14,15,16]),
                     bin_ctpvals=np.array([500.,700.,850.]),
@@ -98,13 +99,13 @@ def model_generator(force=False, wvl=0.550, mma=29, dpol=0.03, tau=[0.0], tau_g=
             model_ref.layers.cloud.aerosols=pmd.Aerosols(r_eff=bin_cervals[model_values[3]],v_eff=v_eff,psd=psd,nr=nr,ni=ni,layered=layered,typ='C')
             pmd.mie_code(model_ref.layers.cloud.aerosols, wvl_ref,ngaur=nmug_mie)
             sigma_ext_ref=model_ref.layers.cloud.aerosols.sext
-            
+
             model=pmd.Model(mma=mma,dpol=dpol,wvl_list=[wvl])
             model.layers.cloud.aerosols=pmd.Aerosols(r_eff=bin_cervals[model_values[3]],v_eff=v_eff,psd=psd,nr=nr,ni=ni,layered=layered,typ='C')
             pmd.mie_code(model.layers.cloud.aerosols, [wvl],ngaur=nmug_mie)
             sigma_ext=model.layers.cloud.aerosols.sext
             
-            Tau=bin_cotvals[model_values[2]]*(sigma_ext[0]/sigma_ext_ref[0])            
+            Tau=bin_cotvals[model_values[2]]*(sigma_ext[0]/sigma_ext_ref[0])
             model=pmd.Model(mma=mma,dpol=dpol,wvl_list=[wvl])
             del(model.layers.cloud)
             del(model.layers.gasbelow)
@@ -117,7 +118,7 @@ def model_generator(force=False, wvl=0.550, mma=29, dpol=0.03, tau=[0.0], tau_g=
                 del(model.layers.gasbelow)
             model.layers.cloud.aerosols=pmd.Aerosols(r_eff=bin_cervals[model_values[3]],v_eff=v_eff,psd=psd,nr=nr,ni=ni,layered=layered,typ='C')
             model.asurf=bin_surfalb[model_values[0]]
-            
+
             pmd.compute_model(model, force=True, filetype=1, path_input=dap_output_path[0], rename=True,output_name=str('model_'+model_code),set_taus=set_taus, nmug_mie=nmug_mie, nmug=nmug, nsubr=nsubr, nmat=nmat)
             models_seq.append(str('model_'+model_code))
     print(time.time()-start)
@@ -261,17 +262,23 @@ def asterspectrum_read(spectrum_file,x_int,xyvalues=False):
     else:
         return y_inter/100
 
-def planet_Earth(models, alpha=[0], npix=20, force=False, set_taus=False, rename=True,
-                  output_names=['modelA','modelB'], dap_output_path=['./dap_database_0.550/'], 
-                  obs_path='./observation_database/',data_output_path='./PyMieDAP_Data/', fixed_pattern=False,
-                  input_pattern=None, cusp=False, thresh_lat=50., patchy=False,
-                  xscale=0.1, yscale=0.01, full_disk=False, fixed_cover=None,
-                  bands=False, bands_lats=[-90,90],windobs=False,plot_obs=True,
-                  fclouds=[0.5,0.5], constant_fcloud=False, sscloud=False,
-                  sigma_c=10., delta_c=[0.], nmug_mie=100, nmug=150, nsubr=50,
-                  nmat=3, pixscaler=1, adaptive_pixels=False,custommask=True,diurnal_var='all',diurnal_res=18.,aerosols=False,
-                  obliquity=[0.],rotation=[0.],long_alph_custom=False, custom_year=False,custom_modelname=False,cloudfracretr=True,
-                  custom_glint=False,
+def findModel(searchList, elem):
+    idxx=np.array([])
+    idxy=np.array([])
+    for e in elem:
+        for i,x in enumerate(searchList):
+            if e in x:
+                idxy=np.append(idxy,np.where(x==e)[0])
+                idxx=np.append(idxx,np.ones((len(np.where(x==e)[0])))*i)
+    return (idxx.astype(int),idxy.astype(int))
+
+def planet_Earth(models, alpha=[0], npix=20, force=False, set_taus=False, rename=True,filetype=1,
+                  dap_output_path=['./dap_database_0.550/'],stored_pixvals=True,
+                  obs_path='./observation_database/',data_output_path='./PyMieDAP_Data/',
+                  windobs=False,plot_obs=True,nmug_mie=100, nmug=150, nsubr=50,
+                  nmat=3, diurnal_var='all',diurnal_res=18.,aerosols=False,
+                  obliquity=[0.],rotation=[0.],long_alph_custom=False, custom_year=False,custom_modelname=False,
+                  custom_glint=False,mask_data=False,
                   bin_surfalb=np.array([0.0278,0.10936,0.98969,0.139387]),bin_surf=np.array([0,14,15,16]), 
                   bin_aot=np.array([0.2625,0.1875,0.001,0.]),bin_aotvals=np.array([0.3,0.225,0.15,0.]),
                   bin_ctp=np.array([600.,800.,1e6]),bin_ctpvals=np.array([500.,700.,850.]),
@@ -295,39 +302,6 @@ def planet_Earth(models, alpha=[0], npix=20, force=False, set_taus=False, rename
         if True, will set opacities following scattering cross section and column density
     rename : bool, optional
         if True, model output files will be renamed
-    output_names : list of strings
-        list of names of the models, used for the name of the Fourier files
-    fixed_pattern : bool, optional
-        if True, a cloud pattern is generated at start and then
-        reused for all phase angle after.
-    input_pattern: array, optional
-        an existing pattern that can be used as a starter
-        (caution: must have size nphase*npix*npix)
-    cusp : bool, optional
-        if True, polar cusps are created
-    thresh_lat : float, optional
-        defines the latitude above which the cusps exist
-    patchy : bool, optional
-        if True, patchy clouds are generated
-    fcloud : array, optional
-        fraction of the planet to be covered with clouds
-        should have same length as models input list
-    constant_fcloud : bool, optional
-        if True, the factor fcloud applies not to the whole
-        planet but to the lit part of the planet
-    sscloud : bool, optional
-        if True, a subsolar cloud is created
-    sigma_c : float, optional
-        extend in degrees of the subsolar cloud with respect to the SSP. Cloud
-        exists for SZA<sigma_c
-    delta_c : float, optional
-        offset in degrees the position of the subsolar cloud with
-        respect to subsolar point.
-    bands : bool, optional
-        if True, defines latitudinal bands
-    bands_lats : array, optional
-        array listing the borders of the bands.
-        Ex: [-90, 45, 90] defines two bands
     nmug : int, optional
         number of Gauss point for DAP code
     nmug_mie : int, optional
@@ -336,16 +310,6 @@ def planet_Earth(models, alpha=[0], npix=20, force=False, set_taus=False, rename
         number of Stokes elements to compute
     nsubr : int, optional
         number of divisions for size dist in Mie calculations
-    adaptive_pixels : bool, optional
-        if True, npix increases with increasing phase angle (in sin**2 of
-        alpha/2)
-    pixscaler : float, optional
-        factor used in combination with adaptive_pixels to set the
-        rate of increase in pix number. Default 1
-    xscale : float, optional
-        for patchy clouds gives the typical size on x-axis, as a function of npix
-    yscale : float, optional
-        for patchy clouds gives the typical size on y-axis, as a function of npix
     
     Returns
     -------
@@ -365,6 +329,7 @@ def planet_Earth(models, alpha=[0], npix=20, force=False, set_taus=False, rename
     Those parameters being stored in the first model object given as input.
     
     """
+    ngeosMax=1000000
     atm_model=models[0]
     atm_model.dpol=0.03
     atm_model.mma=29
@@ -413,23 +378,24 @@ def planet_Earth(models, alpha=[0], npix=20, force=False, set_taus=False, rename
         obs_dates[obs_dates>=full_year.days+1]-=full_year.days
     product='MYD08_'+str(obs_interval_product)+'3'
     filenames=[product+'.A'+str(int(f_obsday_year))+str(int(item)).zfill(3) for item in np.floor(obs_dates)]
-
+    if long_alph_custom!=False:
+        filenames=filenames*len(alpha)
+        obs_dates=obs_dates*np.ones(len(alpha))
+        
     # Preparing arrays
     # ------------------
-    If = np.nan*np.zeros((nwvl,nalpha,(2*npix)**2))
-    Qf = np.nan*np.zeros((nwvl,nalpha,(2*npix)**2))
-    Uf = np.nan*np.zeros((nwvl,nalpha,(2*npix)**2))
-    Vf = np.nan*np.zeros((nwvl,nalpha,(2*npix)**2))
+    If = np.zeros((nwvl,nalpha,(npix)**2))
+    Qf = np.zeros((nwvl,nalpha,(npix)**2))
+    Uf = np.zeros((nwvl,nalpha,(npix)**2))
+    Vf = np.zeros((nwvl,nalpha,(npix)**2))
 
-    phaf = np.nan*np.zeros((nwvl,nalpha,(2*npix)**2))
-    szaf = np.nan*np.zeros((nwvl,nalpha,(2*npix)**2))
-    emif = np.nan*np.zeros((nwvl,nalpha,(2*npix)**2))
-    azif = np.nan*np.zeros((nwvl,nalpha,(2*npix)**2))
-    betf = np.nan*np.zeros((nwvl,nalpha,(2*npix)**2))
-    latf = np.nan*np.zeros((nwvl,nalpha,(2*npix)**2))
-    lonf = np.nan*np.zeros((nwvl,nalpha,(2*npix)**2))
-    xf = np.nan*np.zeros((nwvl,nalpha,(2*npix)**2))
-    yf = np.nan*np.zeros((nwvl,nalpha,(2*npix)**2))
+    phaf = np.zeros((nwvl,nalpha,(npix)**2))
+    szaf = np.zeros((nwvl,nalpha,(npix)**2))
+    emif = np.zeros((nwvl,nalpha,(npix)**2))
+    azif = np.zeros((nwvl,nalpha,(npix)**2))
+    betf = np.zeros((nwvl,nalpha,(npix)**2))
+    xf = np.zeros((nwvl,nalpha,(npix)**2))
+    yf = np.zeros((nwvl,nalpha,(npix)**2))
 
     if len(alpha)!=len(obliquity):
         obliquity = obliquity[0]*np.ones(len(alpha))
@@ -442,83 +408,154 @@ def planet_Earth(models, alpha=[0], npix=20, force=False, set_taus=False, rename
 
     # Loop on phase angle
     # -------------------
-        for A,alph in enumerate(alpha):
-            if adaptive_pixels is True:
-                npix2 = np.ceil(npix * (1 + np.sin(np.radians(alph)/2.)**2))
-                print('npix=',npix2)
-            else:
-                npix2 = npix
-    
-            #Get geom
-            ngeos, apix, theta0, theta, phi, beta, lats, longs, xs, ys = pmd.geos.getgeos(alph, npix2)
-    
-            theta0 = theta0[:ngeos]
-            theta = theta[:ngeos]
-            phi = phi[:ngeos]
-            beta = beta[:ngeos]
-            lats = lats[:ngeos]
-            longs = longs[:ngeos]
-            phase = np.ones(ngeos)*alph
-    
-    
-            phaf[j,A,:ngeos] = alph*np.ones(ngeos)
-            szaf[j,A,:ngeos] = theta0[:ngeos]
-            emif[j,A,:ngeos] = theta[:ngeos]
-            azif[j,A,:ngeos] = phi[:ngeos]
-            betf[j,A,:ngeos] = beta[:ngeos]
-            latf[j,A,:ngeos] = lats[:ngeos]
-            lonf[j,A,:ngeos] = longs[:ngeos]
-            xf[j,A,:ngeos] = xs[:ngeos]
-            yf[j,A,:ngeos] = ys[:ngeos]
-    
-            print(filenames[A])
-    
-            # Create table to store output
-            It = np.zeros((len(wvl),ngeos))
-            Qt = np.zeros((len(wvl),ngeos))
-            Ut = np.zeros((len(wvl),ngeos))
-            Vt = np.zeros((len(wvl),ngeos))
-    
-            # call mask_Earth
-            picture, mask, picture_full, ncloud, asym, Data_means, Patchy_clouds = mask_Earth(alpha=alph, npix=npix2,
-                                                                    windobs=windobs,plot_obs=plot_obs,
-                                                                    aerosols=aerosols,custom_glint=custom_glint,
-                                                                    custommask=custommask,filename=filenames[A],obs_day=obs_dates[A],
-                                                                    longitudinalpos=lon_greenw_offset[A],
-                                                                    obliquity=obliquity[A],rotation=rotation[A],nobins=False,
-                                                                    bin_surf=bin_surf,bin_ctp=bin_ctp,
-                                                                    bin_ctpvals=bin_ctpvals,bin_cotvals=bin_cotvals,bin_cervals=bin_cervals,
-                                                                    bin_cot=bin_cot,bin_cer=bin_cer,start=start,obs_path=obs_path, data_output_path=data_output_path)
-            atm_model.fcloud[A]=ncloud
-            atm_model.asym.append(asym)
-            atm_model.asym.append(Data_means)
-            atm_model.mask.append([mask,Patchy_clouds])
-            models,model_codesuniq_origi=model_generator(force=force, wvl=w, mma=mma, dpol=dpol, tau=tau, tau_g=tau_g, rayscat=rayscat,
-                                                               v_eff=v_eff, psd=psd, nr=nr, ni=ni, layered=layered,bin_surfalb=bin_surfalb,bin_surf=bin_surf,
-                                                               nmug_mie=nmug_mie, nmug=nmug, nsubr=nsubr, nmat=nmat,set_taus=set_taus,bin_ctpvals=bin_ctpvals,
-                                                               bin_cotvals=bin_cotvals,bin_cervals=bin_cervals,dap_output_path=dap_output_path,
-                                                              data_output_path=data_output_path,custom_modelname=custom_modelname)
-                    
-            for pixtype,model in enumerate(models):
-                  if custom_modelname==False:
-                        pixtype=model.split('model_')[-1]
-                        pixtype=pixtype.encode()
-                        print('Reading '+str(model) + '_{:4.7f}.dat'.format(w))
-                  elif custom_modelname!=False:
-                        pixtype=model_codesuniq_origi[pixtype]
-                        pixtype=pixtype.encode()
-                        print('Reading '+str(model) + '_{:4.7f}.dat'.format(w)+' instead of model_'+pixtype.decode()+'_{:4.7f}.dat'.format(w))
-                  phaseB = phase[mask==pixtype]
-                  theta0B = theta0[mask==pixtype]
-                  thetaB = theta[mask==pixtype]
-                  phiB = phi[mask==pixtype]
-                  betaB = beta[mask==pixtype]
-                  
+    # Create table to store output
+        It = np.zeros((nalpha,(npix)**2))
+        Qt = np.zeros((nalpha,(npix)**2))
+        Ut = np.zeros((nalpha,(npix)**2))
+        Vt = np.zeros((nalpha,(npix)**2))
+        
+        Modelnames=[[]]*len(alpha)
+        Modelnames_orig=[[]]*len(alpha)
+        masks=[[]]*len(alpha)
+        Patchy_clouds_mask=[[]]*len(alpha)
+        
+        pixelval_filename='Pixelvals_dres'+str(int(diurnal_res))+'_obsint'+str(int(obs_interval))+'_'+str(obs_period[0]).replace("/","-")+'_'+str(int(obs_dates[0]))+'_'+str(obs_period[1]).replace("/","-")+'_'+str(int(obs_dates[-1]))+'_wind'+str(windobs)+'_binsurf'+str(len(bin_surf))+'_npix'+str(npix)+'.pix'
+        if stored_pixvals==True and os.path.exists(data_output_path+pixelval_filename) and mask_data==False:
+            with open(data_output_path+pixelval_filename, "rb") as fp:   # Unpickling
+                [masks,Patchy_clouds_mask,Unique_models,Unique_models_orig] = pickle.load(fp)
+                
+            for A,alph in enumerate(alpha):
+                #Get geom
+                ngeos, apix, theta0, theta, phi, beta, lats, longs, xs, ys = pmd.geos.getgeos(alph, npix)
+        
+                theta0 = theta0[:ngeos]
+                theta = theta[:ngeos]
+                phi = phi[:ngeos]
+                beta = beta[:ngeos]
+                lats = lats[:ngeos]
+                longs = longs[:ngeos]        
+        
+                phaf[j,A,:ngeos] = alph*np.ones(ngeos)
+                szaf[j,A,:ngeos] = theta0[:ngeos]
+                emif[j,A,:ngeos] = theta[:ngeos]
+                azif[j,A,:ngeos] = phi[:ngeos]
+                betf[j,A,:ngeos] = beta[:ngeos]
+                xf[j,A,:ngeos] = xs[:ngeos]
+                yf[j,A,:ngeos] = ys[:ngeos]
+                
+                print('Computing only geometries for filename:',filenames[A])
+                
+        else:
+            for A,alph in enumerate(alpha):        
+                #Get geom
+                ngeos, apix, theta0, theta, phi, beta, lats, longs, xs, ys = pmd.geos.getgeos(alph, npix)
+        
+                theta0 = theta0[:ngeos]
+                theta = theta[:ngeos]
+                phi = phi[:ngeos]
+                beta = beta[:ngeos]
+                lats = lats[:ngeos]
+                longs = longs[:ngeos]        
+        
+                phaf[j,A,:ngeos] = alph*np.ones(ngeos)
+                szaf[j,A,:ngeos] = theta0[:ngeos]
+                emif[j,A,:ngeos] = theta[:ngeos]
+                azif[j,A,:ngeos] = phi[:ngeos]
+                betf[j,A,:ngeos] = beta[:ngeos]
+                xf[j,A,:ngeos] = xs[:ngeos]
+                yf[j,A,:ngeos] = ys[:ngeos]
+        
+                print(filenames[A])
+
+                # call mask_Earth
+                mask, ncloud, asym, Data_means, Patchy_clouds = mask_Earth(alpha=alph, npix=npix,
+                                                                        windobs=windobs,plot_obs=plot_obs,
+                                                                        aerosols=aerosols,custom_glint=custom_glint,
+                                                                        filename=filenames[A],obs_day=obs_dates[A],
+                                                                        longitudinalpos=lon_greenw_offset[A],
+                                                                        obliquity=obliquity[A],rotation=rotation[A],nobins=False,
+                                                                        bin_surf=bin_surf,bin_ctp=bin_ctp,
+                                                                        bin_ctpvals=bin_ctpvals,bin_cotvals=bin_cotvals,bin_cervals=bin_cervals,
+                                                                        bin_cot=bin_cot,bin_cer=bin_cer,start=start,obs_path=obs_path, data_output_path=data_output_path)
+                masks[A]=mask
+                Patchy_clouds_mask[A]=Patchy_clouds
+                
+                atm_model.fcloud[A]=ncloud
+                atm_model.asym.append(asym)
+                atm_model.asym.append(Data_means)
+                atm_model.mask.append([mask,Patchy_clouds])
+                models,model_codesuniq_origi=model_generator(force=force, wvl=w, mma=mma, dpol=dpol, tau=tau, tau_g=tau_g, rayscat=rayscat,
+                                                                   v_eff=v_eff, psd=psd, nr=nr, ni=ni, layered=layered,bin_surfalb=bin_surfalb,bin_surf=bin_surf,
+                                                                   nmug_mie=nmug_mie, nmug=nmug, nsubr=nsubr, nmat=nmat,set_taus=set_taus,bin_ctpvals=bin_ctpvals,
+                                                                   bin_cotvals=bin_cotvals,bin_cervals=bin_cervals,dap_output_path=dap_output_path,
+                                                                  data_output_path=data_output_path,custom_modelname=custom_modelname)
+                
+                Modelnames[A]=models
+                Modelnames_orig[A]=model_codesuniq_origi
+            Unique_models=list(set(sum(Modelnames, [])))
+            Unique_models_orig=[]
+
+            for model in Unique_models:
+                idx_model=sum(Modelnames,[]).index(model)
+                Unique_models_orig.append(sum(Modelnames_orig,[])[idx_model])
+
+            with open(data_output_path+pixelval_filename, 'wb') as file:
+                pickle.dump([masks,Patchy_clouds_mask,Unique_models,Unique_models_orig], file, protocol=2)
+        
+            if mask_data==True:
+                return
+        
+        phase = phaf[j,:,:]
+        theta0 = szaf[j,:,:]
+        theta = emif[j,:,:]
+        phi = azif[j,:,:]
+        beta = betf[j,:,:]
+        xs = xf[j,:,:]
+        ys = yf[j,:,:]
+
+
+        if filetype==1 or filetype==2:
+              file_ext='.hdf5'
+        elif filetype==3:
+              file_ext='.dat'
+
+        print('The following model files are read:')
+        print(Unique_models)
+
+        for pixtype,model in enumerate(Unique_models):
+              if custom_modelname==False:
+                    pixtype=model.split('model_')[-1]
+                    pixtype=pixtype.encode()
+                    print('Reading '+str(model) + '_{:4.7f}'.format(w)+file_ext)
+              elif custom_modelname!=False:
+                    pixtype=Unique_models_orig[pixtype]
+                    pixtype=pixtype.encode()
+                    print('Reading '+str(model) + '_{:4.7f}'.format(w)+file_ext+' instead of model_'+pixtype.decode()+'_{:4.7f}'.format(w)+file_ext)
+
+              idx_pixels=findModel(masks,[pixtype])
+              n=len(idx_pixels[0])
+              geo_limit=np.append(np.arange(0,n,ngeosMax),np.array([n]))
+              print('Computing  ',n,'  pixels with the current model type.')
+              
+              phaseB = phase[idx_pixels]
+              theta0B = theta0[idx_pixels]
+              thetaB = theta[idx_pixels]
+              phiB = phi[idx_pixels]
+              betaB = beta[idx_pixels]
+              
+              PCL=np.array([]).reshape(0,len(Patchy_clouds_mask[0][0]))
+              for m,mask in enumerate(masks):
+                  idx_pcl=np.where(mask==pixtype)
+                  Patchy_clouds=Patchy_clouds_mask[m]
+                  PCL=np.append(PCL,Patchy_clouds[idx_pcl],axis=0)
+
+              if len(phaseB)==0:
+                  print('No corresponding pixels with this model atmosphere.')
+              else:
                   #==============================================================================
                   #           In case of aerosols, clouds and clear atmosphere in the same pixel
                   #==============================================================================
                   if Patchy_clouds.shape[1]>2 and aerosols==True:
-                      PCL=Patchy_clouds[mask==pixtype]
                       if any(PCL[:,0]!=0.) or any(PCL[:,2]!=0.):
                           phaseB_PCL=phaseB
                           theta0B_PCL = theta0B
@@ -558,41 +595,55 @@ def planet_Earth(models, alpha=[0], npix=20, force=False, set_taus=False, rename
                                       elif int(counter)==int(len(custom_modelname)-2):
                                           model_cloud=model_cloud
                                   counter+=2.
-                          print('Reading a Patchy cloud with aerosol pixels, consisting of (cloudy,clear,aerosol): '+str(model_cloud)+','+str(model_clear)+','+str(model))
+                          print('Reading a Patchy cloud with aerosol pixels, consisting of (cloudy,clear,aerosol): '+str(model_cloud)+file_ext+', '+str(model_clear)+file_ext+', '+str(model)+file_ext)
                           for output_path in dap_output_path:
-                              if os.path.exists(output_path+str(model_clear) + '_{:4.7f}.dat'.format(w)) or os.path.exists(output_path+'rfou_'+str(model_clear) + '_{:4.7f}.hdf5'.format(w)):
-                                  filepath_clear=output_path+str(model_clear) + '_{:4.7f}.dat'.format(w)
+                              if os.path.exists(output_path+str(model_clear) + '_{:4.7f}'.format(w)+file_ext):
+                                  filepath_clear=output_path+str(model_clear) + '_{:4.7f}'.format(w)+file_ext
                                   break
                           for output_path in dap_output_path:
-                              if os.path.exists(output_path+str(model_cloud) + '_{:4.7f}.dat'.format(w)) or os.path.exists(output_path+'rfou_'+str(model_cloud) + '_{:4.7f}.hdf5'.format(w)):
-                                  filepath_cloud=output_path+str(model_cloud) + '_{:4.7f}.dat'.format(w)
+                              if os.path.exists(output_path+str(model_cloud) + '_{:4.7f}'.format(w)+file_ext):
+                                  filepath_cloud=output_path+str(model_cloud) + '_{:4.7f}'.format(w)+file_ext
                                   break
                           for output_path in dap_output_path:
-                              if os.path.exists(output_path+str(model) + '_{:4.7f}.dat'.format(w)) or os.path.exists(output_path+'rfou_'+str(model) + '_{:4.7f}.hdf5'.format(w)):
-                                  filepath=output_path+str(model) + '_{:4.7f}.dat'.format(w)
+                              if os.path.exists(output_path+str(model) + '_{:4.7f}'.format(w)+file_ext):
+                                  filepath=output_path+str(model) + '_{:4.7f}'.format(w)+file_ext
                                   break
-                          IB_clear,QB_clear,UB_clear,VB_clear = pmd.read_dap_output(phaseB_PCL,theta0B_PCL,thetaB_PCL,filepath_clear,phi=phiB_PCL, beta=betaB_PCL)
-                          IB_cloud,QB_cloud,UB_cloud,VB_cloud = pmd.read_dap_output(phaseB_PCL,theta0B_PCL,thetaB_PCL,filepath_cloud,phi=phiB_PCL, beta=betaB_PCL)
-                          IB,QB,UB,VB = pmd.read_dap_output(phaseB,theta0B,thetaB,filepath,phi=phiB, beta=betaB)
+                          IB_clear=np.zeros((n));QB_clear=np.zeros((n));UB_clear=np.zeros((n));VB_clear=np.zeros((n))
+                          IB_cloud=np.zeros((n));QB_cloud=np.zeros((n));UB_cloud=np.zeros((n));VB_cloud=np.zeros((n))
+                          IB_aer=np.zeros((n));QB_aer=np.zeros((n));UB_aer=np.zeros((n));VB_aer=np.zeros((n))
+                          for g,geo_iter in enumerate(np.arange(0,n,ngeosMax)):
+                              idxlow=geo_limit[g]
+                              idxhigh=geo_limit[g+1]
+                              IB_clear[idxlow:idxhigh],QB_clear[idxlow:idxhigh],UB_clear[idxlow:idxhigh],VB_clear[idxlow:idxhigh] = pmd.read_dap_output(phaseB_PCL[idxlow:idxhigh],theta0B_PCL[idxlow:idxhigh],thetaB_PCL[idxlow:idxhigh],
+                                      filepath_clear,filetype=filetype,phi=phiB_PCL[idxlow:idxhigh], beta=betaB_PCL[idxlow:idxhigh])
+                              IB_cloud[idxlow:idxhigh],QB_cloud[idxlow:idxhigh],UB_cloud[idxlow:idxhigh],VB_cloud[idxlow:idxhigh] = pmd.read_dap_output(phaseB_PCL[idxlow:idxhigh],theta0B_PCL[idxlow:idxhigh],thetaB_PCL[idxlow:idxhigh],
+                                      filepath_cloud,filetype=filetype,phi=phiB_PCL[idxlow:idxhigh], beta=betaB_PCL[idxlow:idxhigh])
+                              IB_aer[idxlow:idxhigh],QB_aer[idxlow:idxhigh],UB_aer[idxlow:idxhigh],VB_aer[idxlow:idxhigh] = pmd.read_dap_output(phaseB[idxlow:idxhigh],theta0B[idxlow:idxhigh],thetaB[idxlow:idxhigh],
+                                      filepath,filetype=filetype,phi=phiB[idxlow:idxhigh], beta=betaB[idxlow:idxhigh])
                           if any((PCL[:,2]/PCL[:,1]+(1-(PCL[:,0]+PCL[:,2])/PCL[:,1])+(PCL[:,0]/PCL[:,1]))>1):
                               print('Fractions not computed correctly')
-                          IB=IB*(PCL[:,2]/PCL[:,1])+IB_clear*(1-(PCL[:,0]+PCL[:,2])/PCL[:,1])+IB_cloud*(PCL[:,0]/PCL[:,1])
-                          QB=QB*(PCL[:,2]/PCL[:,1])+QB_clear*(1-(PCL[:,0]+PCL[:,2])/PCL[:,1])+QB_cloud*(PCL[:,0]/PCL[:,1])
-                          UB=UB*(PCL[:,2]/PCL[:,1])+UB_clear*(1-(PCL[:,0]+PCL[:,2])/PCL[:,1])+UB_cloud*(PCL[:,0]/PCL[:,1])
-                          VB=VB*(PCL[:,2]/PCL[:,1])+VB_clear*(1-(PCL[:,0]+PCL[:,2])/PCL[:,1])+VB_cloud*(PCL[:,0]/PCL[:,1])
+                          IB=IB_aer*(PCL[:,2]/PCL[:,1])+IB_clear*(1-(PCL[:,0]+PCL[:,2])/PCL[:,1])+IB_cloud*(PCL[:,0]/PCL[:,1])
+                          QB=QB_aer*(PCL[:,2]/PCL[:,1])+QB_clear*(1-(PCL[:,0]+PCL[:,2])/PCL[:,1])+QB_cloud*(PCL[:,0]/PCL[:,1])
+                          UB=UB_aer*(PCL[:,2]/PCL[:,1])+UB_clear*(1-(PCL[:,0]+PCL[:,2])/PCL[:,1])+UB_cloud*(PCL[:,0]/PCL[:,1])
+                          VB=VB_aer*(PCL[:,2]/PCL[:,1])+VB_clear*(1-(PCL[:,0]+PCL[:,2])/PCL[:,1])+VB_cloud*(PCL[:,0]/PCL[:,1])
                           pixtype=pixtype.encode()
                       else:
                           for output_path in dap_output_path:
-                              if os.path.exists(output_path+str(model) + '_{:4.7f}.dat'.format(w)) or os.path.exists(output_path+'rfou_'+str(model) + '_{:4.7f}.hdf5'.format(w)):
-                                  filepath=output_path+str(model) + '_{:4.7f}.dat'.format(w)
+                              if os.path.exists(output_path+str(model) + '_{:4.7f}'.format(w))+file_ext:
+                                  filepath=output_path+str(model) + '_{:4.7f}'.format(w)+file_ext
                                   break
-                          IB,QB,UB,VB = read_dap_output(phaseB,theta0B,thetaB,filepath,phi=phiB, beta=betaB)
+                              
+                          IB=np.zeros((n));QB=np.zeros((n));UB=np.zeros((n));VB=np.zeros((n))
+                          for g,geo_iter in enumerate(np.arange(0,n,ngeosMax)):
+                              idxlow=geo_limit[g]
+                              idxhigh=geo_limit[g+1]
+                              IB[idxlow:idxhigh],QB[idxlow:idxhigh],UB[idxlow:idxhigh],VB[idxlow:idxhigh] = pmd.read_dap_output(phaseB[idxlow:idxhigh],theta0B[idxlow:idxhigh],thetaB[idxlow:idxhigh],
+                                      filepath,filetype=filetype,phi=phiB[idxlow:idxhigh], beta=betaB[idxlow:idxhigh])
                   
                   #==============================================================================
                   #        In case of clouds and clear pixels at the same pixel
                   #==============================================================================
                   else:
-                      PCL=Patchy_clouds[mask==pixtype]
                       if any(PCL[:,0]!=0.):
                           phaseB_PCL=phaseB
                           theta0B_PCL = theta0B
@@ -601,6 +652,7 @@ def planet_Earth(models, alpha=[0], npix=20, force=False, set_taus=False, rename
                           betaB_PCL = betaB
                           pixtype=pixtype.decode()
                           if pixtype.split('_')[2]=='3':
+                              print(PCL)
                               sys.exit("PCL Error")
                           model_clear=pixtype.split('_')
                           model_clear[2]='3'
@@ -618,87 +670,88 @@ def planet_Earth(models, alpha=[0], npix=20, force=False, set_taus=False, rename
                                       elif int(counter)==int(len(custom_modelname)-2):
                                           model_clear=model_clear
                                   counter+=2.
-                          print('Reading a Patchy cloud, consisting of (cloudy,clear): '+str(model)+','+str(model_clear))
+                          print('Reading a Patchy cloud, consisting of (cloudy,clear): '+str(model)+file_ext+', '+str(model_clear)+file_ext)
                           for output_path in dap_output_path:
-                              if os.path.exists(output_path+str(model_clear) + '_{:4.7f}.dat'.format(w)) or os.path.exists(output_path+str(model_clear) + '_{:4.7f}.hdf5'.format(w)):
-                                  filepath_clear=output_path+str(model_clear) + '_{:4.7f}.dat'.format(w)
+                              if os.path.exists(output_path+str(model_clear) + '_{:4.7f}'.format(w)+file_ext):
+                                  filepath_clear=output_path+str(model_clear) + '_{:4.7f}'.format(w)+file_ext
                                   break
                           for output_path in dap_output_path:
-                              if os.path.exists(output_path+str(model) + '_{:4.7f}.dat'.format(w)) or os.path.exists(output_path+str(model) + '_{:4.7f}.hdf5'.format(w)):
-                                  filepath=output_path+str(model) + '_{:4.7f}.dat'.format(w)
+                              if os.path.exists(output_path+str(model) + '_{:4.7f}'.format(w)+file_ext):
+                                  filepath=output_path+str(model) + '_{:4.7f}'.format(w)+file_ext
                                   break
-                          IB_clear,QB_clear,UB_clear,VB_clear = read_dap_output(phaseB_PCL,theta0B_PCL,thetaB_PCL,filepath_clear,phi=phiB_PCL, beta=betaB_PCL)
-                          IB,QB,UB,VB = read_dap_output(phaseB,theta0B,thetaB,filepath,phi=phiB, beta=betaB)
+                          IB_clear=np.zeros((n));QB_clear=np.zeros((n));UB_clear=np.zeros((n));VB_clear=np.zeros((n))
+                          IB_cloud=np.zeros((n));QB_cloud=np.zeros((n));UB_cloud=np.zeros((n));VB_cloud=np.zeros((n))
+                          for g,geo_iter in enumerate(np.arange(0,n,ngeosMax)):
+                              idxlow=geo_limit[g]
+                              idxhigh=geo_limit[g+1]
+                              IB_clear[idxlow:idxhigh],QB_clear[idxlow:idxhigh],UB_clear[idxlow:idxhigh],VB_clear[idxlow:idxhigh] = pmd.read_dap_output(phaseB_PCL[idxlow:idxhigh],theta0B_PCL[idxlow:idxhigh],thetaB_PCL[idxlow:idxhigh],
+                                      filepath_clear,filetype=filetype,phi=phiB_PCL[idxlow:idxhigh], beta=betaB_PCL[idxlow:idxhigh])
+                              IB_cloud[idxlow:idxhigh],QB_cloud[idxlow:idxhigh],UB_cloud[idxlow:idxhigh],VB_cloud[idxlow:idxhigh] = pmd.read_dap_output(phaseB[idxlow:idxhigh],theta0B[idxlow:idxhigh],thetaB[idxlow:idxhigh],
+                                      filepath,filetype=filetype,phi=phiB[idxlow:idxhigh], beta=betaB[idxlow:idxhigh])
                           if any(((1-PCL[:,0]/PCL[:,1])+(PCL[:,0]/PCL[:,1]))>1):
                               print('Fractions not computed correctly')
-                          IB=IB*(PCL[:,0]/PCL[:,1])+IB_clear*(1-PCL[:,0]/PCL[:,1])
-                          QB=QB*(PCL[:,0]/PCL[:,1])+QB_clear*(1-PCL[:,0]/PCL[:,1])
-                          UB=UB*(PCL[:,0]/PCL[:,1])+UB_clear*(1-PCL[:,0]/PCL[:,1])
-                          VB=VB*(PCL[:,0]/PCL[:,1])+VB_clear*(1-PCL[:,0]/PCL[:,1])
+                          IB=IB_cloud*(PCL[:,0]/PCL[:,1])+IB_clear*(1-PCL[:,0]/PCL[:,1])
+                          QB=QB_cloud*(PCL[:,0]/PCL[:,1])+QB_clear*(1-PCL[:,0]/PCL[:,1])
+                          UB=UB_cloud*(PCL[:,0]/PCL[:,1])+UB_clear*(1-PCL[:,0]/PCL[:,1])
+                          VB=VB_cloud*(PCL[:,0]/PCL[:,1])+VB_clear*(1-PCL[:,0]/PCL[:,1])
                           pixtype=pixtype.encode()
                       else:
                           for output_path in dap_output_path:
-                              if os.path.exists(output_path+str(model) + '_{:4.7f}.dat'.format(w)) or os.path.exists(output_path+str(model) + '_{:4.7f}.hdf5'.format(w)):
-                                  filepath=output_path+str(model) + '_{:4.7f}.dat'.format(w)
+                              if os.path.exists(output_path+str(model) + '_{:4.7f}'.format(w)+file_ext):
+                                  filepath=output_path+str(model) + '_{:4.7f}'.format(w)+file_ext
                                   break
-                          IB,QB,UB,VB = read_dap_output(phaseB,theta0B,thetaB,filepath,phi=phiB, beta=betaB)
+                          IB=np.zeros((n));QB=np.zeros((n));UB=np.zeros((n));VB=np.zeros((n))
+                          for g,geo_iter in enumerate(np.arange(0,n,ngeosMax)):
+                              idxlow=geo_limit[g]
+                              idxhigh=geo_limit[g+1]
+                              IB[idxlow:idxhigh],QB[idxlow:idxhigh],UB[idxlow:idxhigh],VB[idxlow:idxhigh] = pmd.read_dap_output(phaseB[idxlow:idxhigh],theta0B[idxlow:idxhigh],thetaB[idxlow:idxhigh],
+                                      filepath,filetype=filetype,phi=phiB[idxlow:idxhigh], beta=betaB[idxlow:idxhigh])
     
-                  It[j,mask==pixtype] = IB*np.cos(np.radians(theta0B))
-                  Qt[j,mask==pixtype] = QB*np.cos(np.radians(theta0B))
-                  Ut[j,mask==pixtype] = UB*np.cos(np.radians(theta0B))
-                  Vt[j,mask==pixtype] = VB*np.cos(np.radians(theta0B))
+                  It[idx_pixels] = IB*np.cos(np.radians(theta0B))
+                  Qt[idx_pixels] = QB*np.cos(np.radians(theta0B))
+                  Ut[idx_pixels] = UB*np.cos(np.radians(theta0B))
+                  Vt[idx_pixels] = VB*np.cos(np.radians(theta0B))
     
-        If[j,A,:ngeos] = It[j,:]
-        Qf[j,A,:ngeos] = Qt[j,:]
-        Uf[j,A,:ngeos] = Ut[j,:]
-        Vf[j,A,:ngeos] = Vt[j,:]
-
-    atm_model.geom.phase = phaf
-    atm_model.phase = phaf
-    if custommask==True:
-        atm_model.obs_dates = obs_dates
-    atm_model.geom.sza = szaf
-    atm_model.geom.emission = emif
-    atm_model.geom.azimuth = azif
-    atm_model.geom.beta = betf
-    atm_model.geom.latitude = latf
-    atm_model.geom.longitude = lonf
-    atm_model.geom.x = xf
-    atm_model.geom.y = yf
-    atm_model.npix = npix
-
-    atm_model.I = If
+        If[j,:,:] = It
+        Qf[j,:,:] = Qt
+        Uf[j,:,:] = Ut
+        Vf[j,:,:] = Vt
 
     # Compute adjusted radiance
     B = pmd.sunblackbody(np.array(atm_model.wvl_list)*1e-6, Ts=atm_model.Ts)
     Rs = 696342000.
     Dvs = 108208930000.0
     omegas = np.pi * (atm_model.Rs/atm_model.Dps)**2
-    atm_model.I2 = atm_model.I * B[:,np.newaxis,np.newaxis] * omegas
+    I2 = If * B[:,np.newaxis,np.newaxis] * omegas
 
-    atm_model.Q = Qf
-    atm_model.U = Uf
-    atm_model.V = Vf
-    atm_model.P = -Qf/If
-    atm_model.Pt = np.sqrt(Qf**2 + Uf**2 + Vf**2)/If
-    atm_model.Pl = np.sqrt(Qf**2 + Uf**2)/If
-    atm_model.Pv = Vf/If
 
-    output_dir='Run_'+start+'_'+filenames[A].split('.')[0]
+    output_dir='Run_'+start+'_'+filenames[0].split('.')[0]
     try:
         os.makedirs(os.path.normpath(data_output_path+output_dir))
     except OSError:
         if not os.path.isdir(os.path.normpath(data_output_path+output_dir)):
             raise
-    pkl_filename = data_output_path+output_dir+'/'+"Model_"+str(int(f_obsday_year))+"_"+str(obs_interval)+"_"+str(npix)+"_"+time.strftime("%Y.%m.%d.%H.%M")
-    with open(pkl_filename, 'wb') as file:
-        pickle.dump(atm_model, file)
+    h5_filename = data_output_path+output_dir+'/'+"Model_"+str(int(f_obsday_year))+"_"+str(obs_interval)+"_"+str(npix)+"_"+time.strftime("%Y.%m.%d.%H.%M")
 
+    dd.io.save(h5_filename, dict(model=atm_model))
+
+    with h5py.File(h5_filename, 'a') as f:
+        f.create_dataset("pha", data=phaf)
+        f.create_dataset("x", data=xf)
+        f.create_dataset("y", data=yf)
+        f.create_dataset("npix", data=npix)
+        f.create_dataset("I", data=If)
+        f.create_dataset("Q", data=Qf)
+        f.create_dataset("U", data=Uf)
+        f.create_dataset("V", data=Vf)
+    f.close()
+    
     mpl.ion()
 
 
-def plot_Earth(model, wvl_idx=0, display='grid', stokes=['Ps'], phase_idx=0,title='Polarization', cmap='YlOrRd',vmin=None,vmax=None,
-                font_size=12, figsize=[8,8], Ylim=[-10,35,5], dpi=100, diskintegrate=False, data_scale=1.,data_only=False):
+def plot_Earth(model, wvl_idx=0, display='grid', stokes='Ps', phase_idx=0,title='Polarization', cmap='YlOrRd',vmin=None,vmax=None,
+                font_size=12, figsize=[8,8], Ylim=[-10,35,5], dpi=100, diskintegrate=False, data_scale=1.,data_only=False,
+                data_direct=False,xin=None,yin=None,npix=None):
 
     """ Function to nicely plot a resolved planet based on Model object
 
@@ -742,11 +795,22 @@ def plot_Earth(model, wvl_idx=0, display='grid', stokes=['Ps'], phase_idx=0,titl
 
     """
 
-    npix=model.npix
     if data_only==False:
         fig = mpl.figure(figsize=(figsize), dpi=dpi)
-    
-    if diskintegrate==True:
+        
+    if data_direct==True:
+        Z=np.nan*np.zeros(xin.shape[1])
+        for phase_idx,alph in enumerate(xin[wvl_idx,:,0]):
+            ngeos, apix, theta0, theta, phi, beta, lats, longs, xs, ys = pmd.geos.getgeos(alph, npix)
+            Yx=yin[wvl_idx,phase_idx,:]*apix
+            Z[phase_idx] = np.nansum(Yx)
+        x=xin[wvl_idx,:,0]
+        x=x[~np.isnan(Z)]
+        Z=Z[~np.isnan(Z)]
+        Z = data_scale * Z
+        return x,Z
+    elif diskintegrate==True:
+        npix=model.npix
         Z=np.nan*np.zeros(model.phase.shape[1])
         for phase_idx,alph in enumerate(model.phase[wvl_idx,:,0]):
                 ngeos, apix, theta0, theta, phi, beta, lats, longs, xs, ys = pmd.geos.getgeos(alph, npix)
@@ -799,6 +863,7 @@ def plot_Earth(model, wvl_idx=0, display='grid', stokes=['Ps'], phase_idx=0,titl
             mpl.autoscale(enable=True, axis='x', tight=True)
         return x,Z
     else:
+        npix=model.npix
         stokes=stokes[0]
         alph=model.phase[wvl_idx,:,0]
         ngeos, apix, theta0, theta, phi, beta, lats, longs, xs, ys = pmd.geos.getgeos(alph, npix)
@@ -863,7 +928,8 @@ def mask_Earth(alpha=0, npix=100, filename='MYD08_D3.A2011115', obs_day=115.,
                 obs_path='./observation_database/',data_output_path='./PyMieDAP_Data/',
                 longitudinalpos=0., obliquity=0., rotation=0.,custom_glint=False,
                 nobins=False, iceclouds=False,windobs=False,plot_obs=True,aerosols=False,
-                bin_surfalb=np.array([0.0278,0.10936,0.98969,0.139387]),bin_surf=np.array([0,14,15,16]), 
+                bin_surfalb=np.array([0.0278,0.10936,0.98969,0.139387]),
+                bin_surf=np.array([1,1,1,1,1,2,4,2,2,2,4,2,4,2,3,4,0]),
                 bin_aot=np.array([0.2625,0.1875,0.0001,0.]),bin_aotvals=np.array([0.3,0.225,0.15,0.]),
                 bin_ctp=np.array([600.,800.,1e6]),bin_ctpvals=np.array([500.,700.,850.]),
                 bin_cot=np.array([15.,7.5,0.001,0.]), bin_cotvals=np.array([20.,10.,5.,0.]),
@@ -880,45 +946,6 @@ def mask_Earth(alpha=0, npix=100, filename='MYD08_D3.A2011115', obs_day=115.,
     npix : int, optional
         number of pixels on each axis
         default is 20
-    cusp : bool, optional
-        if True, polar cusps are added and pixels above thresh_lat have value 0
-        default is False
-    thresh_lat : float, optional
-        latitude threshold above which the cusps extend
-        default is 50.
-    patchy : bool
-        if True, generates a random patchy cloud cover. First type of patches
-        is given value 0, second is 1, etc.
-        Default is True
-    bands : bool
-        If True, generates bands that are defined by their latitudes. First
-        band has mask value 0, second is 1, etc.
-        default is False
-    bands_lats : array
-        array with limits of the bands. Should start at -90d and end at 90d. Must be in
-        increasing order. Default is [-90,90]
-    fclouds : array
-        List of fractions of the planet that should be covered with pixels of
-        each model
-        Default is [0.5, 0.5]
-    fixed_cover : None or array
-        if None, a new cloud cover is generated. If a table is
-        given, it will be used as the cloud cover. Default is None.
-    constant_fcloud : Bool
-        if True, the cloud cover fraction is calculated for
-        the given phase angle and not for the whole disk
-        Default is False
-    sscloud : bool
-        if True, a subsolar cloud is generated
-    sigma_c : float
-        extend in degrees of the subsolar cloud. Points between the
-        subsolar point and the points with SZA=alpha+sigma are given value 0.
-    delta_c : float
-        longitudinal offset for the subsolar cloud, in degrees
-    xscale : float
-        for patchy clouds gives the typical size on x-axis, as a function of npix
-    yscale : float
-        for patchy clouds gives the typical size on y-axis, as a function of npix
     
     Returns
     -------
@@ -940,9 +967,7 @@ def mask_Earth(alpha=0, npix=100, filename='MYD08_D3.A2011115', obs_day=115.,
     ngeos, apix, theta0, theta, phi, beta, lats, longs, xs, ys = pmd.geos.getgeos(alpha, npix)
     
     # prepare grids
-    #grid = np.zeros((npix,npix))
     grid_lit = np.zeros((npix,npix))
-    grid_full = np.zeros((npix,npix))
     grid_lit[:] = np.nan
     
     # get angles
@@ -965,29 +990,29 @@ def mask_Earth(alpha=0, npix=100, filename='MYD08_D3.A2011115', obs_day=115.,
     X = X.round(12)
     Y = Y.round(12)
     xv, yv = np.meshgrid(X,Y)
-    # remove outside of disk
-    grid_full[xv*xv+yv*yv>1]=np.nan
-    #grid_lit[xv*xv+yv*yv>1]=np.nan
  
     mpl.ioff()
-    grid_full[xv*xv+yv*yv>1]=np.nan
-    grid_lit[:] = np.nan
     # open land cover file
     model_classtot=np.array([[],[],[],[],[]])
-    ds = rasterio.open(obs_path+'MCD12Q1.006_LC_Type1_doy2011_SAMP.tif')
-    ds=ds.read(1)
+    surffile = rasterio.open(obs_path+'MCD12Q1.006_LC_Type1_doy2011_SAMP.tif')
+    ds=surffile.read(1)
+    surffile.close()
     for file in glob.glob(obs_path+filename+'*Cloud_Top_Pressure_Mean_INT_SAMP'+'*.tif'):
-        dsCTP=rasterio.open(file)
-        dsCTP=dsCTP.read(1)
+        CTPfile=rasterio.open(file)
+        dsCTP=CTPfile.read(1)
+        CTPfile.close()
     for file in glob.glob(obs_path+filename+'*Cloud_Optical_Thickness_Liquid_Log_Mean_INT_SAMP'+'*.tif'):
-        dsCOT=rasterio.open(file)
-        dsCOT=dsCOT.read(1)
+        COTfile=rasterio.open(file)
+        dsCOT=COTfile.read(1)
+        COTfile.close()
     for file in glob.glob(obs_path+filename+'*Cloud_Effective_Radius_Liquid_Mean_INT_SAMP'+'*.tif'):
-        dsCER=rasterio.open(file)
-        dsCER=dsCER.read(1)
+        CERfile=rasterio.open(file)
+        dsCER=CERfile.read(1)
+        CERfile.close()
     for file in glob.glob(obs_path+filename+'*Cloud_Fraction_Mean_INT_SAMP'+'*.tif'):
-        dsCF=rasterio.open(file)
-        dsCF=dsCF.read(1)
+        CFfile=rasterio.open(file)
+        dsCF=CFfile.read(1)
+        CFfile.close()
     if windobs==True:
         bin_wind=np.array([-100,6])
         bin_windvals=np.array([5,7])
@@ -997,17 +1022,21 @@ def mask_Earth(alpha=0, npix=100, filename='MYD08_D3.A2011115', obs_day=115.,
         print('Reading '+filename+'.'+str(int(obs_bin[obs_hour_idx])).zfill(2)+' as a multiday windspeed observation')
         for file in glob.glob(obs_path+filename+'.'+str(int(obs_bin[obs_hour_idx])).zfill(2)+'*Ocean_Surface_Wind_Speed_10m_INT_SAMP.tif'):
             dsWdsp=rasterio.open(file)
+            dsWdsp=dsWdsp.read(1)
         model_classtot=np.array([[],[],[],[],[],[]])
     if iceclouds==True:
         for file in glob.glob(obs_path+filename+'*Cloud_Effective_Radius_Ice_Mean_INT_SAMP'+'*.tif'):
             dsCERice=rasterio.open(file)
+            dsCERice=dsCERice.read(1)
         for file in glob.glob(obs_path+filename+'*Cloud_Optical_Thickness_Ice_Log_Mean_INT_SAMP'+'*.tif'):
             dsCOTice=rasterio.open(file)
+            dsCOTice=dsCOTice.read(1)
         model_classtot=np.array([[],[],[],[],[],[],[]])
     if aerosols==True:
         print('Reading an aerosol observation.')
         for file in glob.glob(obs_path+filename+'*AOD_550_Dark_Target_Deep_Blue_Combined_Mean_INT_SAMP'+'*.tif'):
             dsAOT=rasterio.open(file)
+            dsAOT=dsAOT.read(1)
         if aerosols==True and windobs==False and iceclouds==False:
             model_classtot=np.array([[],[],[],[],[],[]])
         elif aerosols==True and windobs==True and iceclouds==False:
@@ -1090,36 +1119,40 @@ def mask_Earth(alpha=0, npix=100, filename='MYD08_D3.A2011115', obs_day=115.,
         
         datasetcf=np.round(datasetcf,5)
         datasetcf_backup=np.copy(datasetcf)
-        if len(datasetctp)==0:
+        if np.sum(datasetcf)==0.:
             ctp=700.
-        else:
-            if len(datasetctp[datasetctp>0.])==0.:
-                ctp=700.
-            else:
-                ctp=np.sum((datasetctp[datasetctp>0.]*datasetcf[datasetctp>0.]))/(np.sum(datasetcf[datasetctp>0.]))
-        if len(datasetcer)==0:
             cer=12.5
-        else:
-            if len(datasetcer[datasetcer>0.])==0.:
-                cer=12.5
-            else:
-                cer=np.sum((datasetcer[datasetcer>0.]*datasetcf[datasetcer>0.]))/(np.sum(datasetcf[datasetcer>0.]))
-        if len(datasetcot)==0:
             cot=5.
         else:
-            if len(datasetcot[datasetcot>-10.])==0.:
+            if len(datasetctp)==0:
+                ctp=700.
+            else:
+                if len(datasetctp[datasetctp>0.])==0.:
+                    ctp=700.
+                else:
+                    ctp=np.sum((datasetctp[datasetctp>0.]*datasetcf[datasetctp>0.]))/(np.sum(datasetcf[datasetctp>0.]))
+            if len(datasetcer)==0:
+                cer=12.5
+            else:
+                if len(datasetcer[datasetcer>0.])==0.:
+                    cer=12.5
+                else:
+                    cer=np.sum((datasetcer[datasetcer>0.]*datasetcf[datasetcer>0.]))/(np.sum(datasetcf[datasetcer>0.]))
+            if len(datasetcot)==0:
                 cot=5.
             else:
-                cot_log_mean=np.sum((datasetcot[datasetcot>-10.]*datasetcf[datasetcot>-10.]))/(np.sum(datasetcf[datasetcot>-10.]))
-                cot=10**cot_log_mean
+                if len(datasetcot[datasetcot>-10.])==0.:
+                    cot=5.
+                else:
+                    cot_log_mean=np.sum((datasetcot[datasetcot>-10.]*datasetcf[datasetcot>-10.]))/(np.sum(datasetcf[datasetcot>-10.]))
+                    cot=10**cot_log_mean
         try:
-            IGBP=datasetsurf[np.argmax(datasetsurf)]
+            vals,counts=np.unique(datasetsurf,return_counts=True)
+            IGBP=vals[np.argmax(counts)]
         except (IndexError,ValueError):
-            IGBP=-1.
-        if int(IGBP)==255 or int(IGBP)==17: #remove to use the proper modis class
-            IGBP=-1
-        if int(IGBP)==7 or int(IGBP)==11 or int(IGBP)==13:
-            IGBP=16
+            IGBP=17
+        if int(IGBP)==255 or int(IGBP)==-1: # Unclassified regions are set to ocean.
+            IGBP=17
         ############
         if iceclouds==True:
             if len(datasetcerice)==0:
@@ -1138,7 +1171,7 @@ def mask_Earth(alpha=0, npix=100, filename='MYD08_D3.A2011115', obs_day=115.,
                     cotice_log_mean=np.sum((datasetcotice[datasetcotice>-10.]*datasetcf[datasetcotice>-10.]))/(np.sum(datasetcf[datasetcotice>-10.]))
                     cotice=10**cotice_log_mean
         if windobs==True:
-            if len(datasetwdsp)==0. or int(IGBP)>0. or len(datasetwdsp[datasetwdsp>0.])==0:
+            if len(datasetwdsp)==0. or int(IGBP)!=17. or len(datasetwdsp[datasetwdsp>0.])==0:
                 wdsp=0.
             else:
                 wdsp=np.mean(datasetwdsp[datasetwdsp>0.])
@@ -1151,7 +1184,9 @@ def mask_Earth(alpha=0, npix=100, filename='MYD08_D3.A2011115', obs_day=115.,
                 AeroFrac=len(datasetAOT[datasetAOT!=0.])/len(datasetAOT)
         ############
         #there always has to be a zero cot or cer in the bins for the no data!!!!!!!!!
-        idxlclass=np.digitize(IGBP,bin_surf,right=True)
+
+        idxlclass = bin_surf[IGBP-1] # remove 1 because python array index starts at 0!
+
         if np.isnan(ctp) or np.isnan(cot) or np.isnan(cer):
             idxctp=np.argmin(bin_ctpvals)
             idxcot=np.where(bin_cotvals==0)[0][0]
@@ -1274,9 +1309,13 @@ def mask_Earth(alpha=0, npix=100, filename='MYD08_D3.A2011115', obs_day=115.,
         dataeffrice=np.copy(grid_lit)
         dataeffrice[ssyidx,ssxidx]=model_classtot[6]
     Land_frac=np.array([])
-    for L_type in np.arange(len(bin_surf)):
-        frac=len(np.where(np.digitize(dataland[~np.isnan(dataland)],bin_surf,right=True)==L_type)[0])
-        frac=frac/float(ngeos)
+    Surfvals,Surfcounts=np.unique(dataland,return_counts=True)
+    for c,L_type in enumerate(Surfvals):
+        frac=Surfcounts[c]
+        if ngeos!=0:
+            frac=frac/float(ngeos)
+        else:
+            frac=np.nan
         Land_frac=np.append(Land_frac,frac)
     Data_means=[Data_means,Land_frac]
     AllData_lit=[dataland,datapres,dataopac,dataeffr,datacfrac]
@@ -1287,8 +1326,8 @@ def mask_Earth(alpha=0, npix=100, filename='MYD08_D3.A2011115', obs_day=115.,
         if not os.path.isdir(os.path.normpath(data_output_path+output_dir)):
             raise
     if plot_obs==True:
-        cmap = colors.ListedColormap(['darkblue','darkblue','forestgreen','forestgreen','forestgreen','forestgreen','forestgreen','yellowgreen','y','khaki','gold','limegreen','lightseagreen','green','grey','yellowgreen','snow','moccasin'])
-        bounds = np.linspace(-1,16,35).tolist()
+        cmap = colors.ListedColormap(['forestgreen','forestgreen','forestgreen','forestgreen','forestgreen','yellowgreen','y','khaki','gold','limegreen','lightseagreen','green','grey','yellowgreen','snow','moccasin','darkblue'])
+        bounds = np.linspace(1,17,33).tolist()
         norm = colors.BoundaryNorm(bounds,cmap.N)
         if iceclouds==True:
             f, axarr = mpl.subplots(7, 1,figsize=(6,32))
@@ -1340,34 +1379,34 @@ def mask_Earth(alpha=0, npix=100, filename='MYD08_D3.A2011115', obs_day=115.,
             f.colorbar(im,ax=axarr[6])
         mpl.savefig(data_output_path+output_dir+'/'+str(npix)+'_'+str(np.round(alpha,2))+'_'+str(abs(np.round(longitudinalpos,2))) + '.png',format = 'png', transparent=True)
         mpl.close()
-        try:
-            len_bitstr=len(max(model_codetot, key=len))
-        except ValueError:
-            len_bitstr=0
-        grid_full=grid_full.astype(dtype='|S'+str(len_bitstr))
-        grid_full[ssyidx,ssxidx] = np.array(model_codetot)
-        if aerosols==True:
-            grid_lit_Patchies=np.ones((npix,npix,3))*np.nan
-        else:
-            grid_lit_Patchies=np.ones((npix,npix,2))*np.nan
-        grid_lit=grid_lit.astype(dtype='|S'+str(len_bitstr))
-        grid_lit[ssyidx,ssxidx]= np.array(model_codetot)
-        if ngeos!=0:
-            grid_lit_Patchies[ssyidx,ssxidx]=np.array(Patchy_clouds)
-        with open(data_output_path+"modelcodes.txt", "wb") as fp:
-            pickle.dump(model_codestore, fp)
-        ds=None
-        Y=Y[::-1]
-        grid_full=np.flipud(grid_full)
-        grid_lit=np.flipud(grid_lit)
-        grid_lit_Patchies=np.flipud(grid_lit_Patchies)
-        print(time.time()-starttime)
-        mpl.ion()
+    try:
+        len_bitstr=len(max(model_codetot, key=len))
+    except ValueError:
+        len_bitstr=0
+    if aerosols==True:
+        grid_lit_Patchies=np.ones((npix,npix,3))*np.nan
+    else:
+        grid_lit_Patchies=np.ones((npix,npix,2))*np.nan
+    grid_lit=grid_lit.astype(dtype='|S'+str(len_bitstr))
+    grid_lit[ssyidx,ssxidx]= np.array(model_codetot)
+    if ngeos!=0:
+        grid_lit_Patchies[ssyidx,ssxidx]=np.array(Patchy_clouds)
+    with open(data_output_path+"modelcodes.txt", "wb") as fp:
+        pickle.dump(model_codestore, fp, protocol=2)
+    ds=None
+    Y=Y[::-1]
+    grid_lit=np.flipud(grid_lit)
+    grid_lit_Patchies=np.flipud(grid_lit_Patchies)
+    print(time.time()-starttime)
+    mpl.ion()
 
         # get current cloud coverage at given phase angle
     cl=np.where(dataopac[np.where(~np.isnan(dataopac))]>0)[0].size
     lit = np.where(~np.isnan(dataopac))[0].size
-    nb_cloud=float(cl)/(lit)
+    if ngeos!=0:
+        nb_cloud=float(cl)/(lit)
+    else:
+        nb_cloud=np.nan
     asym=[]
     xv, yv = np.meshgrid(X,Y)
     asymmetries=4
@@ -1397,14 +1436,14 @@ def mask_Earth(alpha=0, npix=100, filename='MYD08_D3.A2011115', obs_day=115.,
     grid_lit_Patchies=grid_lit_Patchies[np.where(grid_lit!='nan'.encode())]
     grid_out = grid_out.flatten()
     
-    return grid_lit, grid_out, grid_full, nb_cloud, asym, Data_means, grid_lit_Patchies
+    return grid_out, nb_cloud, asym, Data_means, grid_lit_Patchies
     
 def glint_coordinates(clear_ocean_path='/home2/victor/eDAP2/Database_1layer_noclouds/model_0_0_3_1_7_0.8650000.dat',alpha=87,npix=50,wvl=0.865,threshold=2.5,plot_glint=False):
     model=Model()
     model.wvl_list=[wvl]
     model.name[0]=clear_ocean_path
     
-    pmd.planet_pixels([model],alpha=[alpha],npix=npix,full_disk=True,custommask=False)
+    pmd.planet_pixels([model],alpha=[alpha],npix=npix,full_disk=True)
     if plot_glint==True:
         plot_Earth(model,stokes=['Q'],figsize=[10,10])
     

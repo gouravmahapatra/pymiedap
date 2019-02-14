@@ -19,7 +19,6 @@
 # de Haan et al. 1987, A&A
 # Stam et al. 2006, A&A
 """
-
 # ==============
 # IMPORT MODULES
 # ==============
@@ -30,8 +29,7 @@ import module_mieshell as mieshell
 import module_readmie as readmie
 import module_dap as dap
 import module_geos as geos
-import os
-import sys
+import os,h5py,glob,sys
 import os.path
 import matplotlib.pyplot as mpl
 from PIL import Image
@@ -1458,8 +1456,21 @@ def dap_code(model, rename=False, output_name='modelA',
         #     Call the doubling-adding routine:
         #-----------------------------------------------------------------------
         if filetype==1 or filetype==2:
-              dap.adding(outputname,a,b,coefs,ncoefs,max_ncoefs,nmug,nmat,surfmat,
-                         len(outputname),filetype,nlays)
+            (rfou,xmu,nfou)=dap.adding(a,b,coefs,ncoefs,max_ncoefs,nmug,nmat,surfmat,nlays)
+            f = h5py.File(outputname,'a')
+            f.create_dataset('Array-counts', data=np.array([nfou+1,nmat,nmug+1]))
+            f.create_dataset('XMU-array', data=xmu)
+            f.create_dataset('RFOU-array', data=rfou[:,:,:nfou+1])
+            if filetype==1:
+                derivs=np.zeros((nfou+1,nmat,3,nmug+1,nmug+1))
+                for m in np.arange(nfou+1):
+                    for k in np.arange(nmat):
+                        ki=np.arange(0,nmug+1)*nmat+k
+                        PDD=np.zeros((3,nmug+1,nmug+1))
+                        PDD=dap.rgpd3p(xmu,xmu,rfou[ki,:,m],PDD,nmug+1,nmug+1)
+                        derivs[m,k,:,:,:]=PDD
+                f.create_dataset('DERIVS-array', data=derivs)
+            f.close()
         else:
             dap.addingascii(outputname,a,b,coefs,ncoefs,max_ncoefs,nmug,nmat,surfmat,len(outputname),nlays)
 
@@ -1483,9 +1494,8 @@ def dap_code(model, rename=False, output_name='modelA',
             os.rename('fou_{:4.3f}.dat'.format(wav),output_file)
         print('End of DAP program')
 
-
 def read_dap_output(phase, sza, emission, filename='ModelA', filetype=1, beta=None, phi=None,
-                    ngeosMAX=100000, nmuMAX=300, nfouMAX=2000, nmatMAX=4):
+                    ngeosMAX=1000000, nmuMAX=300, nfouMAX=2000, nmatMAX=4):
     """ Reads the supermatrices coefficients for given geometry
 
     Parameters
@@ -1564,7 +1574,27 @@ def read_dap_output(phase, sza, emission, filename='ModelA', filetype=1, beta=No
     # make sure all input angles are in degrees
     # Reading Stoke vector
     if filetype==1 or filetype==2:
-        Sv = geos.read_dap(filename, ngeos, szaF, emissionF, azimuthF, betaF, filetype)
+        szaF=szaF[:ngeos]
+        emissionF=emissionF[:ngeos]
+        azimuthF=azimuthF[:ngeos]
+        betaF=betaF[:ngeos]
+        
+        f = h5py.File(filename,'r')
+        (nfou,nmat,nmu) = f['.']['Array-counts'].value
+        xmu = f['.']['XMU-array'].value
+        rfou = f['.']['RFOU-array'].value
+        if filetype==1:
+            derivs = f['.']['DERIVS-array'].value
+        # In case the hdf5 files were made with the old version of pymiedap:
+        if np.shape(derivs)[4]==nfou and np.shape(derivs)[3]==nmat and np.shape(derivs)[0]==nmu and np.shape(derivs)[1]==nmu:
+            derivs=derivs.transpose()
+            Ftype=True
+        else:
+            Ftype=False
+        if np.shape(rfou)[0]==nfou and np.shape(rfou)[2]==nmat*nmu and Ftype==True:
+            rfou=rfou.transpose()
+        f.close()
+        Sv = geos.read_dap(filename,derivs,rfou,xmu,szaF,emissionF,azimuthF,betaF,filetype,nfou,nmat,nmu,ngeos)
     else:
         rfou = np.zeros((nmatMAX*nmuMAX,nmuMAX,nfouMAX+1), order='F')
         Sv = geos.read_dapascii(filename, ngeos, szaF, emissionF, azimuthF, betaF, rfou)
@@ -1810,6 +1840,15 @@ def binned_average(x,y,xbins, errmean=True, weighted=True, sigmas=1.):
 
     return xmid,moy,sigma
 
+def findModel(searchList, elem):
+    idxx=np.array([])
+    idxy=np.array([])
+    for e in elem:
+        for i,x in enumerate(searchList):
+            if e in x:
+                idxy=np.append(idxy,np.where(x==e)[0])
+                idxx=np.append(idxx,np.ones((len(np.where(x==e)[0])))*i)
+    return (idxx.astype(int),idxy.astype(int))
 
 def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rename=True,
                   output_names=['modelA','modelB'], filetype=1, fixed_pattern=False,
@@ -2432,6 +2471,9 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
                 else:
                     # if multiple patterns read all pixels
                     print('Reading {}'.format(model.name[j]))
+                    
+                    if ngeos<1:
+                        continue
                     I,Q,U,V = read_dap_output(phase,theta0,theta,model.name[j],phi=phi, beta=beta,
                                               filetype=filetype)
                     Is[pixtype,j,:] = I*np.cos(np.radians(theta0))
@@ -3009,6 +3051,49 @@ def orthographic_projection(center=np.array([0,0]), npix=20, input_img='./earth_
             grid_full[xtmp,ytmp] = maps.flatten()[i]
 
     return x,y,maps2, xidx, yidx, grid_full
+
+def ASCII2HDF5(files,derivs=True):
+    for file in glob.glob(files):
+        fileascii=file
+        filehdf5=file.strip('.dat')+'.hdf5'
+        
+        h5File = h5py.File(filehdf5,'w')
+        dt = h5py.special_dtype(vlen=str)
+        
+        lines=[]
+        for line in open(fileascii):
+            li=line.strip()
+            if li.startswith("#"):
+                print(line.rstrip())
+                lines.append(line.rstrip())
+        
+        
+        asciiList = [n.encode("ascii", "ignore") for n in lines]
+        h5File.create_dataset('model', (len(asciiList),1),'S100', asciiList)
+        h5File.close()
+        
+        nmuMAX=300
+        nfouMAX=2000
+        nmatMAX=4
+        rfou = np.zeros((nmatMAX*nmuMAX,nmuMAX,nfouMAX+1), order='F')
+        rfou,nfou,nmat,nmu,xmu= geos.rdfousascii(fileascii,rfou)
+        xmu=xmu[:nmu]
+        rfou=rfou[:nmu*nmat,:nmu,:nfou]
+        
+        f = h5py.File(filehdf5,'a')
+        f.create_dataset('Array-counts', data=np.array([nfou,nmat,nmu]))
+        f.create_dataset('XMU-array', data=xmu)
+        f.create_dataset('RFOU-array', data=rfou)
+        if derivs==True:
+            derivs=np.zeros((nfou,nmat,3,nmu,nmu))
+            for m in np.arange(nfou):
+                for k in np.arange(nmat):
+                    ki=np.arange(0,nmu)*nmat+k
+                    PDD=np.zeros((3,nmu,nmu))
+                    PDD=dap.rgpd3p(xmu,xmu,rfou[ki,:,m],PDD,nmu,nmu)
+                    derivs[m,k,:,:,:]=PDD
+            f.create_dataset('DERIVS-array', data=derivs)
+        f.close()
 
 
 # -----------
