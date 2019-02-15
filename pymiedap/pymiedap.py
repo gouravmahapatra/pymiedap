@@ -2784,15 +2784,19 @@ def mask_planet(alpha=0, npix=20, cusp=False, thresh_lat=50., patchy=True,
                 #fill the planet with pixels
                 while nb_cloud<total_fcloud:
                     # generate several multivariate gaussians on the grid
-                    moy = (npr.randint(1,npix),npr.randint(1,npix))
+                    moy = (npr.randint(0,npix),npr.randint(0,npix))
                     cov = np.diag([npix*yscale,npix*xscale])
                     x,y = npr.multivariate_normal(moy,cov,50).T
                     # Warning: here x is N/S axis and y E/W axis
+                    x = np.round(x)
+                    y = np.round(y)
                     x = x.astype('int')
                     y = y.astype('int')
                     # if they go beyond the grid, wrap them around
-                    x[abs(x)>=npix] = -1
-                    y[abs(y)>=npix] = -1
+                    x[x>=npix] = x[x>=npix]-npix
+                    y[y>=npix] = y[y>=npix]-npix
+                    x[x<-npix] = x[x<-npix]+npix
+                    y[y<-npix] = y[y<-npix]+npix
                     # if a pixel is not already taken, give the value of the current type
                     #grid[x,y] = np.where(grid[x,y]==-1, T, grid[x,y])
                     grid_full[x,y] = np.where(grid_full[x,y]==-1, T, grid_full[x,y])
