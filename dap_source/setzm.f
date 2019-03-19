@@ -85,7 +85,7 @@ Cf2py intent(out) Zmmin,Zmplus
       IF (nmat.EQ.1) THEN
           IF (verbo) print *,' setzm: use scalar phase matrix'
           CALL scalzm(m,layer,coefs,ncoefs,xmu,binfac,
-     .                nmu,nmat,Zmmin,Zmplus)
+     .                nmu,Zmmin,Zmplus)
           GOTO 999
       ENDIF
 
