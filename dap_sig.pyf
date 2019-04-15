@@ -39,18 +39,6 @@ python module module_dap ! in
             integer intent(in) :: nmat
             integer intent(in) :: nmu
         end subroutine assign
-        subroutine baerosols(nlays,nmat,baer,coefin,ncoefin,basca,baabs,coefs,coefsa,ncoefsa) ! in :module_dap:./dap_source/baerosols.f
-            integer intent(in) :: nlays
-            integer intent(in) :: nmat
-            double precision dimension(50),intent(in) :: baer
-            double precision dimension(4,4,4001,50),intent(in) :: coefin
-            integer dimension(50),intent(in) :: ncoefin
-            double precision dimension(50),intent(out) :: basca
-            double precision dimension(50),intent(out) :: baabs
-            double precision dimension(4,4,4001,50),intent(out) :: coefs
-            double precision dimension(4,4,4001,50),intent(out) :: coefsa
-            integer dimension(50),intent(out) :: ncoefsa
-        end subroutine baerosols
         subroutine bmolecules(wav,nlays,pres,depol,ri,mma,grav,bmsca,bmabs,coefsm) ! in :module_dap:./dap_source/bmolecules.f
             double precision intent(in) :: wav
             integer intent(in) :: nlays

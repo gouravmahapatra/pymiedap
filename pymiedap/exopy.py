@@ -954,9 +954,9 @@ def test_integration(body, scene='clear', plot = 'no'):
         output[2,i,A] = 4*np.cos(np.radians(sza[i,A]))*body.grid.shadow[i,A]*area[2,A]*U/np.pi
         print(t.time()-t1)
 
-	Ip = np.nansum(output[0,:],1)
-	Qp = np.nansum(output[1,:],1)
-	Up = np.nansum(output[2,:],1)
+    Ip = np.nansum(output[0,:],1)
+    Qp = np.nansum(output[1,:],1)
+    Up = np.nansum(output[2,:],1)
 
     #==========================================================================
     #==========================================================================
@@ -1001,8 +1001,7 @@ def test_integration(body, scene='clear', plot = 'no'):
 
         print(t22-t11)
 
-
-	return [Ip, Qp, Up]
+    return [Ip, Qp, Up]
 
 
 

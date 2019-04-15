@@ -144,6 +144,7 @@ class Layer():
         self.mixed_aerosols.col_dens = N
         self.mixed_aerosols.sext = sum_fsext
         self.mixed_aerosols.ssca = sum_fssca
+        self.mixed_aerosols.ssalb = sum_fssca/sum_fsext
         #Warning! Might not be okay!
         #self.mixed_aerosols.nr = aero.nr
         #self.mixed_aerosols.ni = aero.ni
@@ -1018,6 +1019,7 @@ def mie_code(aerosols, wavelengths, output=False, delta=1e-8, cutoff=1e-8, thmin
     aerosols.qext = qexts
     aerosols.ssca = sscas
     aerosols.qsca = qscas
+    aerosols.ssalb = sscas/sexts
 
     print('End of Mie program')
 
@@ -1157,6 +1159,7 @@ def mie_shell(aerosols, wavelengths, output=False, delta=1e-8, cutoff=1e-8, thmi
     aerosols.qext = qexts
     aerosols.ssca = sscas
     aerosols.qsca = qscas
+    aerosols.ssalb = sscas/sexts
 
     print('End of Mie program')
     #return u,F, miec
@@ -1301,16 +1304,13 @@ def dap_code(model, rename=False, output_name='modelA',
     nlays = len(vars(model.layers))  # number of atmospheric layers
     nwvl = len(model.wvl_list)
 
-    pres = np.zeros(nlaysMAX, order='F')  # pressure levels for each layer
     ncoefs = np.zeros(nlaysMAX, order='F')
     wavels = model.wvl_list
     nwavels = len(wavels)
-    taus = np.zeros(nlaysMAX, order='F')  # all values of tau
-    taus_g = np.zeros(nlaysMAX, order='F')  # all values of tau_g at wvl z
-    laylevel = np.zeros(nlaysMAX, order='F')  # level of layers
 
     # Creating array to receive the coefficients
     coefin = np.zeros((nmatMAX,nmatMAX,ncoefsMAX,nlaysMAX), order='F')
+    coefs = np.zeros((nmatMAX,nmatMAX,ncoefsMAX,nlaysMAX), order='F')
     ncoefin = np.zeros((nlaysMAX), order='F')
     model.name = ['']*len(model.wvl_list)
 
@@ -1327,6 +1327,11 @@ def dap_code(model, rename=False, output_name='modelA',
     for z, wav in enumerate(wavels):
         #get coefs for each wavelength
         taus = np.zeros(nlaysMAX, order='F')  # all values of tau at wvl z
+        taus_g = np.zeros(nlaysMAX, order='F')  # all values of tau_g at wvl z
+        basca = np.zeros(nlaysMAX, order='F')  # all values of basca
+        baabs = np.zeros(nlaysMAX, order='F')  # all values of baabs
+        ssalbs = np.zeros(nlaysMAX, order='F')  # all values of s.scat albedoes
+        pres = np.zeros(nlaysMAX, order='F')  # pressure levels for each layer
 
         print('Wavelength {:06.7f} microns'.format(wav))
 
@@ -1345,6 +1350,11 @@ def dap_code(model, rename=False, output_name='modelA',
             if max(layer.tau)!=0:
                 coefin[:,:,:,l] = layer.mixed_aerosols.coefs[z,:,:,:]
                 ncoefin[l] = layer.mixed_aerosols.ncoefs[z]
+                ssalbs[l] = layer.mixed_aerosols.ssalb[z]
+                # Calculate the aerosol scattering and absorption optical
+                # thicknesses,
+                basca[l] = ssalbs[l] * taus[l]
+                baabs[l] = (1. - ssalbs[l]) * taus[l]
 
             print('{}.sc.{:06.7f}'.format(layer.mixed_aerosols.typ, wav))
             l = l + 1
@@ -1356,23 +1366,18 @@ def dap_code(model, rename=False, output_name='modelA',
         taus_g[:l] = taus_g[layorder]  # putting the taus_g in right order
         pres[:l] = pres[layorder]  # putting the pressures in right order
 
+        # More reordering
         coefin[:,:,:,:l] = coefin[:,:,:,layorder]
         ncoefin[:l] = ncoefin[layorder]
+        ssalbs[:l] = ssalbs[layorder]
+        basca[:l] = basca[layorder]
+        baabs[:l] = baabs[layorder]
 
         # Calculate the molecular parameters of the atmosphere:
         ri = model.rindex_gas[z]
         bmsca, bmabs, coefsm = dap.bmolecules(wav, nlays, pres, dpol, ri, mma, gravity)
 
         model.coefsm = coefsm
-        #-----------------------------------------------------------------
-        #     Calculate the aerosol scattering and absorption optical
-        #     thicknesses, and the expansion coefficients:
-        #-----------------------------------------------------------------
-        #basca, baabs, coefs, coefsa, ncoefsa = dap.baerosols(nlays, nmat, taus,
-        baabs, basca, coefs, coefsa, ncoefsa = dap.baerosols(nlays, nmat, taus,
-                                                             coefin, ncoefin)
-        # REM: why are baabs and bsca inverted? should be checked
-        model.coefsa = coefsa
 
         # Storing the effective scattering and absorption opacities
         for layer_name, layer in vars(model.layers).items():
@@ -1396,24 +1401,12 @@ def dap_code(model, rename=False, output_name='modelA',
         #---------------------------------------------------------------
         #     Calculate the combined expansion coefficients
         #---------------------------------------------------------------
-       #for i in np.arange(nlays):
-       #    ncoefs[i] = max(ncoefsa[i], 2)
-       #    for j in np.arange(nmat):
-       #        for k in np.arange(nmat):
-       #            for m in np.arange(ncoefs[i]):
-       #                com = bmsca[i] * coefsm[j,k,m]
-       #                coa = basca[i] * coefsa[j,k,m,i]
-       #                if ((bmsca[i]+basca[i]) < 1e-10):
-       #                    coefs[j,k,m,i]= 0.
-       #                else:
-       #                    coefs[j,k,m,i]= (com+coa)/(bmsca[i]+basca[i])
-
         for i in np.arange(nlays):
-            ncoefs[i] = max(ncoefsa[i], 2)
+            ncoefs[i] = max(ncoefin[i], 2)
             # multiply all coefs by the associated optical thickness
             # in each layer
             com = bmsca[i,np.newaxis,np.newaxis] * coefsm
-            coa = basca[i,np.newaxis,np.newaxis,np.newaxis] * coefsa[:,:,:,i]
+            coa = basca[i,np.newaxis,np.newaxis,np.newaxis] * coefin[:,:,:,i]
             # if the opacities are too small, nullify coefs
             if ((bmsca[i]+basca[i]) < 1e-10):
                 coefs[:,:,:,i]= 0.
@@ -2791,15 +2784,19 @@ def mask_planet(alpha=0, npix=20, cusp=False, thresh_lat=50., patchy=True,
                 #fill the planet with pixels
                 while nb_cloud<total_fcloud:
                     # generate several multivariate gaussians on the grid
-                    moy = (npr.randint(1,npix),npr.randint(1,npix))
+                    moy = (npr.randint(0,npix),npr.randint(0,npix))
                     cov = np.diag([npix*yscale,npix*xscale])
                     x,y = npr.multivariate_normal(moy,cov,50).T
                     # Warning: here x is N/S axis and y E/W axis
+                    x = np.round(x)
+                    y = np.round(y)
                     x = x.astype('int')
                     y = y.astype('int')
                     # if they go beyond the grid, wrap them around
-                    x[abs(x)>=npix] = -1
-                    y[abs(y)>=npix] = -1
+                    x[x>=npix] = x[x>=npix]-npix
+                    y[y>=npix] = y[y>=npix]-npix
+                    x[x<-npix] = x[x<-npix]+npix
+                    y[y<-npix] = y[y<-npix]+npix
                     # if a pixel is not already taken, give the value of the current type
                     #grid[x,y] = np.where(grid[x,y]==-1, T, grid[x,y])
                     grid_full[x,y] = np.where(grid_full[x,y]==-1, T, grid_full[x,y])
