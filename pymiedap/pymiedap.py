@@ -979,8 +979,19 @@ def mie_code(aerosols, wavelengths, output=False, delta=1e-8, cutoff=1e-8, thmin
                                              delta)
 
         ncoefs = nangle
+
+        # Generalization to 6 matrix elements
+        Fshape = np.shape(F)
+        F2 = np.zeros((6,Fshape[1]), order='F')
+        F2[0,:] = F[0,:]  # F11
+        F2[1,:] = F[0,:]  # F22
+        F2[2,:] = F[2,:]  # F33
+        F2[3,:] = F[2,:]  # F44
+        F2[4,:] = F[1,:]  # F12
+        F2[5,:] = F[3,:]  # F34
+
         #expansion of the matrix
-        coefs = matrix_expansion(ncoefs, nangle, u, wg, F)
+        coefs = matrix_expansion(ncoefs, nangle, u, wg, F2)
 
         # Store the coefficients for each wvl
         supercoefin[i,:,:,:] = coefs
@@ -1119,8 +1130,19 @@ def mie_shell(aerosols, wavelengths, output=False, delta=1e-8, cutoff=1e-8, thmi
                                                   delta)
 
         ncoefs = nangle
+
+        # Generalization to 6 matrix elements
+        Fshape = np.shape(F)
+        F2 = np.zeros((6,Fshape[1]), order='F')
+        F2[0,:] = F[0,:]  # F11
+        F2[1,:] = F[0,:]  # F22
+        F2[2,:] = F[2,:]  # F33
+        F2[3,:] = F[2,:]  # F44
+        F2[4,:] = F[1,:]  # F12
+        F2[5,:] = F[3,:]  # F34
+
         #expansion of the matrix
-        coefs = matrix_expansion(ncoefs, nangle, u, wg, F)
+        coefs = matrix_expansion(ncoefs, nangle, u, wg, F2)
 
         # Store the coefficients for each wvl
         supercoefin[i,:,:,:] = coefs

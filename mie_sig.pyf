@@ -18,7 +18,7 @@ python module module_mie ! in
             integer intent(in) :: nangle
             double precision dimension(10000),intent(in) :: u
             double precision dimension(10000),intent(in) :: wg
-            double precision dimension(4,10000),intent(in) :: f
+            double precision dimension(6,10000),intent(in) :: f
             double precision dimension(4,4,4001),intent(out) :: coefs
         end subroutine devel
         subroutine fichid(m,x,nchi,nmax,nd,psi,chi,d) ! in :module_mie:./mie_source/fichid.f
