@@ -64,9 +64,9 @@ class Layer():
         particular column density in particles per square micrometers
     """
 
-    def __init__(self, tau=[30], tau_g=[0.], press=30e-3, psd='2',
+    def __init__(self, tau=[30], tau_g=[0.], press=30e-3,
                  mix_factor=0., bmsca=[0], bmabs=[0],
-                 tau_ray=[0.], rayscat=True,
+                 tau_ray=[0.], rayscat=True, col_dens=0.,
                  basca=[0], baabs=[0]):
         """ Initializes the model object with default values
         aerosols: a subclass to describe the properties of the aerosols
@@ -77,7 +77,7 @@ class Layer():
         self.tau_ray = tau_ray
         self.rayscat = rayscat
         self.press = press
-        self.col_dens = 3.2
+        self.col_dens = col_dens
         self.bmsca = bmsca
         self.bmabs = bmabs
         self.basca = basca
