@@ -162,7 +162,7 @@ class Layers:
 
         self.gastop = Layer(tau=[0.0], press=1e-5)
         self.haze = Layer(press=10e-3, tau=[0.01])
-        self.cloud = Layer(press=1., psd='3')
+        self.cloud = Layer(press=1.)
         self.gasbelow = Layer(tau=[0.0], press=100)
 
 
