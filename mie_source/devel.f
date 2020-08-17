@@ -13,7 +13,7 @@
       INCLUDE 'max_incl'
 
       INTEGER ncoefs, nangle
-      DOUBLE PRECISION u(nangMAX),wg(nangMAX),F(nmatMAX,nangMAX),
+      DOUBLE PRECISION u(nangMAX),wg(nangMAX),F(6,nangMAX),
      .                 coefs(nmatMAX,nmatMAX,0:ncoefsMAX),
      .                 P00(nangMAX,2),P02(nangMAX,2),
      .                 P22(nangMAX,2),P2m2(nangMAX,2)
@@ -38,7 +38,7 @@ Cf2py intent(out) coefs
 *  Multiply the scattering matrix F with the weights w for all angles  *
 *  We DO this here because otherwise it should be DOne for each l      *
 ************************************************************************
-      DO k=1,nmatMAX
+      DO k=1,6
          DO i=1,nangle
             F(k,i)= wg(i)*F(k,i)
          ENDDO
@@ -132,11 +132,11 @@ Cf2py intent(out) coefs
          alfam= 0.D0
          DO i=1,nangle
             coefs(1,1,l) = coefs(1,1,l) + P00(i,lnew)*F(1,i)
-            alfap = alfap + P22(i,lnew)*(F(1,i)+F(3,i))
-            alfam = alfam + P2m2(i,lnew)*(F(1,i)-F(3,i))
-            coefs(4,4,l) = coefs(4,4,l) + P00(i,lnew)*F(3,i)
-            coefs(1,2,l) = coefs(1,2,l) + P02(i,lnew)*F(2,i)
-            coefs(3,4,l) = coefs(3,4,l) + P02(i,lnew)*F(4,i)
+            alfap = alfap + P22(i,lnew)*(F(2,i)+F(3,i))
+            alfam = alfam + P2m2(i,lnew)*(F(2,i)-F(3,i))
+            coefs(4,4,l) = coefs(4,4,l) + P00(i,lnew)*F(4,i)
+            coefs(1,2,l) = coefs(1,2,l) + P02(i,lnew)*F(5,i)
+            coefs(3,4,l) = coefs(3,4,l) + P02(i,lnew)*F(6,i)
          ENDDO
 ************************************************************************
 *         Multiply with trivial factors like 0.5D0*(2*l+1)             *
@@ -158,7 +158,7 @@ Cf2py intent(out) coefs
 ************************************************************************
 *     Remove the weight factor from the scattering matrix              *
 ************************************************************************
-      DO k=1,nmatMAX
+      DO k=1,6
          DO i=1,nangle
             F(k,i) = F(k,i)/wg(i)
          ENDDO

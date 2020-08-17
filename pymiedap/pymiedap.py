@@ -63,9 +63,9 @@ class Layer():
         particular column density in particles per square micrometers
     """
 
-    def __init__(self, tau=[30], tau_g=[0.], press=30e-3, psd='2',
+    def __init__(self, tau=[30], tau_g=[0.], press=30e-3,
                  mix_factor=0., bmsca=[0], bmabs=[0],
-                 tau_ray=[0.], rayscat=True,
+                 tau_ray=[0.], rayscat=True, col_dens=0.,
                  basca=[0], baabs=[0]):
         """ Initializes the model object with default values
         aerosols: a subclass to describe the properties of the aerosols
@@ -76,7 +76,7 @@ class Layer():
         self.tau_ray = tau_ray
         self.rayscat = rayscat
         self.press = press
-        self.col_dens = 3.2
+        self.col_dens = col_dens
         self.bmsca = bmsca
         self.bmabs = bmabs
         self.basca = basca
@@ -161,7 +161,7 @@ class Layers:
 
         self.gastop = Layer(tau=[0.0], press=1e-5)
         self.haze = Layer(press=10e-3, tau=[0.01])
-        self.cloud = Layer(press=1., psd='3')
+        self.cloud = Layer(press=1.)
         self.gasbelow = Layer(tau=[0.0], press=100)
 
 
@@ -978,8 +978,19 @@ def mie_code(aerosols, wavelengths, output=False, delta=1e-8, cutoff=1e-8, thmin
                                              delta)
 
         ncoefs = nangle
+
+        # Generalization to 6 matrix elements
+        Fshape = np.shape(F)
+        F2 = np.zeros((6,Fshape[1]), order='F')
+        F2[0,:] = F[0,:]  # F11
+        F2[1,:] = F[0,:]  # F22
+        F2[2,:] = F[2,:]  # F33
+        F2[3,:] = F[2,:]  # F44
+        F2[4,:] = F[1,:]  # F12
+        F2[5,:] = F[3,:]  # F34
+
         #expansion of the matrix
-        coefs = matrix_expansion(ncoefs, nangle, u, wg, F)
+        coefs = matrix_expansion(ncoefs, nangle, u, wg, F2)
 
         # Store the coefficients for each wvl
         supercoefin[i,:,:,:] = coefs
@@ -1118,8 +1129,19 @@ def mie_shell(aerosols, wavelengths, output=False, delta=1e-8, cutoff=1e-8, thmi
                                                   delta)
 
         ncoefs = nangle
+
+        # Generalization to 6 matrix elements
+        Fshape = np.shape(F)
+        F2 = np.zeros((6,Fshape[1]), order='F')
+        F2[0,:] = F[0,:]  # F11
+        F2[1,:] = F[0,:]  # F22
+        F2[2,:] = F[2,:]  # F33
+        F2[3,:] = F[2,:]  # F44
+        F2[4,:] = F[1,:]  # F12
+        F2[5,:] = F[3,:]  # F34
+
         #expansion of the matrix
-        coefs = matrix_expansion(ncoefs, nangle, u, wg, F)
+        coefs = matrix_expansion(ncoefs, nangle, u, wg, F2)
 
         # Store the coefficients for each wvl
         supercoefin[i,:,:,:] = coefs
@@ -1303,16 +1325,9 @@ def dap_code(model, rename=False, output_name='modelA',
     nlays = len(vars(model.layers))  # number of atmospheric layers
     nwvl = len(model.wvl_list)
 
-    pres = np.zeros(nlaysMAX, order='F')  # pressure levels for each layer
     ncoefs = np.zeros(nlaysMAX, order='F')
     wavels = model.wvl_list
     nwavels = len(wavels)
-    taus = np.zeros(nlaysMAX, order='F')  # all values of tau
-    taus_g = np.zeros(nlaysMAX, order='F')  # all values of tau_g at wvl z
-    ssalbs = np.zeros(nlaysMAX, order='F')  # all values of s.scat albedoes
-    laylevel = np.zeros(nlaysMAX, order='F')  # level of layers
-    basca = np.zeros(nlaysMAX, order='F')  # all values of basca
-    baabs = np.zeros(nlaysMAX, order='F')  # all values of baabs
 
     # Creating array to receive the coefficients
     coefin = np.zeros((nmatMAX,nmatMAX,ncoefsMAX,nlaysMAX), order='F')
@@ -1333,6 +1348,11 @@ def dap_code(model, rename=False, output_name='modelA',
     for z, wav in enumerate(wavels):
         #get coefs for each wavelength
         taus = np.zeros(nlaysMAX, order='F')  # all values of tau at wvl z
+        taus_g = np.zeros(nlaysMAX, order='F')  # all values of tau_g at wvl z
+        basca = np.zeros(nlaysMAX, order='F')  # all values of basca
+        baabs = np.zeros(nlaysMAX, order='F')  # all values of baabs
+        ssalbs = np.zeros(nlaysMAX, order='F')  # all values of s.scat albedoes
+        pres = np.zeros(nlaysMAX, order='F')  # pressure levels for each layer
 
         print('Wavelength {:06.7f} microns'.format(wav))
 
@@ -2877,15 +2897,19 @@ def mask_planet(alpha=0, npix=20, cusp=False, thresh_lat=50., patchy=True,
                 #fill the planet with pixels
                 while nb_cloud<total_fcloud:
                     # generate several multivariate gaussians on the grid
-                    moy = (npr.randint(1,npix),npr.randint(1,npix))
+                    moy = (npr.randint(0,npix),npr.randint(0,npix))
                     cov = np.diag([npix*yscale,npix*xscale])
                     x,y = npr.multivariate_normal(moy,cov,50).T
                     # Warning: here x is N/S axis and y E/W axis
+                    x = np.round(x)
+                    y = np.round(y)
                     x = x.astype('int')
                     y = y.astype('int')
                     # if they go beyond the grid, wrap them around
-                    x[abs(x)>=npix] = -1
-                    y[abs(y)>=npix] = -1
+                    x[x>=npix] = x[x>=npix]-npix
+                    y[y>=npix] = y[y>=npix]-npix
+                    x[x<-npix] = x[x<-npix]+npix
+                    y[y<-npix] = y[y<-npix]+npix
                     # if a pixel is not already taken, give the value of the current type
                     #grid[x,y] = np.where(grid[x,y]==-1, T, grid[x,y])
                     grid_full[x,y] = np.where(grid_full[x,y]==-1, T, grid_full[x,y])
