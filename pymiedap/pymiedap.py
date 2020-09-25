@@ -330,14 +330,16 @@ class Model(object):
                           ', P=' + str(layer.press) +
                           ', tau=' + str(layer.tau) +
                           ', tau_gas=' + str(layer.tau_g) + '\n')
-                strout += layer.aerosols.__repr__()
+                strout += layer.mixed_aerosols.__repr__()
             else:
-                strout = ('LAYER '+str(layer_name) +'\n'+
-                          ' Type:' + layer.aerosols.typ +
+                for aero_name, aero in vars(layer).items():
+                    if isinstance(aero, Aerosols):
+                        strout = ('LAYER '+str(layer_name) +'\n'+
+                          ' Type:' + aero.typ +
                           ', P=' + str(layer.press) +
                           ', tau=' + str(layer.tau) +
                           ', tau_gas=' + str(layer.tau_g) + '\n')
-                strout += layer.aerosols.__repr__()
+                        strout += aero.__repr__()
             strfin = strfin + strout
         return wvl_str+planet_str+gas_str+lays_str+strfin
 
