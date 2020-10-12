@@ -1472,7 +1472,7 @@ def dap_code(model, rename=False, output_name='modelA',
             output_file = path_output + 'fou_{:4.7f}.dat'.format(wav)
             output_file = os.path.normpath(output_file)
             model.name[z] = output_file
-            os.rename('fou_{:4.3f}.dat'.format(wav),output_file)
+            os.rename(outputname,output_file)
         print('End of DAP program')
 
 
