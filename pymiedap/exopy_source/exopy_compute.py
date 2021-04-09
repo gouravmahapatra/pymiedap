@@ -39,15 +39,15 @@
 #
 
 
-import exopy_config                    as _cfg
-from exopy_geometry import geometry    as _geom
-from exopy_phase    import phase       as _phase
-from exopy_eclipse  import eclipse     as _eclipse
-from exopy_transit  import transits    as _transit
-from exopy_radiance import integration as _integ
-from exopy_radiance import combine     as _comb
-from exopy_orbit    import nested2bp   as _2bp
-from exopy_orbit    import kepler_orbit as _kep
+from . import exopy_config                    as _cfg
+from .exopy_geometry import geometry    as _geom
+from .exopy_phase    import phase       as _phase
+from .exopy_eclipse  import eclipse     as _eclipse
+from .exopy_transit  import transits    as _transit
+from .exopy_radiance import integration as _integ
+from .exopy_radiance import combine     as _comb
+from .exopy_orbit    import nested2bp   as _2bp
+from .exopy_orbit    import kepler_orbit as _kep
 
 
 

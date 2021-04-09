@@ -27,7 +27,7 @@ LIST OF FUNCTIONS
 """
 
 import numpy as np
-import exopy_config as _cfg
+from . import exopy_config as _cfg
 #from exopy_functions import PolyArea
 
 

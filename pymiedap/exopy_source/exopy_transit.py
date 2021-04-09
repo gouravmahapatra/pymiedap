@@ -28,7 +28,7 @@
 #"""
 
 
-import exopy_config as _cfg
+from . import exopy_config as _cfg
 import numpy as np
 #from exopy_functions import PolyArea
 

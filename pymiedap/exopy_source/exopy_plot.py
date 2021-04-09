@@ -33,7 +33,7 @@ from matplotlib.collections import PatchCollection as _PatchCollection
 from matplotlib import animation as _animation
 #from shapely.geometry import Polygon as _Poly
 import numpy as _np
-from exopy_functions import grid_area as _grid_area
+from .exopy_functions import grid_area as _grid_area
 import time as _time
 #import exopy_config as _cfg
 
@@ -776,7 +776,7 @@ def IQ2(bodies, t = 0, wvl=0, phase = False, save = False, cmap=_matplotlib.cm.v
 
 def geometry_d(body, conf, t = 0, save = False, dots = False):
 
-    print('\n    ⇒ Plotting geometry parameters of ' + body.name+' at t = '+str(body.ephemeris.time[t])+' seconds')
+    print('\n   -> Plotting geometry parameters of ' + body.name+' at t = '+str(body.ephemeris.time[t])+' seconds')
     from matplotlib.patches import Rectangle
 
     # create a figure with subplots
@@ -1181,7 +1181,7 @@ class plot_flags():
 
 def grid(body):
 
-    print('\n    ⇒ Plotting grid of ' + body.type + ' ' + body.name)
+    print('\n    -> Plotting grid of ' + body.type + ' ' + body.name)
 
     fig , ax = _plt.subplots()
     _plt.plot(body.grid.nodes[:,0], body.grid.nodes[:,1], 'o', color = conf._plot_color('nodes'), markersize=3)
@@ -1201,7 +1201,7 @@ def shadow_d(body, conf, t = 0, save = False, dots = False):
     if not hasattr(body.grid, 'shadow'):
     	body.grid.shadow = _np.ones([len(body.ephemeris.time), len(body.grid.nodes)])
 
-    print('\n    ⇒ Plotting shadow of ' + body.type + ' ' + body.name+' at t ='+str(body.ephemeris.time[t])+' seconds')
+    print('\n    -> Plotting shadow of ' + body.type + ' ' + body.name+' at t ='+str(body.ephemeris.time[t])+' seconds')
 
     flags = _load_flags(body,'d',[t,t+1])
 
@@ -1258,7 +1258,7 @@ def shadow_dd(body, conf, t = [0,0,0], save = False, dots = False):
         if not hasattr(body.grid, 'shadow'):
                 body.grid.shadow = _np.ones([len(body.ephemeris.time), len(body.grid.nodes)])
 
-        print('\n    ⇒ Plotting shadow of ' + body.type + ' ' + body.name+' at t ='+str(body.ephemeris.time[t[0]])+', t ='+str(body.ephemeris.time[t[1]])+', and t ='+str(body.ephemeris.time[t[2]])+' seconds')
+        print('\n    -> Plotting shadow of ' + body.type + ' ' + body.name+' at t ='+str(body.ephemeris.time[t[0]])+', t ='+str(body.ephemeris.time[t[1]])+', and t ='+str(body.ephemeris.time[t[2]])+' seconds')
         from matplotlib.patches import Rectangle
 
         # create a figure with subplots
@@ -1323,7 +1323,7 @@ def shadow_dd(body, conf, t = [0,0,0], save = False, dots = False):
 
 def I_d(body, conf, t = 0, wvl=0, dots = False, cmap=_matplotlib.cm.viridis):
 
-    print('\n    ⇒ Plotting I parameter ' + body.type + ' ' + body.name+' at t ='+str(body.ephemeris.time[t])+' seconds')
+    print('\n    Plotting I parameter ' + body.type + ' ' + body.name+' at t ='+str(body.ephemeris.time[t])+' seconds')
     from matplotlib.patches import Rectangle
 
     flags = _load_flags(body,'d',[t,t+1])
@@ -1364,7 +1364,7 @@ def I_d(body, conf, t = 0, wvl=0, dots = False, cmap=_matplotlib.cm.viridis):
 
 def Q_d(body, conf, t = 0, wvl=0, dots = False, cmap=_matplotlib.cm.viridis):
 
-    print('\n    ⇒ Plotting Q parameter ' + body.type + ' ' + body.name+' at t ='+str(body.ephemeris.time[t])+' seconds')
+    print('\n    Plotting Q parameter ' + body.type + ' ' + body.name+' at t ='+str(body.ephemeris.time[t])+' seconds')
     from matplotlib.patches import Rectangle
 
     flags = _load_flags(body,'d',[t,t+1])
@@ -1404,7 +1404,7 @@ def Q_d(body, conf, t = 0, wvl=0, dots = False, cmap=_matplotlib.cm.viridis):
 
 def U_d(body, conf, t = 0, wvl=0, dots = False, cmap=_matplotlib.cm.viridis):
 
-    print('\n    ⇒ Plotting U parameter ' + body.type + ' ' + body.name+' at t ='+str(body.ephemeris.time[t])+' seconds')
+    print('\n    Plotting U parameter ' + body.type + ' ' + body.name+' at t ='+str(body.ephemeris.time[t])+' seconds')
     from matplotlib.patches import Rectangle
 
     flags = _load_flags(body,'d',[t,t+1])
@@ -1444,7 +1444,7 @@ def U_d(body, conf, t = 0, wvl=0, dots = False, cmap=_matplotlib.cm.viridis):
 
 def V_d(body, conf, t = 0, wvl=0, dots = False, cmap=_matplotlib.cm.viridis):
 
-    print('\n    ⇒ Plotting V parameter ' + body.type + ' ' + body.name+' at t ='+str(body.ephemeris.time[t])+' seconds')
+    print('\n    Plotting V parameter ' + body.type + ' ' + body.name+' at t ='+str(body.ephemeris.time[t])+' seconds')
     from matplotlib.patches import Rectangle
 
     flags = _load_flags(body,'d',[t,t+1])
@@ -1484,7 +1484,7 @@ def V_d(body, conf, t = 0, wvl=0, dots = False, cmap=_matplotlib.cm.viridis):
 
 def radiance_d(body, conf, t = 0, wvl=0, save = False, dots = False, cmap=_matplotlib.cm.viridis):
 
-    print('\n    ⇒ Plotting stokes parameters of ' + body.type + ' ' + body.name+' at t ='+str(body.ephemeris.time[t])+' seconds')
+    print('\n    Plotting stokes parameters of ' + body.type + ' ' + body.name+' at t ='+str(body.ephemeris.time[t])+' seconds')
     from matplotlib.patches import Rectangle
 
     # create a figure with subplots
@@ -1598,7 +1598,7 @@ def anim_shadow_1(body, dots = False, time  = 'all', info = [15, False]):
 
     if time == 'all': time = [0,len(body.ephemeris.time)]
 
-    print('\n    ⇒ Plotting shadow animation of ' + body.type + ' ' + body.name+' from t ='+str(body.ephemeris.time[time[0]])+' seconds to t = '+str(body.ephemeris.time[time[1]-1])+' seconds')
+    print('\n    Plotting shadow animation of ' + body.type + ' ' + body.name+' from t ='+str(body.ephemeris.time[time[0]])+' seconds to t = '+str(body.ephemeris.time[time[1]-1])+' seconds')
 
     flags = _load_flags(body,'d', time)
 
@@ -1690,7 +1690,7 @@ def anim_shadow_2(body1, body2, dots = False, time  = 'all', info = [ 15, False]
 
     if time == 'all': time = [0,len(body1.ephemeris.time)]
 
-    print('\n    ⇒ Plotting shadow animation of ' + body1.type + ' ' + body1.name+' and '+ body2.type + ' ' + body2.name +' from t ='+str(body1.ephemeris.time[time[0]])+' seconds to t = '+str(body2.ephemeris.time[time[1]-1])+' seconds')
+    print('\n    Plotting shadow animation of ' + body1.type + ' ' + body1.name+' and '+ body2.type + ' ' + body2.name +' from t ='+str(body1.ephemeris.time[time[0]])+' seconds to t = '+str(body2.ephemeris.time[time[1]-1])+' seconds')
 
     flags1 = _load_flags(body1,'d', time)
     flags2 = _load_flags(body2,'d', time)

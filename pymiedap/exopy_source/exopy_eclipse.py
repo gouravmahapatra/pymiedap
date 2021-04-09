@@ -28,7 +28,7 @@
 
 
 import numpy as np
-import exopy_config as _cfg
+from . import exopy_config as _cfg
 #from exopy_functions import PolyArea
 
 def eclipse(bodies, star, conf):
@@ -189,68 +189,68 @@ def eclipse(bodies, star, conf):
         eclipsed = (sinrho_i < sinOMEGA_i)
 
 
-	if any(eclipsed): # Body i eclipsed at some time
+    if any(eclipsed): # Body i eclipsed at some time
 
-		# Update illuminated nodes indicator -> Non eclipse epochs are
-		# discarded
-		i_illuminated = (bodies[i].grid.illuminated_nodes)&(eclipsed[:,np.newaxis])
+        # Update illuminated nodes indicator -> Non eclipse epochs are
+        # discarded
+        i_illuminated = (bodies[i].grid.illuminated_nodes)&(eclipsed[:,np.newaxis])
 
-		sinPSI = np.ones(T)*np.nan
-		cosPSI = np.ones(T)
-		tanPSI = np.ones(T)*np.nan
+        sinPSI = np.ones(T)*np.nan
+        cosPSI = np.ones(T)
+        tanPSI = np.ones(T)*np.nan
 
-		sinPSI[eclipsed]   = (Rs - Radj) / Dj[eclipsed]
-		cosPSI[eclipsed]   =  np.sqrt(Dj[eclipsed]**2-(Rs-Radj)**2)/Dj[eclipsed]
-		tanPSI[eclipsed]   =  sinPSI[eclipsed]/cosPSI[eclipsed]
+        sinPSI[eclipsed]   = (Rs - Radj) / Dj[eclipsed]
+        cosPSI[eclipsed]   =  np.sqrt(Dj[eclipsed]**2-(Rs-Radj)**2)/Dj[eclipsed]
+        tanPSI[eclipsed]   =  sinPSI[eclipsed]/cosPSI[eclipsed]
 
-		###############################################################
-		######            LOOK FOR FULL UMBRA NODES              ######
-		###############################################################
+        ###############################################################
+        ######            LOOK FOR FULL UMBRA NODES              ######
+        ###############################################################
 
-		O2A1   = np.zeros(T)
-		R_A1P  = np.ones([2,T])
-		coszeta= np.zeros(T)
+        O2A1   = np.zeros(T)
+        R_A1P  = np.ones([2,T])
+        coszeta= np.zeros(T)
 
-		O2A1[eclipsed]    = -(Radj - Radi) / sinPSI[eclipsed]
-		R_A1P[:,eclipsed] =   np.array([- d2_i[eclipsed] - O2A1[eclipsed], - d1_i[eclipsed] ])
-		coszeta[eclipsed] =   R_A1P[0,eclipsed] / ( np.linalg.norm(R_A1P[:,eclipsed],axis=0) )
+        O2A1[eclipsed]    = -(Radj - Radi) / sinPSI[eclipsed]
+        R_A1P[:,eclipsed] =   np.array([- d2_i[eclipsed] - O2A1[eclipsed], - d1_i[eclipsed] ])
+        coszeta[eclipsed] =   R_A1P[0,eclipsed] / ( np.linalg.norm(R_A1P[:,eclipsed],axis=0) )
 
-		# if coszeta > cosPSI --> Full umbra!
-		full_umbra_times = eclipsed & (coszeta>cosPSI)
-		bodies[i].grid.shadow[ full_umbra_times[:,np.newaxis] & (i_illuminated)  ] = 0
+        # if coszeta > cosPSI --> Full umbra!
+        full_umbra_times = eclipsed & (coszeta>cosPSI)
+        bodies[i].grid.shadow[ full_umbra_times[:,np.newaxis] & (i_illuminated)  ] = 0
 
-		# full umbra flags are set
-		bodies[i].flag.umbra[-1][0][(full_umbra_times)&(eclipsed)] = True
+        # full umbra flags are set
+        bodies[i].flag.umbra[-1][0][(full_umbra_times)&(eclipsed)] = True
 
-		# Update illuminated nodes indicator
-		i_illuminated = (i_illuminated)&(~full_umbra_times[:,np.newaxis])
+        # Update illuminated nodes indicator
+        i_illuminated = (i_illuminated)&(~full_umbra_times[:,np.newaxis])
 
-		# Times for continuing the eclipse search:
-		remaining = eclipsed&~full_umbra_times&bodyi_behind
+        # Times for continuing the eclipse search:
+        remaining = eclipsed&~full_umbra_times&bodyi_behind
 
-		# The rest of the cases will require doing an node-wise analysis
-		# So far d1 and d2 accounted for the center of the bodies, now,
-		# d1_nodes and d2_nodes do exactly the same but for each node
+        # The rest of the cases will require doing an node-wise analysis
+        # So far d1 and d2 accounted for the center of the bodies, now,
+        # d1_nodes and d2_nodes do exactly the same but for each node
 
-		# For the construction of d_nodes, it is taken into account that
-		# now, di accounts for the position of the nodes and dj is still
-		# the position of the center of the eclipsing body
+        # For the construction of d_nodes, it is taken into account that
+        # now, di accounts for the position of the nodes and dj is still
+        # the position of the center of the eclipsing body
 
-		d_nod       = bodies[i].grid.position_nodes_ob.swapaxes(0,1)
+        d_nod       = bodies[i].grid.position_nodes_ob.swapaxes(0,1)
         #   d_nod_norm  = bodies[i].grid.distance_nodes_ob
-		d2_nod      = np.zeros([T,bodies[i].grid.N_points])
-		d1_nod      = np.zeros([T,bodies[i].grid.N_points])
+        d2_nod      = np.zeros([T,bodies[i].grid.N_points])
+        d1_nod      = np.zeros([T,bodies[i].grid.N_points])
         #   d2_nod1     = np.zeros([T,bodies[i].grid.N_points])
         #   d1_nod1     = np.zeros([T,bodies[i].grid.N_points])
         #   aux         = np.zeros([T,bodies[i].grid.N_points])
 
         #print len(remaining)
         #print np.shape(Rphi_s)
-		dijaux  = np.einsum('ijtl,jtl->itl', Rphi_s[:,:,remaining,np.newaxis], -d_nod[:,remaining,:] + dj[:,remaining,np.newaxis])
-		dijp    = np.einsum('jitl,jtl->itl', Ralpha[:,:,remaining,np.newaxis], dijaux)
+        dijaux  = np.einsum('ijtl,jtl->itl', Rphi_s[:,:,remaining,np.newaxis], -d_nod[:,remaining,:] + dj[:,remaining,np.newaxis])
+        dijp    = np.einsum('jitl,jtl->itl', Ralpha[:,:,remaining,np.newaxis], dijaux)
 
-		d2_nod[remaining,:] = np.abs(dijp[0,:,:])
-		d1_nod[remaining,:] = np.linalg.norm(dijp[1:,:,:],axis=0)
+        d2_nod[remaining,:] = np.abs(dijp[0,:,:])
+        d1_nod[remaining,:] = np.linalg.norm(dijp[1:,:,:],axis=0)
 
 
         #                aux[remaining,:]    = np.einsum('iTN,iT->TN', d_nod[:,remaining,:], dj[:,remaining])#/Dj[:,np.newaxis] - Dj[:,np.newaxis]
@@ -258,187 +258,187 @@ def eclipse(bodies, star, conf):
         #                del aux
         #                d1_nod1[remaining,:] = np.sqrt(d_nod_norm[remaining,:]**2-(Dj[remaining,np.newaxis]+d2_nod[remaining,:])**2)
         ##
-		# FROM d1_nod AND d2_nod, ANY ANGLE CAN BE CALCULATED FOR EACH POINT IN THE MESH
-		# LET'S CONTINUE LOOKING FOR OTHER ECLIPSE CASES
+        # FROM d1_nod AND d2_nod, ANY ANGLE CAN BE CALCULATED FOR EACH POINT IN THE MESH
+        # LET'S CONTINUE LOOKING FOR OTHER ECLIPSE CASES
 
-		###############################################################
-		######           LOOK FOR PARTIAL UMBRA NODES            ######
-		###############################################################
+        ###############################################################
+        ######           LOOK FOR PARTIAL UMBRA NODES            ######
+        ###############################################################
 
-		O2A2   = np.zeros(T)
-		O2A3   = np.zeros(T)
-		R_A2P  = np.zeros([2,T])
-		R_A3P  = np.zeros([2,T])
-		costheta = np.zeros(T)
+        O2A2   = np.zeros(T)
+        O2A3   = np.zeros(T)
+        R_A2P  = np.zeros([2,T])
+        R_A3P  = np.zeros([2,T])
+        costheta = np.zeros(T)
 
-		O2A2[remaining]    = -(Radi + Radj) / sinPSI[remaining]
-		O2A3[remaining]    = - Radj / sinPSI[remaining]
+        O2A2[remaining]    = -(Radi + Radj) / sinPSI[remaining]
+        O2A3[remaining]    = - Radj / sinPSI[remaining]
 
-		R_A2P[:,remaining] =   np.array([ - d2_i[remaining] - O2A2[remaining], d1_i[remaining] ])
-		R_A3P[:,remaining] =   np.array([ - d2_i[remaining] - O2A3[remaining], d1_i[remaining] ])
+        R_A2P[:,remaining] =   np.array([ - d2_i[remaining] - O2A2[remaining], d1_i[remaining] ])
+        R_A3P[:,remaining] =   np.array([ - d2_i[remaining] - O2A3[remaining], d1_i[remaining] ])
 
-		R_A2P_norm = np.linalg.norm( R_A2P, axis=0 )
-		R_A3P_norm = np.linalg.norm( R_A3P, axis=0 )
-		costheta[remaining]=   R_A2P[0,remaining]/R_A2P_norm[remaining]
+        R_A2P_norm = np.linalg.norm( R_A2P, axis=0 )
+        R_A3P_norm = np.linalg.norm( R_A3P, axis=0 )
+        costheta[remaining]=   R_A2P[0,remaining]/R_A2P_norm[remaining]
 
-		# if costheta > cosPSI and (RA2P>R1/tanPSI or RA3P<R1)  --> Partial umbra!
+        # if costheta > cosPSI and (RA2P>R1/tanPSI or RA3P<R1)  --> Partial umbra!
 
-		partial_umbra_times = (remaining) & (costheta>cosPSI) & ( (R_A2P_norm > Radi/tanPSI) | (R_A3P_norm < Radi) )
-		partial_umbra_nodes = (partial_umbra_times[:,np.newaxis]) & (i_illuminated)
+        partial_umbra_times = (remaining) & (costheta>cosPSI) & ( (R_A2P_norm > Radi/tanPSI) | (R_A3P_norm < Radi) )
+        partial_umbra_nodes = (partial_umbra_times[:,np.newaxis]) & (i_illuminated)
 
-		# Now we know which nodes at which times are suitable for being in umbra.
-		# A final decision needs calculating the beta angle:
+        # Now we know which nodes at which times are suitable for being in umbra.
+        # A final decision needs calculating the beta angle:
 
-		R_A3P_nod  = np.zeros([2,T,bodies[i].grid.N_points])#*np.nan   # I commented the nan product, since it multiplies the time by ~o(2)
-		R_A3P_nod_norm = np.zeros([T,bodies[i].grid.N_points])
-		O2A3       = O2A3[:,np.newaxis].repeat(bodies[i].grid.N_points, axis= 1)
-		sinbeta    = np.zeros([T,bodies[i].grid.N_points])
+        R_A3P_nod  = np.zeros([2,T,bodies[i].grid.N_points])#*np.nan   # I commented the nan product, since it multiplies the time by ~o(2)
+        R_A3P_nod_norm = np.zeros([T,bodies[i].grid.N_points])
+        O2A3       = O2A3[:,np.newaxis].repeat(bodies[i].grid.N_points, axis= 1)
+        sinbeta    = np.zeros([T,bodies[i].grid.N_points])
 
-		R_A3P_nod[0,partial_umbra_nodes] = - d2_nod[partial_umbra_nodes] - O2A3[partial_umbra_nodes]  #O2A3[partial_umbra,np.newaxis]
-		R_A3P_nod[1,partial_umbra_nodes] =   d1_nod[partial_umbra_nodes]########## he quitado un signo negativo -
-		R_A3P_nod_norm[partial_umbra_nodes] = np.linalg.norm(R_A3P_nod[:,partial_umbra_nodes],axis=0) #np.sqrt( d1_nod[partial_umbra_nodes]**2  +  (d2_nod[partial_umbra_nodes] + O2A3[partial_umbra_nodes])**2 )
+        R_A3P_nod[0,partial_umbra_nodes] = - d2_nod[partial_umbra_nodes] - O2A3[partial_umbra_nodes]  #O2A3[partial_umbra,np.newaxis]
+        R_A3P_nod[1,partial_umbra_nodes] =   d1_nod[partial_umbra_nodes]########## he quitado un signo negativo -
+        R_A3P_nod_norm[partial_umbra_nodes] = np.linalg.norm(R_A3P_nod[:,partial_umbra_nodes],axis=0) #np.sqrt( d1_nod[partial_umbra_nodes]**2  +  (d2_nod[partial_umbra_nodes] + O2A3[partial_umbra_nodes])**2 )
 
-		sinbeta[partial_umbra_nodes]  = R_A3P_nod[1,partial_umbra_nodes] / R_A3P_nod_norm[partial_umbra_nodes]
+        sinbeta[partial_umbra_nodes]  = R_A3P_nod[1,partial_umbra_nodes] / R_A3P_nod_norm[partial_umbra_nodes]
 
-		partial_umbra = (sinbeta < sinPSI[:,np.newaxis]) & (partial_umbra_nodes)
+        partial_umbra = (sinbeta < sinPSI[:,np.newaxis]) & (partial_umbra_nodes)
 
-		bodies[i].grid.shadow[ partial_umbra ] = 0
+        bodies[i].grid.shadow[ partial_umbra ] = 0
 
-		# partial umbra flags are set
-		bodies[i].flag.umbra[-1][0][np.sum(partial_umbra,axis=1,dtype=bool)] = True
+        # partial umbra flags are set
+        bodies[i].flag.umbra[-1][0][np.sum(partial_umbra,axis=1,dtype=bool)] = True
 
-		# Update illuminated nodes indicator
-		i_illuminated = i_illuminated&~partial_umbra
+        # Update illuminated nodes indicator
+        i_illuminated = i_illuminated&~partial_umbra
 
-		###############################################################
-		###############################################################
-		######             LOOK FOR ANTUMBRA NODES               ######
-		###############################################################
-		###############################################################
+        ###############################################################
+        ###############################################################
+        ######             LOOK FOR ANTUMBRA NODES               ######
+        ###############################################################
+        ###############################################################
 
-		# First, the center of the body needs to fulfill:
-		# 180-zeta  <  PSI
-		# coszeta was already calulated at the beginning
+        # First, the center of the body needs to fulfill:
+        # 180-zeta  <  PSI
+        # coszeta was already calulated at the beginning
 
-		# if coszeta < -cosPSI --> Antumbra!
-		antumbra_times = remaining & (coszeta<-cosPSI)
+        # if coszeta < -cosPSI --> Antumbra!
+        antumbra_times = remaining & (coszeta<-cosPSI)
 
-		# Which nodes are to be evaluated?
-		antumbra_nodes = antumbra_times[:,np.newaxis] & i_illuminated
+        # Which nodes are to be evaluated?
+        antumbra_nodes = antumbra_times[:,np.newaxis] & i_illuminated
 
-		# Now we know which nodes at which times are suitable for being in antumbra.
-		# A final decision needs calculating the beta angle:
-		cosbeta = np.zeros([T,bodies[i].grid.N_points])
+        # Now we know which nodes at which times are suitable for being in antumbra.
+        # A final decision needs calculating the beta angle:
+        cosbeta = np.zeros([T,bodies[i].grid.N_points])
 
-		R_A3P_nod[0,antumbra_nodes] = - d2_nod[antumbra_nodes] - O2A3[antumbra_nodes]  #O2A3[partial_umbra,np.newaxis]
-		R_A3P_nod[1,antumbra_nodes] = - d1_nod[antumbra_nodes]
-		R_A3P_nod_norm[antumbra_nodes] = np.sqrt( d1_nod[antumbra_nodes]**2  +  (d2_nod[antumbra_nodes] + O2A3[antumbra_nodes])**2 )
+        R_A3P_nod[0,antumbra_nodes] = - d2_nod[antumbra_nodes] - O2A3[antumbra_nodes]  #O2A3[partial_umbra,np.newaxis]
+        R_A3P_nod[1,antumbra_nodes] = - d1_nod[antumbra_nodes]
+        R_A3P_nod_norm[antumbra_nodes] = np.sqrt( d1_nod[antumbra_nodes]**2  +  (d2_nod[antumbra_nodes] + O2A3[antumbra_nodes])**2 )
 
-		cosbeta[antumbra_nodes]  = R_A3P_nod[0,antumbra_nodes] / R_A3P_nod_norm[antumbra_nodes]
+        cosbeta[antumbra_nodes]  = R_A3P_nod[0,antumbra_nodes] / R_A3P_nod_norm[antumbra_nodes]
 
-		antumbra = (cosbeta < -cosPSI[:,np.newaxis]) & (antumbra_nodes)
+        antumbra = (cosbeta < -cosPSI[:,np.newaxis]) & (antumbra_nodes)
 
-		angle_sun = np.arcsin( Rs   / bodies[i].grid.distance_nodes_ob[antumbra] )
-		angle_j   = np.arcsin( Radj / np.sqrt(d1_nod[antumbra]**2 + d2_nod[antumbra]**2) )
+        angle_sun = np.arcsin( Rs   / bodies[i].grid.distance_nodes_ob[antumbra] )
+        angle_j   = np.arcsin( Radj / np.sqrt(d1_nod[antumbra]**2 + d2_nod[antumbra]**2) )
 
-		bodies[i].grid.shadow[ antumbra ] = np.ones_like(angle_j) - (angle_j/angle_sun)**2
+        bodies[i].grid.shadow[ antumbra ] = np.ones_like(angle_j) - (angle_j/angle_sun)**2
 
-		# Penumbra flags are set
-		bodies[i].flag.antumbra[-1][0][np.sum(antumbra,axis=1,dtype=bool)] = True
+        # Penumbra flags are set
+        bodies[i].flag.antumbra[-1][0][np.sum(antumbra,axis=1,dtype=bool)] = True
 
-		# Update illuminated nodes indicator
-		i_illuminated = i_illuminated&~antumbra
+        # Update illuminated nodes indicator
+        i_illuminated = i_illuminated&~antumbra
 
-		###############################################################
-		###############################################################
-		######             LOOK FOR PENUMBRA NODES               ######
-		###############################################################
-		###############################################################
+        ###############################################################
+        ###############################################################
+        ######             LOOK FOR PENUMBRA NODES               ######
+        ###############################################################
+        ###############################################################
 
-		# The remaining points with i_illuminated == True are candidates
-		# for the penumbra region
+        # The remaining points with i_illuminated == True are candidates
+        # for the penumbra region
 
-		O2A4 = np.zeros([T])
-		O2A4[remaining]  =  Radj / sinOMEGA_i[remaining]
+        O2A4 = np.zeros([T])
+        O2A4[remaining]  =  Radj / sinOMEGA_i[remaining]
 
-		R_A4P_nod  = np.zeros([2,T,bodies[i].grid.N_points])#*np.nan   # I commented the nan product, since it multiplies the time by ~o(2)
-		R_A4P_nod_norm = np.zeros([T,bodies[i].grid.N_points])
-		O2A4 = O2A4[:,np.newaxis].repeat(bodies[i].grid.N_points, axis= 1)
-		cosomega = np.zeros([T,bodies[i].grid.N_points])
+        R_A4P_nod  = np.zeros([2,T,bodies[i].grid.N_points])#*np.nan   # I commented the nan product, since it multiplies the time by ~o(2)
+        R_A4P_nod_norm = np.zeros([T,bodies[i].grid.N_points])
+        O2A4 = O2A4[:,np.newaxis].repeat(bodies[i].grid.N_points, axis= 1)
+        cosomega = np.zeros([T,bodies[i].grid.N_points])
 
-		penumbra_nodes = i_illuminated # Remaining illuminated nodes --> Non-eclipse nodes were set to False at the beginning
+        penumbra_nodes = i_illuminated # Remaining illuminated nodes --> Non-eclipse nodes were set to False at the beginning
 
-		R_A4P_nod[0,penumbra_nodes] = - d2_nod[penumbra_nodes] - O2A4[penumbra_nodes]  #O2A3[partial_umbra,np.newaxis]
-		R_A4P_nod[1,penumbra_nodes] = - d1_nod[penumbra_nodes]
-		R_A4P_nod_norm[penumbra_nodes] = np.sqrt( d1_nod[penumbra_nodes]**2  +  (d2_nod[penumbra_nodes] + O2A4[penumbra_nodes])**2 )
+        R_A4P_nod[0,penumbra_nodes] = - d2_nod[penumbra_nodes] - O2A4[penumbra_nodes]  #O2A3[partial_umbra,np.newaxis]
+        R_A4P_nod[1,penumbra_nodes] = - d1_nod[penumbra_nodes]
+        R_A4P_nod_norm[penumbra_nodes] = np.sqrt( d1_nod[penumbra_nodes]**2  +  (d2_nod[penumbra_nodes] + O2A4[penumbra_nodes])**2 )
 
-		cosomega[penumbra_nodes]  = - R_A4P_nod[0,penumbra_nodes] / R_A4P_nod_norm[penumbra_nodes]
+        cosomega[penumbra_nodes]  = - R_A4P_nod[0,penumbra_nodes] / R_A4P_nod_norm[penumbra_nodes]
 
-		penumbra = (cosomega > cosOMEGA_i[:,np.newaxis]) & (penumbra_nodes)
+        penumbra = (cosomega > cosOMEGA_i[:,np.newaxis]) & (penumbra_nodes)
 
-		angle_sun = np.arcsin( Rs   / bodies[i].grid.distance_nodes_ob[penumbra] )
-		angle_j   = np.arcsin( Radj / np.sqrt(d1_nod[penumbra]**2 + d2_nod[penumbra]**2) )
+        angle_sun = np.arcsin( Rs   / bodies[i].grid.distance_nodes_ob[penumbra] )
+        angle_j   = np.arcsin( Radj / np.sqrt(d1_nod[penumbra]**2 + d2_nod[penumbra]**2) )
 
-		dj = dj[:,:,np.newaxis].repeat(bodies[i].grid.N_points, axis= 2)
+        dj = dj[:,:,np.newaxis].repeat(bodies[i].grid.N_points, axis= 2)
 
-		aux = np.zeros([T,bodies[i].grid.N_points])
-		delta_angle = np.zeros([T,bodies[i].grid.N_points])
-		theta1 = np.zeros([T,bodies[i].grid.N_points])
-		theta2 = np.zeros([T,bodies[i].grid.N_points])
-		aux[remaining,:] = np.einsum('itN,itN->tN', -d_nod[:,remaining,:], -d_nod[:,remaining,:] + dj[:,remaining,:])
-		aux[penumbra] = aux[penumbra]/bodies[i].grid.distance_nodes_ob[penumbra]/np.linalg.norm(-d_nod[:,penumbra] + dj[:,penumbra],axis=0)
-		delta_angle[penumbra] = (np.arccos(aux[penumbra]))
+        aux = np.zeros([T,bodies[i].grid.N_points])
+        delta_angle = np.zeros([T,bodies[i].grid.N_points])
+        theta1 = np.zeros([T,bodies[i].grid.N_points])
+        theta2 = np.zeros([T,bodies[i].grid.N_points])
+        aux[remaining,:] = np.einsum('itN,itN->tN', -d_nod[:,remaining,:], -d_nod[:,remaining,:] + dj[:,remaining,:])
+        aux[penumbra] = aux[penumbra]/bodies[i].grid.distance_nodes_ob[penumbra]/np.linalg.norm(-d_nod[:,penumbra] + dj[:,penumbra],axis=0)
+        delta_angle[penumbra] = (np.arccos(aux[penumbra]))
 
-		cord = 1/delta_angle[penumbra]*np.sqrt(4*delta_angle[penumbra]**2*angle_sun**2 - (delta_angle[penumbra]**2+angle_sun**2-angle_j**2)**2)
-		xc_j     = (delta_angle[penumbra]**2+angle_j**2-angle_sun**2)/(2*delta_angle[penumbra])
-		xc_sun   = (delta_angle[penumbra]**2+angle_sun**2-angle_j**2)/(2*delta_angle[penumbra])
+        cord = 1/delta_angle[penumbra]*np.sqrt(4*delta_angle[penumbra]**2*angle_sun**2 - (delta_angle[penumbra]**2+angle_sun**2-angle_j**2)**2)
+        xc_j     = (delta_angle[penumbra]**2+angle_j**2-angle_sun**2)/(2*delta_angle[penumbra])
+        xc_sun   = (delta_angle[penumbra]**2+angle_sun**2-angle_j**2)/(2*delta_angle[penumbra])
 
-		#bodies[i].cord = cord
-		#bodies[i].miralo = (delta_angle[penumbra]**2+angle_j**2-angle_sun**2)
-		#bodies[i].angle_j = angle_j
-		#bodies[i].angle_sun = angle_sun
-		#bodies[i].delta_angle = delta_angle[penumbra]
+        #bodies[i].cord = cord
+        #bodies[i].miralo = (delta_angle[penumbra]**2+angle_j**2-angle_sun**2)
+        #bodies[i].angle_j = angle_j
+        #bodies[i].angle_sun = angle_sun
+        #bodies[i].delta_angle = delta_angle[penumbra]
 
-		theta1 = 2*np.arcsin( cord/2/angle_j  )
-		theta1p = np.copy(theta1)
-		theta1p[(angle_sun>angle_j)&(xc_sun>delta_angle[penumbra])] = 2*np.pi - theta1[(angle_sun>angle_j)&(xc_sun>delta_angle[penumbra])]
-		theta2 = 2*np.arcsin( cord/2/angle_sun)
-		theta2p = np.copy(theta2)
-		theta2p[(angle_j>angle_sun)&(xc_j  >delta_angle[penumbra])] = 2*np.pi - theta2[(angle_j>angle_sun)&(xc_j  >delta_angle[penumbra])]
+        theta1 = 2*np.arcsin( cord/2/angle_j  )
+        theta1p = np.copy(theta1)
+        theta1p[(angle_sun>angle_j)&(xc_sun>delta_angle[penumbra])] = 2*np.pi - theta1[(angle_sun>angle_j)&(xc_sun>delta_angle[penumbra])]
+        theta2 = 2*np.arcsin( cord/2/angle_sun)
+        theta2p = np.copy(theta2)
+        theta2p[(angle_j>angle_sun)&(xc_j  >delta_angle[penumbra])] = 2*np.pi - theta2[(angle_j>angle_sun)&(xc_j  >delta_angle[penumbra])]
 
-		sign_j = np.ones_like(theta1)
-		sign_sun = np.ones_like(theta1)
-		sign_j[(angle_sun>angle_j)&(xc_sun>delta_angle[penumbra])] = -1
-		sign_sun[(angle_j>angle_sun)&(xc_j>delta_angle[penumbra])] = -1
+        sign_j = np.ones_like(theta1)
+        sign_sun = np.ones_like(theta1)
+        sign_j[(angle_sun>angle_j)&(xc_sun>delta_angle[penumbra])] = -1
+        sign_sun[(angle_j>angle_sun)&(xc_j>delta_angle[penumbra])] = -1
 
-		#theta1 = np.arccos( (angle_j**2/(2*delta_angle[penumbra]*angle_sun))*(-1+(angle_sun/angle_j)**2+(delta_angle[penumbra]/angle_j)**2) )
-		#theta2 = np.arcsin(angle_sun/angle_j*np.sin(theta1))
+        #theta1 = np.arccos( (angle_j**2/(2*delta_angle[penumbra]*angle_sun))*(-1+(angle_sun/angle_j)**2+(delta_angle[penumbra]/angle_j)**2) )
+        #theta2 = np.arcsin(angle_sun/angle_j*np.sin(theta1))
 
-		#bodies[i].residual = delta_angle[penumbra]**2 - angle_j**2 - angle_sun**2
+        #bodies[i].residual = delta_angle[penumbra]**2 - angle_j**2 - angle_sun**2
 
-		#bodies[i].xc_j = xc_j
-		#bodies[i].xc_sun = xc_sun
-		#bodies[i].sign_j = sign_j
-		#bodies[i].sign_sun = sign_sun
+        #bodies[i].xc_j = xc_j
+        #bodies[i].xc_sun = xc_sun
+        #bodies[i].sign_j = sign_j
+        #bodies[i].sign_sun = sign_sun
 
-		#bodies[i].theta1 = theta1
-		#bodies[i].theta2 = theta2
+        #bodies[i].theta1 = theta1
+        #bodies[i].theta2 = theta2
 
 
-		A2 = (theta2p-sign_sun*np.sin(theta2))/2/np.pi
-		A1 = ((angle_j/angle_sun))**2*(theta1p-sign_j*np.sin(theta1))/2/np.pi
-		R = (angle_j/angle_sun)**2
+        A2 = (theta2p-sign_sun*np.sin(theta2))/2/np.pi
+        A1 = ((angle_j/angle_sun))**2*(theta1p-sign_j*np.sin(theta1))/2/np.pi
+        R = (angle_j/angle_sun)**2
 
-		#bodies[i].A1 = A1
-		#bodies[i].A2 = A2
-		#bodies[i].R  = R
+        #bodies[i].A1 = A1
+        #bodies[i].A2 = A2
+        #bodies[i].R  = R
 
-		aux1 = A1 + A2
-		#aux1 = (theta2-np.sin(theta2))/np.pi+R*(theta1-np.sin(theta1))/np.pi
-		bodies[i].grid.shadow[penumbra] = (np.ones_like(aux1) - aux1)
+        aux1 = A1 + A2
+        #aux1 = (theta2-np.sin(theta2))/np.pi+R*(theta1-np.sin(theta1))/np.pi
+        bodies[i].grid.shadow[penumbra] = (np.ones_like(aux1) - aux1)
 
-		# Penumbra flags are s
-		bodies[i].flag.penumbra[-1][0][np.sum(penumbra,axis=1,dtype=bool)] = True
+        # Penumbra flags are s
+        bodies[i].flag.penumbra[-1][0][np.sum(penumbra,axis=1,dtype=bool)] = True
 
 
     return bodies

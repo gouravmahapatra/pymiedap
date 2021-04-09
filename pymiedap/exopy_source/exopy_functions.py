@@ -67,7 +67,7 @@ from IPython.display import HTML
 from tempfile import NamedTemporaryFile
 import base64
 import re
-import exopy_grid as grd
+from . import exopy_grid as grd
 from .. import pymiedap as pmd
 
 plt.ion()
@@ -207,7 +207,7 @@ class body():
 
         '''The new body is characterized by the setup function'''
         body.__setup(self,name,Type,note)
-        print('    ✓ New',Type, name,'created!')
+        print('    New',Type, name,'created!')
 
     def __updatelist(self,name):
 
@@ -1377,7 +1377,7 @@ class ProgressBar(object):
     DEFAULT = '    Progress: %(bar)s %(percent)3d%%'
     FULL = '    %(bar)s %(current)d/%(total)d (%(percent)3d%%) %(remaining)d to go'
 
-    def __init__(self, total, width=20, fmt=DEFAULT, symbol='█',
+    def __init__(self, total, width=20, fmt=DEFAULT, symbol='-',
                  output=sys.stderr):
         assert len(symbol) == 1
 

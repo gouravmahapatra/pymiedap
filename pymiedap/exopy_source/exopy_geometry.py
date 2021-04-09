@@ -30,7 +30,7 @@
 #sys.path.append('/home/javier/anaconda3/lib/python3.5/site-packages')
 #from exopy_functions import PolyArea
 import numpy as np
-import exopy_config as _cfg
+from . import exopy_config as _cfg
 
 def geometry(body, conf, ref_line_angle = None):
     '''

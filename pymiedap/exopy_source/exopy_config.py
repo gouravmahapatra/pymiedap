@@ -23,8 +23,8 @@
 # - el: Elevation angle of the observer's position wrt the exosystem
 #       reference frame [deg?] (float)
 # - approach: 'conical' or 'parallel' rays approach [-] (str)
-# - case: ¿?
-# - N:    ¿?
+# - case: 
+# - N:    
 # - ref_body: reference body for the combination of the various ra-
 #	     diance signals [-] (str)
 # - ref_line: reference body line for the combination of the various

@@ -64,11 +64,11 @@
 
 import pymiedap as pmd
 import numpy as np
-import exopy_source.exopy_plot as plot
-import exopy_source.exopy_config as cfg
-import exopy_source.exopy_compute as compute
-import exopy_source.exopy_atm_models as atm_models
-import exopy_source.exopy_functions as fun
+from .exopy_source import exopy_plot as plot
+from .exopy_source import exopy_config as cfg
+from .exopy_source import exopy_compute as compute
+from .exopy_source import exopy_atm_models as atm_models
+from .exopy_source import exopy_functions as fun
 from matplotlib import rc as _rc
 _rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 ## for Palatino and other serif fonts use:

@@ -37,7 +37,7 @@
 
 # Required modules
 import math, numpy as np
-import exopy_functions as fun
+from . import exopy_functions as fun
 
 def kepler(M, e, method = 'Newton-Raphson'):
     """
@@ -153,7 +153,7 @@ def nested2bp(moon, planet, star, dt, tf):
     #
     #==============================================================================
     G = 6.674e-11                              # Universal gravitational constant
-                                               # [N⋅m2/kg2]
+                                               # [N*m2/kg2]
     m_m      = moon.properties.m               # Mass of moon   [kg]
     m_p      = planet.properties.m             # Mass of planet [kg]
     m_s      = star.properties.m               # Mass of star   [kg]
@@ -180,7 +180,7 @@ def nested2bp(moon, planet, star, dt, tf):
 
     mu_m   = G*(m_p + m_m)       # Moon-planet standard gravitational parameter
     mu_b   = G*(m_m + m_p + m_s) # Moon-planet-barycenter stnd. grav. parameter
-                                 # [N⋅m2/kg]
+                                 # [N*m2/kg]
     time   = np.arange(0, tf, dt, dtype=np.float)  # Time vector [s]
 
     n_mb   = (mu_m/(a_mb*(m_p+m_m)/m_p)**3)**0.5 # Moon-bar. mean motion [1/s]
@@ -260,7 +260,7 @@ def nested2bp(moon, planet, star, dt, tf):
     #
     # Being the origin of the reference frame the center of mass of the system,
     # the following relation is met:
-    # <m_s·position2D_mb + m_p·position2D_pb = 0>
+    # <m_s*position2D_mb + m_p*position2D_pb = 0>
     # while <position2D_mp = position2D_mb - position2D_pb>
 
     position2D_pb = - position2D_mb * m_m / m_p          # [meters]
@@ -300,7 +300,7 @@ def nested2bp(moon, planet, star, dt, tf):
     #
     # Being the origin of the reference frame the center of mass of the system,
     # the following relation is met:
-    # <m_s·position3D_mb + m_p·position3D_pb = 0>
+    # <m_s*position3D_mb + m_p*position3D_pb = 0>
     # while <position3D_mp = position3D_mb - position3D_pb>
 
     position3D_pb =  -position3D_mb * m_m / m_p          # [meters]
@@ -445,7 +445,7 @@ def nested2bp(moon, planet, star, dt, tf):
     star.ephemeris.period_bs      = 2*math.pi/(n_bs)
     star.ephemeris.position3D_s   = np.zeros([3,len(time)])
 
-    print('    ✓ The trajectories of ' + moon.name + ', ' + planet.name + ', and ' + star.name + ' have been calculated.\n')
+    print('    The trajectories of ' + moon.name + ', ' + planet.name + ', and ' + star.name + ' have been calculated.\n')
 
     return moon, planet, star
 
@@ -484,7 +484,7 @@ def kepler_orbit(planet, star, dt, tf):
     #
     #===========================================================
 
-    G = 6.674e-11                             # Universal gravitational constant # [N⋅m2/kg2]
+    G = 6.674e-11                             # Universal gravitational constant # [N*m2/kg2]
     m_p      = planet.properties.m            # Mass of planet [kg]
     m_s      = star.properties.m              # Mass of star   [kg]
     a_s     = planet.orbital_elements.a_b     # Planet-star semim.axis [m]
@@ -499,7 +499,7 @@ def kepler_orbit(planet, star, dt, tf):
     #  FIRST STEP: Create time vector and true anomaly vector
     #
     #===========================================================
-    mu_s   = G*(m_p + m_s)       # planet-star stnd. grav. parameter [N⋅m2/kg]
+    mu_s   = G*(m_p + m_s)       # planet-star stnd. grav. parameter [N*m2/kg]
 
     time   = np.arange(0, tf, dt, dtype=np.float)  # Time vector [s]
     n_s   = (mu_s/a_s**3)**0.5   # Barycenter-star mean motion [1/s]
@@ -585,7 +585,7 @@ def kepler_orbit(planet, star, dt, tf):
     star.ephemeris.position3D_ps  = position3D_s
     star.ephemeris.period_ps      = 2*math.pi/(n_s)
     star.ephemeris.position3D_s   = np.zeros([3,len(time)])
-    print('    ✓ The trajectories of ' + planet.name + ' and ' + star.name + ' have been calculated.\n')
+    print('    The trajectories of ' + planet.name + ' and ' + star.name + ' have been calculated.\n')
     return planet, star
 
 
