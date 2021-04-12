@@ -52,8 +52,27 @@ Add this to your .bashrc
 export PYTHONPATH=$PYTHONPATH:~/lib/python
 ```
 then run the install.
+
+Alternatively the following should work well
+
+```bash
+python setup.py install --user
+
+```
+
 Be careful that on Mac, you might need to use another file than .bashrc. Also,
 for **Spyder** users, you can set it with Spyder's PYTHONPATH manager.
+
+Another known issue is related to IPython: depending how your locale is set, you
+might have some issues with an error message
+```
+ERROR in routine SPLINT: Bad XA input.
+```
+if so, using
+```
+export LC_ALL=C
+```
+in your terminal or bashrc should solve the problem.
 
 Once installed and your path set correctly, you can import PyMieDAP and Exopy in a
 (i)Python terminal or a script using:
