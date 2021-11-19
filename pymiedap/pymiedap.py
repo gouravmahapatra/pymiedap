@@ -226,6 +226,26 @@ def rotate_stokes(Q,U,beta):
 
     return newQ, newU
 
+def calc_radial(model):
+    """ Function to compute the radial polarization
+    Input:
+        a model object with a pixel resolved computation
+    Output: 
+        adds the radial polarization
+    """
+
+    # check if x and y are defined
+    if not hasattr(model.geom, 'x'):
+        raise Exception('This model object does not have pixels defined')
+
+    # compute phi angle
+    phi = np.arctan(model.geom.x/model.geom.y)
+
+    #make the rotation and store the radial values
+    Qr, Ur = rotate_stokes(model.Q, model.U, phi)
+    model.Qr = Qr
+    model.Ur = Ur
+
 
 def binned_average(x,y,xbins, errmean=True, weighted=True, sigmas=1.):
     """ This function computes binned averages
@@ -541,7 +561,7 @@ def planet_pixels(models, alpha=[10], npix=15, force=False, set_taus=False, rena
     mpl.ion()
 
 
-def plot_pixels(model, wvl_idx=0, display='grid', stokes='Ps', phase_idx=0,
+def plot_pixels(model, wvl_idx=0, display='grid', stokes='P', phase_idx=0,
                 title='Polarization', cmap='YlOrRd',vmin=None,vmax=None, data_scale=1.,
                 font_size=12, figsize=8, dpi=100):
     """ Function to nicely plot a resolved planet based on Model object
@@ -560,9 +580,10 @@ def plot_pixels(model, wvl_idx=0, display='grid', stokes='Ps', phase_idx=0,
         If 'map' displays results as function of latitude/longitude
         Default is 'grid'
     stokes : string, optional
-        which Stokes element to plot. Allowed are 'Ps' (-Q/I), 'I', 'Q', 'U',
+        which Stokes element to plot. Allowed are the names of variables in the
+        model object, likely to be in 'P' (-Q/I), 'I', 'Q', 'U', 'Qr', 'Qu',
         'V', 'Pt' (total polarization), 'Pl' total linear pol, 'Pv' for V/I.
-        Default is 'Ps'
+        Default is 'P'
     title : string, optional
         title of the figure
         Default is 'Polarization'
@@ -617,24 +638,12 @@ def plot_pixels(model, wvl_idx=0, display='grid', stokes='Ps', phase_idx=0,
         scalingy = 1./np.cos(np.radians(Y))
         area = (axh*dpi*axw*dpi)/(2*1.5*npix)**2
 
-    if stokes=='I':
-        Z = model.I[wvl_idx,phase_idx,:]
-    if stokes=='Q':
-        Z = model.Q[wvl_idx,phase_idx,:]
-    if stokes=='U':
-        Z = model.U[wvl_idx,phase_idx,:]
-    if stokes=='V':
-        Z = model.V[wvl_idx,phase_idx,:]
-    if stokes=='Ps':
-        Z = model.P[wvl_idx,phase_idx,:]
-    if stokes=='Pl':
-        Z = model.Pl[wvl_idx,phase_idx,:]
-    if stokes=='Pt':
-        Z = model.Pt[wvl_idx,phase_idx,:]
-    if stokes=='Pv':
-        Z = model.Pv[wvl_idx,phase_idx,:]
+    #getting the required Stokes element
+    Ztmp = getattr(model,stokes)
+    #selecting the wvl and phase
+    Z = Ztmp[wvl_idx,phase_idx,:]
 
-    Z = data_scale * Z
+    Z = data_scale * Z #scaling factor
 
     ax.set_title(title)
     sc = ax.scatter(X, Y, c=Z,lw=0, marker='s',
