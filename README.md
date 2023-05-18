@@ -9,6 +9,10 @@ Full planet modeling at any phase angle is possible.  With the subpackage
 exopy, it is also possible to simulate systems with a star, a planet and a
 possible moon.
 
+## Development status
+
+**PyMieDAP** is not longer maintained. I may reply to questions regarding the code, but no updates will be made until further notice.
+
 ## Getting Started
 
 These instructions will get you a copy of the project up and running on your
