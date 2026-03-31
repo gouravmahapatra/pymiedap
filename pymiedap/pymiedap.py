@@ -2844,7 +2844,7 @@ def mask_planet(alpha=0, npix=20, cusp=False, thresh_lat=50., patchy=True,
     if np.size(diffgrid[~np.isnan(diffgrid)])==0:
         asym=0
     else:
-        asym = np.size(asympix)/np.float(np.size(diffgrid[~np.isnan(diffgrid)]))
+        asym = np.size(asympix) / float(np.size(diffgrid[~np.isnan(diffgrid)]))
 
     # Flatten the grid with only lit points
     grid_out = grid_lit[~np.isnan(grid_lit)]
