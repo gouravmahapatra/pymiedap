@@ -39,7 +39,7 @@ Cf2py intent(out) Sv
       DOUBLE PRECISION Sv0
       PARAMETER (Sv0=1.D0)
 
-      CHARACTER foufile*50
+      CHARACTER foufile*256
  
 *----------------------------------------------------------------------------
 *     Open the output file:

@@ -1,0 +1,12 @@
+include README.md
+include LICENSE.md
+include CHANGELOG.md
+include compile_f2py_modules.sh
+include *.pyf
+recursive-include dap_source *
+recursive-include geos_source *
+recursive-include mie_source *
+recursive-include mieshell_source *
+recursive-include readmie_source *
+recursive-include pymiedap *.py *.png *.svg *.html *.ipynb
+recursive-include tests *.py

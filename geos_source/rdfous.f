@@ -21,7 +21,7 @@ Cf2py intent(in,out) rfou
 
       DOUBLE PRECISION xmu(nmuMAX),rfou(nmatMAX*nmuMAX,nmuMAX,0:nfouMAX)
 
-      CHARACTER ch*1,foufile*50
+      CHARACTER ch*1,foufile*256
 
 *----------------------------------------------------------------------------
 *     Get the input file with the Fourier coefficients:

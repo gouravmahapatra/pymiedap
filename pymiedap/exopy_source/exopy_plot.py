@@ -33,7 +33,7 @@ from matplotlib.collections import PatchCollection as _PatchCollection
 from matplotlib import animation as _animation
 #from shapely.geometry import Polygon as _Poly
 import numpy as _np
-from exopy_functions import grid_area as _grid_area
+from .exopy_functions import grid_area as _grid_area
 import time as _time
 #import exopy_config as _cfg
 
@@ -647,7 +647,7 @@ def IQ2(bodies, t = 0, wvl=0, phase = False, save = False, cmap=_matplotlib.cm.v
     ax1.grid()
     ax1.set_title('Flux')
     ax1.set_xlabel(xlabelstr)
-    ax1.set_ylabel('$\hat I~[-]$')
+    ax1.set_ylabel(r'$\hat I~[-]$')
     I0 = bodies[0].radiance.I[wvl,:]#/I0ref
     I0[_np.isnan(I0)] = 0
     I1 = bodies[1].radiance.I[wvl,:]#/I1ref
@@ -664,7 +664,7 @@ def IQ2(bodies, t = 0, wvl=0, phase = False, save = False, cmap=_matplotlib.cm.v
     ax2.grid()
     ax2.set_title('Q parameter')
     ax2.set_xlabel(xlabelstr)
-    ax2.set_ylabel('$\hat Q~[-]$')
+    ax2.set_ylabel(r'$\hat Q~[-]$')
     Q0 = bodies[0].radiance.Q[wvl,:]#/Q0ref
     Q0[_np.isnan(Q0)] = 0
     Q1 = bodies[1].radiance.Q[wvl,:]#/Q1ref
@@ -1139,8 +1139,8 @@ def _update_text(text, body, t, Type):
         text[3].set_text('t   = %4d days, %02d hours (%d)'%
                      (int(body.ephemeris.time[t]/60/60/24), (body.ephemeris.time[t]/24/60/60-
                       int(body.ephemeris.time[t]/60/60/24))*24,t))
-        text[4].set_text('$Phase$  = %04.2f$^{\circ}$' % (_np.degrees(body.geometry.phase_angle[t]),))
-        text[5].set_text('$\\varphi_S$ = %04.2f$^{\circ}$' % (_np.degrees(body.geometry.solar_azimuth_angle[t]),))
+        text[4].set_text(r'$Phase$  = %04.2f$^{\circ}$' % (_np.degrees(body.geometry.phase_angle[t]),))
+        text[5].set_text(r'$\varphi_S$ = %04.2f$^{\circ}$' % (_np.degrees(body.geometry.solar_azimuth_angle[t]),))
 #
 #        text[0].set_text('$Points: '+ str(body.grid.N_points)+'$')
 #        text[1].set_text('$\^{A}= '+ str(_np.round(_np.sum(body.grid.area)/(m.pi*0.5**2),3))+'$')
@@ -1155,8 +1155,8 @@ def _update_text(text, body, t, Type):
         text[0].set_text('t   = %4d days, %02d hours (%d)'%
                      (int(body.ephemeris.time[t]/60/60/24), (body.ephemeris.time[t]/24/60/60-
                       int(body.ephemeris.time[t]/60/60/24))*24,t))
-        text[1].set_text('$Phase$  = %04.2f$^{\circ}$' % (_np.degrees(body.geometry.phase_angle[t]),))
-        text[2].set_text('$\\varphi_S$ = %04.2f$^{\circ}$' % (_np.degrees(body.geometry.solar_azimuth_angle[t]),))
+        text[1].set_text(r'$Phase$  = %04.2f$^{\circ}$' % (_np.degrees(body.geometry.phase_angle[t]),))
+        text[2].set_text(r'$\varphi_S$ = %04.2f$^{\circ}$' % (_np.degrees(body.geometry.solar_azimuth_angle[t]),))
 #
 #        text[0].set_text('$t \,\,\,\,\, = \, %4d \, days, \, %02d \, hours \, (%d)$'%
 #                     (int(body.ephemeris.time[t]/60/60/24), (body.ephemeris.time[t]/24/60/60-
@@ -2007,7 +2007,7 @@ def XYZorbit(position3D_1, position3D_2 = None, info =
 #==============================================================================
 
     import statistics as stat
-    import exopy_functions as fun
+    from . import exopy_functions as fun
 
     fig = _plt.figure()
     ax = fig.add_subplot(111, projection='3d')
@@ -2030,7 +2030,7 @@ def XYZorbit(position3D_1, position3D_2 = None, info =
 
     # Axes limits and legend depend on the number of curves plotted
     if position3D_2 is not None:
-        if info[6] is 'close':
+        if info[6] == 'close':
 
             aux1 = max([position3D_1[0].max(),position3D_2[0].max()])
             aux2 = min([position3D_1[0].min(),position3D_2[0].min()])
@@ -2050,7 +2050,7 @@ def XYZorbit(position3D_1, position3D_2 = None, info =
             ax.set_zlim3d(stat.mean([aux5, aux6]) - aux/2,
                                                stat.mean([aux5, aux6]) + aux/2)
 
-        if info[6] is 'general':
+        if info[6] == 'general':
 
             aux1 = max([position3D_1[0].max(),position3D_2[0].max(), 0])
             aux2 = min([position3D_1[0].min(),position3D_2[0].min(), 0])
@@ -2075,7 +2075,7 @@ def XYZorbit(position3D_1, position3D_2 = None, info =
         else:
             _plt.legend(loc='center left', frameon=False)
     else:
-        if info[6] is 'close':
+        if info[6] == 'close':
             aux1 = max([position3D_1[0].max()])
             aux2 = min([position3D_1[0].min()])
 
@@ -2094,7 +2094,7 @@ def XYZorbit(position3D_1, position3D_2 = None, info =
             ax.set_zlim3d(stat.mean([aux5, aux6]) - aux/2,
                                                stat.mean([aux5, aux6]) + aux/2)
 
-        if info[6] is 'general':
+        if info[6] == 'general':
             aux1 = max([position3D_1[0].max(), 0])
             aux2 = min([position3D_1[0].min(), 0])
 
@@ -2168,7 +2168,7 @@ def anim_orbit(time, position3D_1, position3D_2 = None, info =
     import mpl_toolkits.mplot3d.axes3d as p3
     import matplotlib.animation as animation
     import statistics as stat
-    import exopy_functions as fun
+    from . import exopy_functions as fun
 
     # Update animation function
     def update_lines(num, dataLines, lines, pts) :
@@ -2199,7 +2199,7 @@ def anim_orbit(time, position3D_1, position3D_2 = None, info =
 
     # Axes limits and legend depend on the number of curves plotted
     if position3D_2 is not None:
-        if info[6] is 'close':
+        if info[6] == 'close':
 
             aux1 = max([position3D_1[0].max(),position3D_2[0].max()])
             aux2 = min([position3D_1[0].min(),position3D_2[0].min()])
@@ -2219,7 +2219,7 @@ def anim_orbit(time, position3D_1, position3D_2 = None, info =
             ax.set_zlim3d(stat.mean([aux5, aux6]) - aux/2,
                                                stat.mean([aux5, aux6]) + aux/2)
 
-        elif info[6] is 'general':
+        elif info[6] == 'general':
 
             aux1 = max([position3D_1[0].max(),position3D_2[0].max(), 0])
             aux2 = min([position3D_1[0].min(),position3D_2[0].min(), 0])
@@ -2246,7 +2246,7 @@ def anim_orbit(time, position3D_1, position3D_2 = None, info =
             leg[0] = info[4][0]
             leg[1] = info[4][1]
     else:
-        if info[6] is 'close':
+        if info[6] == 'close':
             print('a')
             aux1 = max([position3D_1[0].max()])
             aux2 = min([position3D_1[0].min()])
@@ -2266,7 +2266,7 @@ def anim_orbit(time, position3D_1, position3D_2 = None, info =
             ax.set_zlim3d(stat.mean([aux5, aux6]) - aux/2,
                                                stat.mean([aux5, aux6]) + aux/2)
 
-        elif info[6] is 'general':
+        elif info[6] == 'general':
             aux1 = max([position3D_1[0].max(), 0])
             aux2 = min([position3D_1[0].min(), 0])
 
@@ -2343,7 +2343,7 @@ def anim_orbit(time, position3D_1, position3D_2 = None, info =
     ani = animation.FuncAnimation( fig, update_lines,n,fargs=(data,lines,pts),
                                                   interval=info[8], blit=False)
 
-    if info[7] is 'store_yes':
+    if info[7] == 'store_yes':
         __plt.rcParams['animation.ffmpeg_path'] = '/usr/bin/ffmpeg'
         mywriter = animation.FFMpegWriter()
         ani.save('mymovie.mp4', writer=mywriter)
@@ -2390,6 +2390,3 @@ def plot_planetmoon(time, planet, moon):
 
 
     return
-
-
-

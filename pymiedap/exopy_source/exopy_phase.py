@@ -27,7 +27,7 @@ LIST OF FUNCTIONS
 """
 
 import numpy as np
-import exopy_config as _cfg
+from . import exopy_config as _cfg
 #from exopy_functions import PolyArea
 
 
@@ -77,11 +77,11 @@ def phase(body, star, conf):
     alpha = body.geometry.phase_angle#alpha
     phi_s = body.geometry.solar_azimuth_angle
 
-    if approach is 'parallel':
+    if approach == 'parallel':
         xp = np.zeros_like(time)
         Rp = np.ones_like(time)
         angle = np.ones(T)*np.radians(90)
-    elif approach is 'conical':
+    elif approach == 'conical':
         xp = (Rs/Rb-1)*Rb/r_s
         Rp = (1-(xp)**2)**0.5
         angle = np.arctan(Rp/xp)

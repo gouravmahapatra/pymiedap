@@ -63,11 +63,18 @@ from mpl_toolkits.mplot3d import proj3d
 import sys, numpy as np
 import math as m
 import matplotlib.pyplot as plt
-from IPython.display import HTML
+try:
+    from IPython.display import HTML
+except ModuleNotFoundError:
+    class HTML(str):
+        """Fallback HTML wrapper used when IPython is unavailable."""
+
+        def __new__(cls, data=""):
+            return str.__new__(cls, data)
 from tempfile import NamedTemporaryFile
 import base64
 import re
-import exopy_grid as grd
+from . import exopy_grid as grd
 from .. import pymiedap as pmd
 
 plt.ion()
@@ -254,8 +261,11 @@ class body():
 
     def reset():
         print('\n')
-        if query_yes_no('Note: Reseting the database does not delete the \
-        objects from the memory.\n\ Do you want to continue?', default="no"):
+        if query_yes_no(
+            'Note: Reseting the database does not delete the objects from the '
+            'memory.\nDo you want to continue?',
+            default="no",
+        ):
             del(body.__track)
             body.__track = [['#', 'Variable name', 'Type of body']]
             print('\nDatabase reseted!\n')
@@ -1011,19 +1021,19 @@ class flag():
                 text.append('   Reflected light combined:\t'   + str(self.combine) + '\n')
 
                 for i in range(np.size(self.transit,0)):
-                        existance = np.bool(self.transit[i][0][index])
+                        existance = bool(self.transit[i][0][index])
                         text.append('   Transit events with ' + self.transit[i][1]        + ': ' + str(existance))
 
                 for i in range(np.size(self.umbra,0)):
-                        existance = np.bool(self.umbra[i][0][index])
+                        existance = bool(self.umbra[i][0][index])
                         text.append('   Umbral shadowing due to ' + self.umbra[i][1]    + ': ' + str(existance))
 
                 for i in range(np.size(self.antumbra,0)):
-                        existance = np.bool(self.antumbra[i][0][index])
+                        existance = bool(self.antumbra[i][0][index])
                         text.append('   Antumbral shadowing due to ' + self.antumbra[i][1] + ': ' + str(existance))
 
                 for i in range(np.size(self.penumbra,0)):
-                        existance = np.bool(self.penumbra[i][0][index])
+                        existance = bool(self.penumbra[i][0][index])
                         text.append('   Penumbral shadowing due to ' + self.penumbra[i][1] + ': ' + str(existance))
 
         else:
@@ -1046,19 +1056,19 @@ class flag():
                 text.append('   Reflected light combined:\t'   + str(self.combine) + '\n')
 
                 for i in range(np.size(self.transit,0)):
-                        existance = np.bool(np.sum(self.transit[i][0]))
+                        existance = bool(np.sum(self.transit[i][0]))
                         text.append('   Transit events with ' + self.transit[i][1]        + ': ' + str(existance))
 
                 for i in range(np.size(self.umbra,0)):
-                        existance = np.bool(np.sum(self.umbra[i][0]))
+                        existance = bool(np.sum(self.umbra[i][0]))
                         text.append('   Umbral shadowing due to ' + self.umbra[i][1]    + ': ' + str(existance))
 
                 for i in range(np.size(self.antumbra,0)):
-                        existance = np.bool(np.sum(self.antumbra[i][0]))
+                        existance = bool(np.sum(self.antumbra[i][0]))
                         text.append('   Antumbral shadowing due to ' + self.antumbra[i][1] + ': ' + str(existance))
 
                 for i in range(np.size(self.penumbra,0)):
-                        existance = np.bool(np.sum(self.penumbra[i][0]))
+                        existance = bool(np.sum(self.penumbra[i][0]))
                         text.append('   Penumbral shadowing due to ' + self.penumbra[i][1] + ': ' + str(existance))
 
         else:

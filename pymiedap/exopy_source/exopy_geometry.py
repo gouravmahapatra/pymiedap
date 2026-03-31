@@ -30,7 +30,7 @@
 #sys.path.append('/home/javier/anaconda3/lib/python3.5/site-packages')
 #from exopy_functions import PolyArea
 import numpy as np
-import exopy_config as _cfg
+from . import exopy_config as _cfg
 
 def geometry(body, conf, ref_line_angle = None):
     '''
@@ -93,7 +93,7 @@ def geometry(body, conf, ref_line_angle = None):
         body.geometry.ref_plane_angle = np.arctan2(Rob[1,:],Rob[0,:])
 
         key = 1
-        if ref_line_angle is 'fix':
+        if ref_line_angle == 'fix':
             key = 0
             body.geometry.ref_line_angle = np.arctan2(Rob[1,:],Rob[0,:])
             body.geometry.ref_plane_to_ref_line_angle = np.zeros_like(time)
@@ -226,4 +226,3 @@ def geometry(body, conf, ref_line_angle = None):
             body.grid.beta = beta
 
     return body
-

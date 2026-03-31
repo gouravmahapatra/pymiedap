@@ -1,9 +1,10 @@
 import importlib
 import os
-import shutil
 import sys
+import tempfile
 import types
 import unittest
+from pathlib import Path
 
 import numpy as np
 
@@ -96,6 +97,21 @@ class GeometryUtilitiesTest(unittest.TestCase):
 
 
 class NativeIntegrationTest(unittest.TestCase):
+    def test_exopy_imports_with_native_modules(self):
+        pmd = load_pymiedap_module()
+
+        native_modules_ready = all(
+            hasattr(module, "__file__")
+            for module in (pmd.mie, pmd.mieshell, pmd.readmie, pmd.dap, pmd.geos)
+        )
+        if not native_modules_ready:
+            self.skipTest("Native extensions are not available for exopy import testing.")
+
+        import pymiedap.exopy as exopy
+
+        self.assertTrue(hasattr(exopy, "new_body"))
+        self.assertTrue(hasattr(exopy, "run_simulation"))
+
     def test_default_model_computes_and_reads_single_geometry(self):
         pmd = load_pymiedap_module()
 
@@ -107,23 +123,20 @@ class NativeIntegrationTest(unittest.TestCase):
             self.skipTest("Native extensions are not available for end-to-end testing.")
 
         model = pmd.Model()
-        output_dir = "tio/"
         output_name = "default_model"
 
-        shutil.rmtree(output_dir, ignore_errors=True)
-        os.makedirs(output_dir, exist_ok=True)
-        try:
+        with tempfile.TemporaryDirectory() as tmpdir:
             pmd.compute_model(
                 model,
                 force=True,
                 rename=True,
                 output_name=output_name,
-                path_input=output_dir,
+                path_input=tmpdir,
             )
 
             self.assertEqual(len(model.name), 1)
             self.assertTrue(os.path.exists(model.name[0]))
-            self.assertLessEqual(len(model.name[0]), 50)
+            self.assertEqual(Path(model.name[0]).parent, Path(tmpdir))
 
             phase = np.array([30.0])
             sza = np.array([20.0])
@@ -135,8 +148,6 @@ class NativeIntegrationTest(unittest.TestCase):
             self.assertEqual(u.shape, (1,))
             self.assertEqual(v.shape, (1,))
             self.assertTrue(np.isfinite(intensity[0]))
-        finally:
-            shutil.rmtree(output_dir, ignore_errors=True)
 
 
 if __name__ == "__main__":

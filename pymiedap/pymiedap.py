@@ -33,6 +33,7 @@ import module_geos as geos
 import os
 import sys
 import os.path
+from pathlib import Path
 import matplotlib.pyplot as mpl
 from PIL import Image
 
@@ -1223,7 +1224,7 @@ def read_mie_output(filename, full_output=False, nameout='stuff.dat'):
 
     """
 
-    theta, F = readmie.readmieoutput(filename, nameout)
+    theta, F = readmie.readmieoutput(os.fspath(filename), os.fspath(nameout))
 
     Pl = - F[4,:] / F[0,:]
 
@@ -1279,11 +1280,8 @@ def dap_code(model, rename=False, output_name='modelA',
 
     # Checking that the output directory exists
     # if not, creating it
-    try:
-        os.makedirs(os.path.normpath(path_output))
-    except OSError:
-        if not os.path.isdir(os.path.normpath(path_output)):
-            raise
+    output_dir = Path(path_output)
+    output_dir.mkdir(parents=True, exist_ok=True)
 
     #-----------------------------------------------------------------------
     #     Some parameter values:
@@ -1440,15 +1438,13 @@ def dap_code(model, rename=False, output_name='modelA',
         # Naming the model with check for Windows paths
         print('fou_{:4.7f}.dat'.format(wav))
         if rename is True:
-            output_file = path_output + output_name + '_{:4.7f}.dat'.format(wav)
-            output_file = os.path.normpath(output_file)
-            model.name[z] = output_file
-            os.rename('fou_{:4.3f}.dat'.format(wav),output_file)
+            output_file = output_dir / f"{output_name}_{wav:4.7f}.dat"
+            model.name[z] = os.fspath(output_file)
+            os.rename('fou_{:4.3f}.dat'.format(wav), output_file)
         else:
-            output_file = path_output + 'fou_{:4.7f}.dat'.format(wav)
-            output_file = os.path.normpath(output_file)
-            model.name[z] = output_file
-            os.rename('fou_{:4.3f}.dat'.format(wav),output_file)
+            output_file = output_dir / f"fou_{wav:4.7f}.dat"
+            model.name[z] = os.fspath(output_file)
+            os.rename('fou_{:4.3f}.dat'.format(wav), output_file)
         print('End of DAP program')
 
 
@@ -1533,7 +1529,7 @@ def read_dap_output(phase, sza, emission, filename, beta=None, phi=None,
 
     # Reading Stoke vector
     rfou = np.zeros((nmatMAX*nmuMAX,nmuMAX,nfouMAX+1), order='F')
-    Sv = geos.read_dap(filename, ngeos, szaF, emissionF, azimuthF, betaF, rfou)
+    Sv = geos.read_dap(os.fspath(filename), ngeos, szaF, emissionF, azimuthF, betaF, rfou)
     del(rfou)
 
     # storing output in proper Stokes elements
@@ -2904,7 +2900,7 @@ def surface_check(model,nmug, nmat=4, nmuMAX=201):
 
     if type(model.surface)==np.ndarray:
         mus, smf, Lfin = fourier_matrix(nmug=nmug, surf_mat=model.surface, nmat=nmat, nmuMAX=nmuMAX)
-    elif model.surface==str:
+    elif isinstance(model.surface, str):
         print('read fourier file for surface')
 
     return Lfin

@@ -1,7 +1,10 @@
 .DS_Store
 __pycache__/
+.pytest_cache/
 .venv/
 build/
+dist/
+*.egg-info/
 dap_database/
 module_*.cpython-*.so
 module_*-f2pywrappers.f

@@ -62,13 +62,15 @@
 # IMPORT MODULES
 # ==============
 
-import pymiedap as pmd
+from pathlib import Path
+
+from . import pymiedap as pmd
 import numpy as np
-import exopy_source.exopy_plot as plot
-import exopy_source.exopy_config as cfg
-import exopy_source.exopy_compute as compute
-import exopy_source.exopy_atm_models as atm_models
-import exopy_source.exopy_functions as fun
+from .exopy_source import exopy_plot as plot
+from .exopy_source import exopy_config as cfg
+from .exopy_source import exopy_compute as compute
+from .exopy_source import exopy_atm_models as atm_models
+from .exopy_source import exopy_functions as fun
 from matplotlib import rc as _rc
 _rc('font',**{'family':'sans-serif','sans-serif':['Helvetica']})
 ## for Palatino and other serif fonts use:
@@ -81,6 +83,11 @@ import os
 import pickle
 import os.path
 import time
+
+try:
+    _prompt_input = raw_input
+except NameError:
+    _prompt_input = input
 
 # ======================================
 # ======================================
@@ -137,32 +144,33 @@ def save_pickle(bodies, tf, dt, I, Q, U, V, conf, directory = None,
         for i in dirs:
              print(i)
         print(' ')
-        directory = raw_input('Save directory: ')
+        directory = _prompt_input('Save directory: ')
         print(' ')
         print('List of existing files:')
         files = os.listdir(os.getcwd()+'/'+directory)
         for i in files:
              print(i)
         print('')
-        name = raw_input('Name of the file: ')
+        name = _prompt_input('Name of the file: ')
 
     if description is None:
         print('')
-        description = raw_input('Simulation description: ')
+        description = _prompt_input('Simulation description: ')
+
+    output_dir = Path.cwd() / directory
 
     save_data = [bodies, tf, dt, I, Q, U, V, conf.az, conf.el,
                  conf.approach, conf.case, conf.ref_body,
                  conf.ref_line, conf.plot_color, conf.N,
                  description ]
 
-    with open(os.getcwd()+'/'+directory+'/'+name+'.pickle', 'wb') as f:
+    with open(output_dir / f'{name}.pickle', 'wb') as f:
          pickle.dump(save_data, f)
 
-    f = open(os.getcwd()+'/'+directory+'/'+name+'.txt', 'w+')
-    f.write('Description of the simulation: \n')
-    f.write(description)
-    f.write('\n')
-    f.close
+    with open(output_dir / f'{name}.txt', 'w+', encoding='utf-8') as handle:
+        handle.write('Description of the simulation: \n')
+        handle.write(description)
+        handle.write('\n')
 
     print('\nData has been saved.')
 
@@ -213,18 +221,18 @@ def load_pickle(directory = None, name = None):
         for i in dirs:
              print(i)
         print(' ')
-        directory = raw_input('Load directory: ')
+        directory = _prompt_input('Load directory: ')
 
     if name is None:
         print(' ')
         print('List of existing files:')
-        files = os.listdir(os.getcwd()+'/'+directory)
+        files = os.listdir(Path.cwd() / directory)
         for i in files:
              print(i)
         print('')
-        name = raw_input('Name of the file: ')
+        name = _prompt_input('Name of the file: ')
 
-    with open(os.getcwd()+'/'+directory+'/'+name+'.pickle', 'rb') as f:
+    with open(Path.cwd() / directory / f'{name}.pickle', 'rb') as f:
         load_data = pickle.load(f)
 
     conf = cfg.Settings()
@@ -299,23 +307,23 @@ def print_txt(bodies, tf, dt, I, Q, U, V, exopy, directory = None,
         for i in dirs:
              print(i)
         print(' ')
-        directory = raw_input('Save directory: ')
+        directory = _prompt_input('Save directory: ')
         print(' ')
         print('List of existing files:')
-        files = os.listdir(os.getcwd()+'/'+directory)
+        files = os.listdir(Path.cwd() / directory)
         for i in files:
              print(i)
         print('')
-        name = raw_input('Name of the file: ')
+        name = _prompt_input('Name of the file: ')
 
     if description is None:
         print('')
-        description = raw_input('Simulation description: ')
+        description = _prompt_input('Simulation description: ')
 
-    file = open(os.getcwd()+'/'+directory+'/'+name+'.txt', 'w+')
+    file = open(Path.cwd() / directory / f'{name}.txt', 'w+')
 
 
-    file.write('-- EXOPY OUTPUT DATA -- ' + time.strftime('%H:%M:%S') + ' -- ' + time.strftime('%d\%m\%Y') + ' --\n\n')
+    file.write('-- EXOPY OUTPUT DATA -- ' + time.strftime('%H:%M:%S') + ' -- ' + time.strftime('%d/%m/%Y') + ' --\n\n')
 
     file.write('Description:     \t' + description + '\n')
     file.write('Flag eclipses:   \t' + str(bodies[0].flag.eclipse_d) + '\nFlag transits:      \t' + str(bodies[0].flag.transit_d) + '\n')
@@ -439,18 +447,18 @@ def read_txt(directory = None, name = None):
         for i in dirs:
                  print(i)
         print(' ')
-        directory = raw_input('Load directory: ')
+        directory = _prompt_input('Load directory: ')
 
     if name is None:
         print(' ')
         print('List of existing files:')
-        files = os.listdir(os.getcwd()+'/'+directory)
+        files = os.listdir(Path.cwd() / directory)
         for i in files:
                  print(i)
         print('')
-        name = raw_input('Name of the file: ')
+        name = _prompt_input('Name of the file: ')
 
-    file = open(os.getcwd() + '/' + directory + '/' + name +'.txt').read()
+    file = open(Path.cwd() / directory / f'{name}.txt').read()
     lines = file.split('\n')
     totalline = len(lines)
 
@@ -993,7 +1001,7 @@ def test_integration(body, scene='clear', plot = 'no'):
         ax2.plot(phase,Up/np.interp(phase,phase_angle,U),'o-r')
         ax2.set_xlabel('Phase angle [deg]')
         ax2.set_ylabel('Difference')
-        ax2.legend(['$\Delta I$','$\Delta Q$','$\Delta U$'])
+        ax2.legend([r'$\Delta I$', r'$\Delta Q$', r'$\Delta U$'])
 
         plt.tight_layout()
 

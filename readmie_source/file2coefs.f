@@ -26,7 +26,7 @@
       DOUBLE PRECISION pi
       PARAMETER (pi=3.1415926535898D0)
 
-      CHARACTER*20 namein
+      CHARACTER*256 namein
       CHARACTER*23 title
 
 Cf2py intent(in) namein

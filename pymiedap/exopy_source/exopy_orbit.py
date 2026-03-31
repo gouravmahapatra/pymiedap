@@ -37,7 +37,7 @@
 
 # Required modules
 import math, numpy as np
-import exopy_functions as fun
+from . import exopy_functions as fun
 
 def kepler(M, e, method = 'Newton-Raphson'):
     """
@@ -181,7 +181,7 @@ def nested2bp(moon, planet, star, dt, tf):
     mu_m   = G*(m_p + m_m)       # Moon-planet standard gravitational parameter
     mu_b   = G*(m_m + m_p + m_s) # Moon-planet-barycenter stnd. grav. parameter
                                  # [N⋅m2/kg]
-    time   = np.arange(0, tf, dt, dtype=np.float)  # Time vector [s]
+    time   = np.arange(0, tf, dt, dtype=float)  # Time vector [s]
 
     n_mb   = (mu_m/(a_mb*(m_p+m_m)/m_p)**3)**0.5 # Moon-bar. mean motion [1/s]
     n_bs   = (mu_b/a_bs**3)**0.5   # Barycenter-star mean motion [1/s]
@@ -501,7 +501,7 @@ def kepler_orbit(planet, star, dt, tf):
     #===========================================================
     mu_s   = G*(m_p + m_s)       # planet-star stnd. grav. parameter [N⋅m2/kg]
 
-    time   = np.arange(0, tf, dt, dtype=np.float)  # Time vector [s]
+    time   = np.arange(0, tf, dt, dtype=float)  # Time vector [s]
     n_s   = (mu_s/a_s**3)**0.5   # Barycenter-star mean motion [1/s]
 
     if t0 is None and t0 is None:

@@ -4,8 +4,8 @@
 python module module_readmie ! in 
     interface  ! in :module_readmie
         subroutine readmieoutput(namein,nameout,thetas,fs) ! in :module_readmie:read_mie_output.f
-            character*20 intent(in) :: namein
-            character*20 intent(in) :: nameout
+            character*256 intent(in) :: namein
+            character*256 intent(in) :: nameout
             double precision dimension(901),intent(out) :: thetas
             double precision dimension(6,901),intent(out) :: fs
         end subroutine readmieoutput
@@ -23,7 +23,7 @@ python module module_readmie ! in
             double precision dimension(6) :: f
         end subroutine expand
         subroutine file2coefs(namein,ncoef,coefs) ! in :module_readmie:file2coefs.f
-            character*20 intent(in) :: namein
+            character*256 intent(in) :: namein
             integer intent(out) :: ncoef
             double precision dimension(4,4,4001),intent(out) :: coefs
         end subroutine file2coefs
