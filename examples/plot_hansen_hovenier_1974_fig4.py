@@ -11,6 +11,16 @@ single optically thick aerosol layer over a black surface, with user-specified
 Rayleigh scattering scaled to 0.55 um. That means this script is intended as a
 qualitative reproduction of the Figure 4 curve family, not a point-by-point
 reconstruction of the published calculations.
+
+Standalone terminal run:
+    cd /Users/gourav/Documents/PyMieDAP
+    source .venv/bin/activate
+    MPLCONFIGDIR=/tmp/mpl python examples/plot_hansen_hovenier_1974_fig4.py
+
+If the native extension modules are not built yet:
+    cd /Users/gourav/Documents/PyMieDAP
+    source .venv/bin/activate
+    python setup.py build_ext --inplace
 """
 
 from __future__ import annotations
