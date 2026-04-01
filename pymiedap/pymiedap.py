@@ -1394,15 +1394,22 @@ def dap_code(model, rename=False, output_name='modelA',
         for layer_name, layer in vars(model.layers).items():
             # identify position of the current layer
             lev = (pres==layer.press)
+            lev_idx = np.flatnonzero(lev)
+            if lev_idx.size != 1:
+                raise ValueError(
+                    "Expected exactly one pressure match for layer {!r}, got {}."
+                    .format(layer_name, lev_idx.size)
+                )
+            lev_idx = lev_idx[0]
 
             # force user-define rayleigh opacity
             if layer.rayscat is False:
-                bmsca[lev] = layer.tau_ray[z]
+                bmsca[lev_idx] = layer.tau_ray[z]
 
-            layer.bmsca[z] = bmsca[lev]
-            layer.bmabs[z] = bmabs[lev]
-            layer.basca[z] = basca[lev]
-            layer.baabs[z] = baabs[lev]
+            layer.bmsca[z] = bmsca[lev_idx]
+            layer.bmabs[z] = bmabs[lev_idx]
+            layer.basca[z] = basca[lev_idx]
+            layer.baabs[z] = baabs[lev_idx]
 
         #---------------------------------------------------------------------
         #     Open the Fourier coefficients output file:

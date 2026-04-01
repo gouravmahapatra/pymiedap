@@ -15,60 +15,230 @@ possible moon.
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your
-local machine for development and testing purposes. See deployment for notes on
-how to deploy the project on a live system.
+The most reliable way to run this repository today is:
 
-### Prerequisites
+1. install the system dependencies with Homebrew
+2. create a project-local virtual environment
+3. install the Python packages into that virtual environment
+4. build the Fortran extension modules in place
+5. run the examples, tests, or notebooks from that same virtual environment
 
-PyMieDAP requires 
-* Python (2.7 or 3.x)
-* numpy
-* matplotlib
-* scipy
-* a FORTRAN compiler ('gfortran' is known to work fine)
+This repository has been tested on Unix-like systems. macOS and Linux are the
+recommended targets.
 
-but if you are a scientist, you might already have those installed.
+## Recommended Setup
 
-Be careful: this has only been tested for Unices, Windows systems might face
-issues with compilers.
+The commands below assume:
 
-### Installing
+* macOS
+* Homebrew is installed
+* the repository is checked out locally
 
-To install, you can use the setup.py script
+The recommended Python version for this repository is **Python 3.11**.
 
-```
-python setup.py install
-```
+## Quick Start
 
-this will install PyMieDAP where python itself is installed. If you want to
-install it in your home folder, you can use
+### 1. Install System Dependencies
 
-```
-python setup.py install --home=~
+Install the native build tools and runtime libraries with Homebrew:
 
-```
-If you install it locally, you`ll need to add ~/lib/python (or the path you
-chose) to your PYTHONPATH.
-Add this to your .bashrc
-
-```
-export PYTHONPATH=$PYTHONPATH:~/lib/python
-```
-then run the install.
-Be careful that on Mac, you might need to use another file than .bashrc. Also,
-for **Spyder** users, you can set it with Spyder's PYTHONPATH manager.
-
-Once installed and your path set correctly, you can import PyMieDAP and Exopy in a
-(i)Python terminal or a script using:
-
-```
-import pymiedap.pymiedap as pmd
-import pymiedap.exopy as exopy
+```bash
+xcode-select --install
+brew update
+brew install python@3.11 gcc pkgconf openblas
 ```
 
-To know more about how to use PyMieDAP, you can refer to the notebook
-`pymiedap_tutorial.ipynb`.
+What these provide:
+
+* `python@3.11`: the recommended Python interpreter for this repository
+* `gcc`: provides `gfortran`, which is required to build the Fortran modules
+* `pkgconf`: compiler/linker metadata helper
+* `openblas`: optimized BLAS/LAPACK library
+
+### 2. Create and Activate a Virtual Environment
+
+Run all PyMieDAP commands from inside a virtual environment. This keeps the
+installation isolated from other Python projects.
+
+```bash
+cd /path/to/PyMieDAP
+$(brew --prefix)/bin/python3.11 -m venv .venv
+source .venv/bin/activate
+```
+
+After activation, your shell prompt should show `(.venv)`.
+
+Whenever you come back to the project later, reactivate it with:
+
+```bash
+cd /path/to/PyMieDAP
+source .venv/bin/activate
+```
+
+### 3. Install Python Dependencies Into the Virtual Environment
+
+With the virtual environment activated:
+
+```bash
+python -m pip install --upgrade pip wheel "setuptools<60"
+python -m pip install numpy scipy matplotlib pillow ipykernel jupyterlab
+```
+
+### 4. Build the Native PyMieDAP Modules
+
+PyMieDAP depends on compiled native modules such as `module_mie` and
+`module_dap`. Build them from the repository root:
+
+```bash
+python setup.py build_ext --inplace
+```
+
+If the build succeeds, you should see compiled files such as:
+
+```bash
+module_mie.cpython-311-darwin.so
+module_mieshell.cpython-311-darwin.so
+module_readmie.cpython-311-darwin.so
+module_dap.cpython-311-darwin.so
+module_geos.cpython-311-darwin.so
+```
+
+### 5. Verify the Installation
+
+Check that the native modules import correctly:
+
+```bash
+python -c "import module_mie, module_mieshell, module_readmie, module_dap, module_geos; print('native modules ok')"
+```
+
+Then verify the package imports:
+
+```bash
+python -c "import pymiedap.pymiedap as pmd; import pymiedap.exopy as exopy; print('pymiedap ok')"
+```
+
+## Running the Code
+
+### Run the Test Suite
+
+From the repository root, with the virtual environment activated:
+
+```bash
+python -m unittest discover -s tests -v
+```
+
+### Run the Benchmark Script
+
+```bash
+python examples/run_pymiedap_benchmark.py
+```
+
+### Generate the Lambertian Phase-Curve Figure
+
+```bash
+python examples/plot_lambert_phase_curve.py
+```
+
+This writes a figure to:
+
+```text
+examples/lambert_phase_curve.png
+```
+
+### Run a Notebook
+
+Register the virtual environment as a Jupyter kernel:
+
+```bash
+python -m ipykernel install --user --name pymiedap-venv --display-name "PyMieDAP (.venv)"
+```
+
+Start Jupyter from the repository root:
+
+```bash
+jupyter notebook examples/pymiedap_benchmark_updated.ipynb
+```
+
+or:
+
+```bash
+jupyter lab examples/pymiedap_benchmark_updated.ipynb
+```
+
+In Jupyter, select the kernel:
+
+```text
+PyMieDAP (.venv)
+```
+
+If you use the wrong kernel, the notebook will usually fail with errors such
+as:
+
+```text
+ModuleNotFoundError: No module named 'module_mie'
+```
+
+That means the notebook is not running inside the same virtual environment that
+was used to build the native modules.
+
+## Typical Workflow
+
+For day-to-day use, the minimal workflow is:
+
+```bash
+cd /path/to/PyMieDAP
+source .venv/bin/activate
+python setup.py build_ext --inplace
+python -m unittest discover -s tests -v
+python examples/run_pymiedap_benchmark.py
+```
+
+## Troubleshooting
+
+### `ModuleNotFoundError: No module named 'module_mie'`
+
+Cause:
+
+* the native extensions were not built, or
+* the notebook/script is running under the wrong Python interpreter
+
+Fix:
+
+```bash
+source .venv/bin/activate
+python setup.py build_ext --inplace
+python -c "import module_mie; print('module_mie ok')"
+```
+
+If this happens inside Jupyter, switch the kernel to `PyMieDAP (.venv)` and
+restart the notebook kernel.
+
+### `gfortran` not found
+
+Install the compiler with:
+
+```bash
+brew install gcc
+```
+
+### Jupyter is not available
+
+Install it into the virtual environment:
+
+```bash
+source .venv/bin/activate
+python -m pip install jupyterlab ipykernel
+```
+
+## Tutorials and Examples
+
+Useful entry points in this repository:
+
+* `pymiedap_tutorial.ipynb`
+* `pymiedap_benchmark.ipynb`
+* `examples/pymiedap_benchmark_updated.ipynb`
+* `examples/run_pymiedap_benchmark.py`
+* `examples/plot_lambert_phase_curve.py`
 
 ## Authors
 
