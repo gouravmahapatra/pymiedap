@@ -809,8 +809,9 @@ def calc_azimuth(phase, sza, emission, deg=True):
     t1 = np.cos(alpha) - (np.cos(theta)*np.cos(thetap))
     t2 = np.sin(theta)*np.sin(thetap)
 
-    c_delta_phi = t1/t2
-    c_delta_phi[t2<1e-6] = 1. # if denominator is too small, set cos(phi) to 1.
+    c_delta_phi = np.divide(t1, t2, out=np.ones_like(t1, dtype=float), where=np.abs(t2) >= 1e-6)
+    c_delta_phi = np.asarray(c_delta_phi, dtype=float)
+    c_delta_phi[np.abs(t2) < 1e-6] = 1. # if denominator is too small, set cos(phi) to 1.
     c_delta_phi[c_delta_phi>1.] = 1.
     c_delta_phi[c_delta_phi<-1.] = -1.
 
@@ -821,6 +822,18 @@ def calc_azimuth(phase, sza, emission, deg=True):
 
     azimuth = delta_phi
     return azimuth
+
+
+def _safe_divide(numerator, denominator):
+    """Return element-wise division with NaN where the denominator is zero."""
+    numerator = np.asarray(numerator, dtype=float)
+    denominator = np.asarray(denominator, dtype=float)
+    return np.divide(
+        numerator,
+        denominator,
+        out=np.full_like(numerator, np.nan, dtype=float),
+        where=denominator != 0,
+    )
 
 
 def get_cosbeta(PHA,SZA,EMI,AZI):
@@ -2465,10 +2478,12 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
                 model.picture = np.copy(picture_full)
 
                 # Integrating over planet
-                Iall[:,a,citer] = np.nan
-                Qall[:,a,citer] = np.nan
-                Uall[:,a,citer] = np.nan
-                Vall[:,a,citer] = np.nan
+                # No visible illuminated pixels means the disk-integrated
+                # signal should be zero, not NaN.
+                Iall[:,a,citer] = 0.0
+                Qall[:,a,citer] = 0.0
+                Uall[:,a,citer] = 0.0
+                Vall[:,a,citer] = 0.0
 
 
 
@@ -2500,22 +2515,22 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
     atm_model.Q = Qt
     atm_model.U = Ut
     atm_model.V = Vt
-    atm_model.P = (-Qt/It)
-    atm_model.Pl = np.sqrt( (Qt**2+Ut**2)/It**2 )
-    atm_model.Pt = np.sqrt( (Qt**2+Ut**2+Vt**2)/It**2 )
-    atm_model.Pu = Ut/It
-    atm_model.Pv = Vt/It
+    atm_model.P = _safe_divide(-Qt, It)
+    atm_model.Pl = _safe_divide(np.sqrt(Qt**2 + Ut**2), It)
+    atm_model.Pt = _safe_divide(np.sqrt(Qt**2 + Ut**2 + Vt**2), It)
+    atm_model.Pu = _safe_divide(Ut, It)
+    atm_model.Pv = _safe_divide(Vt, It)
 
     # store global results in first input model
     atm_model.Iall = Iall
     atm_model.Qall = Qall
     atm_model.Uall = Uall
     atm_model.Vall = Vall
-    atm_model.Pqall = (-Qall/Iall)
-    atm_model.Plall = np.sqrt( (Qall**2+Uall**2)/Iall**2 )
-    atm_model.Ptall = np.sqrt( (Qall**2+Uall**2+Vall**2)/Iall**2 )
-    atm_model.Puall = Uall/Iall
-    atm_model.Pvall = Vall/Iall
+    atm_model.Pqall = _safe_divide(-Qall, Iall)
+    atm_model.Plall = _safe_divide(np.sqrt(Qall**2 + Uall**2), Iall)
+    atm_model.Ptall = _safe_divide(np.sqrt(Qall**2 + Uall**2 + Vall**2), Iall)
+    atm_model.Puall = _safe_divide(Uall, Iall)
+    atm_model.Pvall = _safe_divide(Vall, Iall)
 
     # saving dispersion
     atm_model.Pqstd = np.std(atm_model.Pqall, axis=2)
