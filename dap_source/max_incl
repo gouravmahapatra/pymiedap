@@ -20,7 +20,7 @@
      .        ncoefsMAX,nmuMAX,nfouMAX,nsupMAX,
      .        nmatMAX
 
-      PARAMETER (nlaysMAX=50,
+      PARAMETER (nlaysMAX=100,
      .           ncoefsMAX=4000,
      .           nfouMAX=ncoefsMAX,
      .           nmuMAX=201,

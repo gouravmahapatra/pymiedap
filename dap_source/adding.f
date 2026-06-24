@@ -2,7 +2,7 @@
 * See license.md or http://gitlab.com/loic.cg.rossi/pymiedap for details.
 
       SUBROUTINE adding(outputname,a,b,coefs,ncoefs,nlays,
-     .                  nmug,nmat,surfmat) 
+     .                  nmug,nmat,surfmat,nsurf,nsurfou) 
 **********************************************************************
 *                A D D I N G    M E T H O D          
 *          F O R    P O L A R I Z E D   L I G H T      
@@ -11,7 +11,7 @@
 
       INCLUDE 'max_incl'
 
-      INTEGER nlays,nmat,nmug,iunfou,nmu,iad,i,j,l,m
+      INTEGER nlays,nmat,nmug,iunfou,nmu,iad,i,j,l,m,nsurf,nsurfou
  
       INTEGER ncoefs(nlaysMAX),
      .        M0(nlaysMAX),M1(nlaysMAX),M2(nlaysMAX), 
@@ -28,17 +28,17 @@
       DOUBLE PRECISION Rmbot(nsupMAX,nsupMAX),Rmtop(nsupMAX,nsupMAX),
      .                 Tmbot(nsupMAX,nsupMAX),Tmtop(nsupMAX,nsupMAX),
      .                 Rmsbot(nsupMAX,nsupMAX),
-     .                 surfmat(nsupMAX,nsupMAX)
+     .                 surfmat(nsurf,nsurf,0:nsurfou)
 
       DOUBLE PRECISION ebbot(nmuMAX),ebtop(nmuMAX)
       
       DOUBLE PRECISION Zmplus(nsupMAX,nsupMAX),Zmmin(nsupMAX,nsupMAX)
 
-      LOGICAL nextm
+      LOGICAL nextm,has_surface
       
       CHARACTER*16 outputname
 
-Cf2py intent(in) outputname,a,b,coefs,ncoefs,nlays,nmug,nmat,surfmat
+Cf2py intent(in) outputname,a,b,coefs,ncoefs,nlays,nmug,nmat,surfmat,nsurf,nsurfou
 
 *---------------------------------------------------------------------
       binc= 1.D0
@@ -100,10 +100,14 @@ C      WRITE(*,*) m
       ENDDO
 
 *---------------------------------------------------------------------
-*     Fill the arrays with the Lambertian surface reflection:
+*     Fill the arrays with the surface reflection for this Fourier term.
+*     Lambertian surfaces only provide m=0.  Rough ocean surfaces can
+*     provide many nonzero azimuthal Fourier coefficients.
 *---------------------------------------------------------------------
-      IF (m.EQ.0) THEN
-         CALL layer0(surfmat,smf,nmu,nmat,ebbot,Rmbot,Tmbot,Rmsbot)
+      has_surface= .false.
+      IF (m.LE.nsurfou) THEN
+         CALL layer0(surfmat(1,1,m),nsurf,smf,nmu,nmat,ebbot,
+     .               Rmbot,Tmbot,Rmsbot,has_surface)
       ENDIF
 
 *---------------------------------------------------------------------
@@ -134,13 +138,14 @@ C      WRITE(*,*) m
 *---------------------------------------------------------------------
 *           If m=0, the new arrays are added to the surface arrays:
 *---------------------------------------------------------------------
-            IF (m.EQ.0) THEN
+            IF (has_surface) THEN
 
-               CALL addlay(nmat,nmu,ebtop,ebbot,iad,Rmtop,Tmtop,
+               CALL addlay(nmat,nmu,ebtop,ebbot,1,Rmtop,Tmtop,
      .                  Rmbot,Tmbot,Rmsbot)
 
 *---------------------------------------------------------------------
-*           If m>0, the new arrays are shifted to the bottom arrays:
+*           If this Fourier term has no surface contribution, the new
+*           arrays are shifted to the bottom arrays as in the legacy code.
 *---------------------------------------------------------------------
             ELSE
                CALL top2bot(nmat,nmu,ebtop,ebbot,Rmtop,Tmtop,
@@ -170,6 +175,7 @@ C      WRITE(*,*) m
 *     Next term of Fourier-loop:
 *---------------------------------------------------------------------
       IF (m.LT.2) nextm=.true.
+      IF (m.LT.nsurfou) nextm=.true.
       IF (nextm) GOTO 1000
 
       CLOSE(iunfou)

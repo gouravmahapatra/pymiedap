@@ -1,6 +1,6 @@
       INTEGER ngeosMAX,nmuMAX,nfouMAX,nmatMAX
 
       PARAMETER (ngeosMAX=100000,
-     .           nmuMAX=300,
-     .           nfouMAX=2000,
+     .           nmuMAX=201,
+     .           nfouMAX=500,
      .           nmatMAX=4)

@@ -1,0 +1,18 @@
+# PyMieDAP — Python dependencies
+# CRITICAL: numpy must be < 2.0  (the Fortran f2py interface uses the
+#           numpy 1.x C-API; numpy 2.x breaks it at import time).
+numpy>=1.23,<2.0
+
+# Core scientific stack
+scipy>=1.9
+matplotlib>=3.5
+h5py>=3.7
+Pillow>=9.0
+
+# HITRAN Access Python Interface (used by pymiedap.ckdistribution)
+# The code does a lazy import of `hapi`; install via the package below.
+hitran-api>=1.2
+
+# Build tools (needed for Fortran compilation via f2py)
+setuptools>=68
+wheel

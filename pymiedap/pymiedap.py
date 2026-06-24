@@ -31,11 +31,13 @@ import module_readmie as readmie
 import module_dap as dap
 import module_geos as geos
 import os
+import shutil
 import sys
 import os.path
 from pathlib import Path
 import matplotlib.pyplot as mpl
 from PIL import Image
+from .ocean import OceanSurface
 
 # ---------
 # CLASSES DEFINITION
@@ -272,6 +274,8 @@ class Model(object):
 
         self._surface = np.diag([asurf,0.,0.,0.])
         self._asurf = asurf #surface albedo for lambertian surf
+        if surface is not None and not (isinstance(surface, list) and len(surface) == 0):
+            self.surface = surface
 
         self.name = ['']
 
@@ -298,7 +302,12 @@ class Model(object):
     @asurf.setter
     def asurf(self, alb):
         self._asurf = alb
-        self._surface[0,0] = self._asurf
+        if isinstance(self._surface, np.ndarray):
+            self._surface[0,0] = self._asurf
+        else:
+            # Non-Lambertian surfaces (e.g. OceanSurface) do not have a
+            # scalar albedo slot; replace with a plain Lambertian matrix.
+            self._surface = np.diag([alb,0.,0.,0.])
 
     @property
     def surface(self):
@@ -307,7 +316,14 @@ class Model(object):
     @surface.setter
     def surface(self, val):
         self._surface = val
-        self._asurf = self._surface[0,0]
+        if isinstance(val, np.ndarray):
+            self._asurf = self._surface[0,0]
+        elif isinstance(val, OceanSurface):
+            # Keep a scalar diagnostic for legacy code; the real surface is
+            # wavelength-, angle- and wind-dependent.
+            self._asurf = np.nan
+        else:
+            self._asurf = np.nan
 
 
 
@@ -1039,7 +1055,7 @@ def mie_code(aerosols, wavelengths, output=False, delta=1e-8, cutoff=1e-8, thmin
 
 
 def mie_shell(aerosols, wavelengths, output=False, delta=1e-8, cutoff=1e-8, thmin=0, thmax=180,
-              nsubr=20, ngaur=20, nlaysMAX=50, ncoefsMAX=4001,
+              nsubr=20, ngaur=20, nlaysMAX=100, ncoefsMAX=4001,
               nfouMAX=4001, nmuMAX=201, nmatMAX=4):
     """ Compute Layered spheres Mie expansion coefficients for Aerosol object.
     Requires the module_mieshell module.
@@ -1249,7 +1265,7 @@ def read_mie_output(filename, full_output=False, nameout='stuff.dat'):
 
 def dap_code(model, rename=False, output_name='modelA',
              path_output='./dap_database/',
-             nlaysMAX=50, ncoefsMAX=4001, nfouMAX=4001,
+             nlaysMAX=100, ncoefsMAX=4001, nfouMAX=4001,
              nmuMAX=201, nmatMAX=4, nmat=4, nmug=20):
     """ This function launches the DAP code to calculate the supermatrices
     produced by the doubling-adding code. Reads input from a model class.
@@ -1311,9 +1327,17 @@ def dap_code(model, rename=False, output_name='modelA',
 
     # Reading basic properties of the model
     asurf = model.asurf
-    surfmat = surface_check(model,nmug, nmat=nmat, nmuMAX=nmuMAX)
     nlays = len(vars(model.layers))  # number of atmospheric layers
     nwvl = len(model.wvl_list)
+
+    # Guard: the Fortran arrays are statically sized to nlaysMAX.
+    # Passing nlays > nlaysMAX causes a silent Fortran buffer overflow.
+    if nlays > nlaysMAX:
+        raise ValueError(
+            f"Model has {nlays} atmospheric layers but the Fortran DAP code "
+            f"was compiled with nlaysMAX={nlaysMAX}.  To support more layers, "
+            f"increase nlaysMAX in dap_source/max_incl and recompile module_dap."
+        )
 
     ncoefs = np.zeros(nlaysMAX, order='F')
     wavels = model.wvl_list
@@ -1343,6 +1367,12 @@ def dap_code(model, rename=False, output_name='modelA',
         baabs = np.zeros(nlaysMAX, order='F')  # all values of baabs
         ssalbs = np.zeros(nlaysMAX, order='F')  # all values of s.scat albedoes
         pres = np.zeros(nlaysMAX, order='F')  # pressure levels for each layer
+
+        # Surface Fourier coefficients may be wavelength-dependent (e.g. OceanSurface).
+        # For plain Lambertian arrays this is computed once and unchanged per wavelength.
+        surfmat, nsurf, nsurfou = surface_check(
+            model, nmug, nmat=nmat, nmuMAX=nmuMAX, wavelength=wav
+        )
 
         print('Wavelength {:06.7f} microns'.format(wav))
 
@@ -1452,24 +1482,58 @@ def dap_code(model, rename=False, output_name='modelA',
 
         #-----------------------------------------------------------------------
         #     Call the doubling-adding routine:
+        #     The Fortran code writes its output into the current working
+        #     directory, so we temporarily chdir into output_dir so the file
+        #     lands there and can be renamed without a cross-device move.
         #-----------------------------------------------------------------------
-        dap.adding(outputname,a,b,coefs,ncoefs,nlays,nmug,nmat,surfmat)
+        # Resolve output_dir to an absolute path BEFORE chdir so that all
+        # subsequent path operations remain correct regardless of cwd.
+        abs_output_dir = output_dir.resolve()
+        _orig_dir = os.getcwd()
+        os.chdir(abs_output_dir)
+        try:
+            dap.adding(outputname,a,b,coefs,ncoefs,nlays,nmug,nmat,surfmat,nsurf,nsurfou)
 
-        # Naming the model with check for Windows paths
-        print('fou_{:4.7f}.dat'.format(wav))
-        if rename is True:
-            output_file = output_dir / f"{output_name}_{wav:4.7f}.dat"
-            model.name[z] = os.fspath(output_file)
-            os.rename('fou_{:4.3f}.dat'.format(wav), output_file)
-        else:
-            output_file = output_dir / f"fou_{wav:4.7f}.dat"
-            model.name[z] = os.fspath(output_file)
-            os.rename('fou_{:4.3f}.dat'.format(wav), output_file)
+            # Naming the model with check for Windows paths
+            print('fou_{:4.7f}.dat'.format(wav))
+            src_name = 'fou_{:4.3f}.dat'.format(wav)
+            if rename is True:
+                output_file = abs_output_dir / f"{output_name}_{wav:4.7f}.dat"
+                model.name[z] = os.fspath(output_file)
+                os.rename(src_name, output_file)
+            else:
+                output_file = abs_output_dir / f"fou_{wav:4.7f}.dat"
+                model.name[z] = os.fspath(output_file)
+                os.rename(src_name, output_file)
+        finally:
+            os.chdir(_orig_dir)
         print('End of DAP program')
 
 
+def _peek_dap_header(filename):
+    """Read nmat and nmugs from a DAP Fourier output file without loading it all.
+
+    The file format (ASCII) is::
+        # comment lines ...
+        <nmat>
+        <nmugs>
+        <xmu_1>
+        ...
+
+    Returns (nmat, nmugs) as integers.
+    """
+    with open(filename, 'r') as fh:
+        for line in fh:
+            if line.startswith('#'):
+                continue
+            nmat = int(line.strip())
+            nmugs = int(next(fh).strip())
+            return nmat, nmugs
+    raise ValueError("Could not read DAP header from {!r}".format(filename))
+
+
 def read_dap_output(phase, sza, emission, filename, beta=None, phi=None,
-                    ngeosMAX=100000, nmuMAX=300, nfouMAX=2000, nmatMAX=4):
+                    ngeosMAX=100000, nmuMAX=None, nfouMAX=2000, nmatMAX=4):
     """ Reads the supermatrices coefficients for given geometry
 
     Parameters
@@ -1513,6 +1577,21 @@ def read_dap_output(phase, sza, emission, filename, beta=None, phi=None,
 
     """
 
+    # module_geos was compiled with rfou dimensioned (804,201,501).
+    # Clamp the Python-side limits to match so we never exceed those bounds.
+    _RFOU_DIM1 = 804   # nmatMAX_compiled * nmuMAX_compiled = 4 * 201
+    _RFOU_DIM2 = 201   # nmuMAX_compiled
+    _RFOU_DIM3 = 501   # nfouMAX_compiled + 1
+
+    if nmuMAX is None:
+        _nmat_file, _nmugs_file = _peek_dap_header(filename)
+        nmuMAX = min(_nmugs_file, _RFOU_DIM2)
+        nmatMAX = min(max(nmatMAX, _nmat_file), 4)
+    else:
+        nmuMAX = min(nmuMAX, _RFOU_DIM2)
+
+    nfouMAX = min(nfouMAX, _RFOU_DIM3 - 1)
+
     ngeos = len(phase)
     betaF = np.zeros(ngeosMAX, order='F')
     azimuthF = np.zeros(ngeosMAX, order='F')
@@ -1548,7 +1627,8 @@ def read_dap_output(phase, sza, emission, filename, beta=None, phi=None,
     # make sure all input angles are in degrees
 
     # Reading Stoke vector
-    rfou = np.zeros((nmatMAX*nmuMAX,nmuMAX,nfouMAX+1), order='F')
+    # rfou must match the compiled module_geos dimensions exactly: (400,100,501)
+    rfou = np.zeros((_RFOU_DIM1, _RFOU_DIM2, _RFOU_DIM3), order='F')
     Sv = geos.read_dap(os.fspath(filename), ngeos, szaF, emissionF, azimuthF, betaF, rfou)
     del(rfou)
 
@@ -2374,7 +2454,23 @@ def planet_integrated(models, alpha=[10], npix=15, force=False, set_taus=False,
                                                                 sigma_c=sigma_c,
                                                                 delta_c=delta_c[a])
 
-
+        # mask_planet builds its pixel list via coordinate matching and may
+        # return fewer pixels than getgeos (floating-point rounding).  Trim the
+        # geometry arrays so all boolean indexing with mask is consistent.
+        nmask = len(mask)
+        if nmask != ngeos:
+            ngeos  = nmask
+            phase  = phase[:ngeos]
+            theta0 = theta0[:ngeos]
+            theta  = theta[:ngeos]
+            phi    = phi[:ngeos]
+            beta   = beta[:ngeos]
+            lats   = lats[:ngeos]
+            longs  = longs[:ngeos]
+            Is = np.zeros((len(models), len(wvl), ngeos))
+            Qs = np.zeros((len(models), len(wvl), ngeos))
+            Us = np.zeros((len(models), len(wvl), ngeos))
+            Vs = np.zeros((len(models), len(wvl), ngeos))
 
         for pixtype,model in enumerate(models): #for each pixel type
             for j,w in enumerate(wvl): # and each wvl
@@ -2712,8 +2808,16 @@ def mask_planet(alpha=0, npix=20, cusp=False, thresh_lat=50., patchy=True,
     #grid_lit[xv*xv+yv*yv>1]=np.nan
 
     # find where correct pixels are on a square grid
-    xidx = [np.where(X==item)[0][0] for i, item in enumerate(xs) if item in X]
-    yidx = [np.where(Y==item)[0][0] for i, item in enumerate(ys) if item in Y]
+    # Build xidx/yidx jointly so lengths always match: only include pixel i
+    # when BOTH xs[i] is found in X and ys[i] is found in Y.
+    xidx = []
+    yidx = []
+    for i in range(len(xs)):
+        xi = np.where(X == xs[i])[0]
+        yi = np.where(Y == ys[i])[0]
+        if len(xi) > 0 and len(yi) > 0:
+            xidx.append(xi[0])
+            yidx.append(yi[0])
 
     if full_disk is True:
         # remove outside of disk
@@ -2872,60 +2976,67 @@ def mask_planet(alpha=0, npix=20, cusp=False, thresh_lat=50., patchy=True,
 
 
 def fourier_matrix(nmug=20, surf_mat=np.diag([1,0,0,0]), nmat=4, nmuMAX=201, nmatMAX=4):
-    """ A function to Fourier develop a scattering matrix for a surface
+    """Fourier-develop a constant Lambertian-like surface matrix.
+
+    Returns the DAP surface shape ``(nsup, nsup, nsurfou+1)``.  A constant
+    Lambertian surface only has the m=0 Fourier coefficient (nsurfou=0).
     """
-
-    # Getting the Gauss points
-    xs, w = dap.gauleg(201,nmug,0.,1.)
+    xs, w = dap.gauleg(201, nmug, 0., 1.)
     smf = np.sqrt(2*xs*w)
-    # adding extra nadir direction
     xs[nmug] = 1.0
-    w[nmug] = 1.0
+    w[nmug]  = 1.0
     smf[nmug] = 1.0
-    nmu = nmug+1
+    nmu  = nmug + 1
+    nsup = nmu * nmat
 
-    #mu = xs
-    #mup = xs
-    L = np.zeros((nmat,nmat,nmu,nmu), order='F')
+    # m=0 only — constant surface has no azimuthal variation.
+    # Replace the 4 nested loops (nmat² × nmu² ≈ 16 × 6561 iterations at nmug=80)
+    # with vectorised outer products: for each Stokes block (l,k), fill the
+    # corresponding nmu×nmu sub-grid using np.outer(smf, smf) × surf_mat[l,k].
+    Lfin = np.zeros((nsup, nsup, 1), order='F')
+    outer_smf = np.outer(smf[:nmu], smf[:nmu])   # (nmu, nmu)
+    for k in range(nmat):
+        for l in range(nmat):
+            if surf_mat[l, k] == 0.0:
+                continue
+            Lfin[l::nmat, k::nmat, 0] = surf_mat[l, k] * outer_smf
 
-    # if nmat<4, we take the corresponding submatrix of the input surface
-    # matrix
-    L[0:,0:,:,:] = surf_mat[:nmat,:nmat,np.newaxis,np.newaxis]
-    #Bmp = np.zeros((nmat,nmat,nphi,nm))
-    #Bmm = np.zeros((nmat,nmat,nphi,nm))
-
-    #for im,mm in enumerate(m):
-    #    for ip,pp in enumerate(phi):
-    #        Bmp[0:,0:,ip,im] = np.diag([np.cos(mm*pp),np.cos(mm*pp),np.sin(mm*pp),np.sin(mm*pp)])
-    #        Bmm[0:,0:,ip,im] = np.diag([-np.sin(mm*pp),-np.sin(mm*pp),np.cos(mm*pp),np.cos(mm*pp)])
-
-    #Bm = Bmp + Bmm
-
-    #Lm = np.einsum('jcbm,ijklp->ijklpm',Bm,L)
-
-    #L2 = scpinteg.simps(Lm,phi,axis=4)
-    #L2 = L2/(phi[-1]-phi[0])
-
-    Lfin = np.zeros((nmatMAX*nmuMAX,nmatMAX*nmuMAX),order='F')
-    for k in np.arange(nmat):
-        for l in np.arange(nmat):
-            for i in np.arange(nmu):
-                for j in np.arange(nmu):
-                    Lfin[nmat*i+l,nmat*j+k] = smf[i]*L[l,k,i,j]*smf[j]
-
-    return xs,smf,Lfin
+    return xs, smf, Lfin, nsup, 0   # nsurfou=0 for Lambertian
 
 
-def surface_check(model,nmug, nmat=4, nmuMAX=201):
-    """ A function to check what type of surface is defined by the user, and
-    act accordingly for the DAP code"""
+def surface_check(model, nmug, nmat=4, nmuMAX=201, wavelength=None):
+    """Build the DAP bottom-boundary Fourier supermatrix.
 
-    if type(model.surface)==np.ndarray:
-        mus, smf, Lfin = fourier_matrix(nmug=nmug, surf_mat=model.surface, nmat=nmat, nmuMAX=nmuMAX)
+    Supported surface types
+    -----------------------
+    numpy.ndarray (4×4)
+        Constant Lambertian-like surface.  Backward-compatible; only the
+        m=0 Fourier term is populated.  Returns ``(Lfin, nsup, 0)``.
+    OceanSurface
+        Rough Fresnel ocean with full polarized water-body solver.  Returns
+        ``(Lfin, nsup, nsurfou)`` where nsurfou = surface.n_fourier.
+    """
+    if isinstance(model.surface, np.ndarray):
+        mus, smf, Lfin, nsup, nsurfou = fourier_matrix(
+            nmug=nmug, surf_mat=model.surface, nmat=nmat, nmuMAX=nmuMAX
+        )
+    elif isinstance(model.surface, OceanSurface):
+        surface = (model.surface if wavelength is None
+                   else model.surface.with_wavelength(wavelength))
+        Lfin, nsup, nsurfou, mus = surface.fourier_supermatrix(
+            nmug=nmug, nmat=nmat, nmuMAX=nmuMAX
+        )
     elif isinstance(model.surface, str):
-        print('read fourier file for surface')
-
-    return Lfin
+        raise NotImplementedError(
+            'Reading surface Fourier coefficients from a file is not supported. '
+            'Use a numpy array (Lambertian) or an OceanSurface instance.'
+        )
+    else:
+        raise TypeError(
+            f'model.surface must be a numpy array or OceanSurface, '
+            f'got {type(model.surface).__name__}'
+        )
+    return Lfin, nsup, nsurfou
 
 
 def orthographic_projection(center=np.array([0,0]), npix=20, input_img='./earth_contour.png'):

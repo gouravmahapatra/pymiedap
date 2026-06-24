@@ -1,11 +1,47 @@
-.DS_Store
+.cache/
+
+# --- Python ---
 __pycache__/
-.pytest_cache/
-.venv/
-build/
-dist/
+*.py[cod]
 *.egg-info/
+.ipynb_checkpoints/
+
+# --- Virtual environments ---
+.venv/
+venv/
+env/
+
+# --- Compiled native extension modules (build locally via setup.py) ---
+*.so
+*.o
+*.mod
+build/
+
+# --- f2py-generated wrappers (regenerated at build time) ---
+*module.c
+*-f2pywrappers.f
+
+# --- Generated doubling-adding Fourier databases & outputs ---
 dap_database/
-module_*.cpython-*.so
-module_*-f2pywrappers.f
-module_*module.c
+examples/dap_database/
+fou_*.dat
+
+# --- T-matrix coefficient files converted to PyMieDAP format ---
+*_pymiedap.coeffs
+
+# --- Run logs / scratch from numerical experiments ---
+*.pid
+nmug*_stdout.txt
+nmug*_stderr.txt
+nmug*_result.txt
+nmug*_out.txt
+nmug*_err.txt
+
+# --- Large archives ---
+*.zip
+
+# --- Figure-digitization intermediates ---
+examples/_fig13work/
+
+# --- OS cruft ---
+.DS_Store

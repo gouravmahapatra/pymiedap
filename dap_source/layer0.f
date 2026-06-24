@@ -1,33 +1,36 @@
 * This file is part of PyMieDAP, released under GNU General Public License.
 * See license.md or http://gitlab.com/loic.cg.rossi/pymiedap for details.
 
-      SUBROUTINE layer0(surfmat,smf,nmu,nmat,ebbot,Rmbot,Tmbot,Rmsbot)
+      SUBROUTINE layer0(surfmat,nsurf,smf,nmu,nmat,ebbot,
+     .                  Rmbot,Tmbot,Rmsbot,has_surface)
 
+*----------------------------------------------------------------------
+*     Fill the bottom-boundary arrays with the Fourier coefficient of
+*     the surface reflection matrix.  Older PyMieDAP versions only used
+*     the intensity-to-intensity element and only for m=0.  This version
+*     accepts a full Stokes supermatrix coefficient for any Fourier term,
+*     which is required for non-Lambertian rough-ocean glint.
 *----------------------------------------------------------------------
       IMPLICIT NONE
 
       INCLUDE 'max_incl'
 
-      INTEGER i,j,nsup,nmu,nmat,ibase,jbase
-
-      DOUBLE PRECISION w
+      INTEGER i,j,nsup,nmu,nmat,nsurf
 
       DOUBLE PRECISION ebbot(nmuMAX),smf(nmuMAX),
      .                 Rmbot(nsupMAX,nsupMAX),Tmbot(nsupMAX,nsupMAX),
      .                 Rmsbot(nsupMAX,nsupMAX),
-     .                 surfmat(nsupMAX,nsupMAX)
+     .                 surfmat(nsurf,nsurf)
 
-Cf2py intent(in) surfmat,smf,nmu,nmat
-Cf2py intent(out) ebbot
+      LOGICAL has_surface
+
+Cf2py intent(in) surfmat,nsurf,smf,nmu,nmat
+Cf2py intent(out) ebbot,has_surface
 Cf2py intent(in,out) Rmbot,Tmbot,Rmsbot
 
-*-----------------------------------------------------------------------
       nsup= nmu*nmat
+      has_surface= .false.
 
-*-----------------------------------------------------------------------
-*     Fill the reflection arrays with Lambertian reflection, and 
-*     the transmission arrays with zero's:
-*-----------------------------------------------------------------------
       DO i=1,nsup
          DO j=1,nsup
             Rmbot(i,j)= 0.D0
@@ -36,25 +39,22 @@ Cf2py intent(in,out) Rmbot,Tmbot,Rmsbot
          ENDDO
       ENDDO
 
-      DO i=1,nmu
-         ibase= (i-1)*nmat
-         DO j=1,nmu
-            jbase= (j-1)*nmat
-            w= smf(i)*smf(j)
-            Rmbot(ibase+1,jbase+1)= surfmat(ibase+1,jbase+1)
+      DO i=1,nsup
+         DO j=1,nsup
+            Rmbot(i,j)= surfmat(i,j)
+            IF (DABS(surfmat(i,j)).GT.eps) has_surface= .true.
          ENDDO
       ENDDO
 
       CALL star(Rmsbot,Rmbot,nmat,nmu)
 
-*-----------------------------------------------------------------------
+*----------------------------------------------------------------------
 *     Fill array ebbot (the direct transmission through the surface),
-*     which equals zero, but is needed anyway:
-*-----------------------------------------------------------------------
+*     which equals zero, but is needed anyway.
+*----------------------------------------------------------------------
       DO i=1,nmu
          ebbot(i)= 0.D0
       ENDDO
 
-*-----------------------------------------------------------------------
       RETURN
       END

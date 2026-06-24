@@ -16,8 +16,8 @@ python module module_geos ! in
             integer intent(out) :: nfou
             integer intent(out) :: nmat
             integer intent(out) :: nmugs
-            double precision dimension(300),intent(out) :: xmu
-            double precision dimension(1200,300,2001),intent(in,out) :: rfou
+            double precision dimension(201),intent(out) :: xmu
+            double precision dimension(804,201,501),intent(in,out) :: rfou
         end subroutine rdfous
         subroutine read_dap(foufile,ngeos,thet0,theta,phi,beta,rfou,sv) ! in :module_geos:./geos_source/read_dap.f
             character*256 intent(in) :: foufile
@@ -26,7 +26,7 @@ python module module_geos ! in
             double precision dimension(100000),intent(in) :: theta
             double precision dimension(100000),intent(in) :: phi
             double precision dimension(100000),intent(in) :: beta
-            double precision dimension(1200,300,2001),intent(in) :: rfou
+            double precision dimension(804,201,501),intent(in) :: rfou
             double precision dimension(4,100000),intent(out) :: sv
         end subroutine read_dap
         subroutine getgeos(alpha,npix,ngeos,apix,thet0,theta,phi,beta,lat,long_bn,xs,ys) ! in :module_geos:./geos_source/getgeos.f
@@ -61,6 +61,3 @@ python module module_geos ! in
         end subroutine splint
     end interface 
 end python module module_geos
-
-! This file was auto-generated with f2py (version:2).
-! See http://cens.ioc.ee/projects/f2py2e/

@@ -3,16 +3,18 @@
 
 python module module_dap ! in 
     interface  ! in :module_dap
-        subroutine adding(outputname,a,b,coefs,ncoefs,nlays,nmug,nmat,surfmat) ! in :module_dap:./dap_source/adding.f
+        subroutine adding(outputname,a,b,coefs,ncoefs,nlays,nmug,nmat,surfmat,nsurf,nsurfou) ! in :module_dap:./dap_source/adding.f
             character*16 intent(in) :: outputname
-            double precision dimension(50),intent(in) :: a
-            double precision dimension(50),intent(in) :: b
-            double precision dimension(4,4,4001,50),intent(in) :: coefs
-            integer dimension(50),intent(in) :: ncoefs
+            double precision dimension(100),intent(in) :: a
+            double precision dimension(100),intent(in) :: b
+            double precision dimension(4,4,4001,100),intent(in) :: coefs
+            integer dimension(100),intent(in) :: ncoefs
             integer intent(in) :: nlays
             integer intent(in) :: nmug
             integer intent(in) :: nmat
-            double precision dimension(804,804),intent(in) :: surfmat
+            integer intent(in) :: nsurf
+            integer intent(in) :: nsurfou
+            double precision dimension(nsurf,nsurf,0:nsurfou),intent(in),depend(nsurf,nsurfou) :: surfmat
         end subroutine adding
         subroutine addlay(nmat,nmu,ebtop,ebbot,iad,rmtop,tmtop,rmbot,tmbot,rmsbot) ! in :module_dap:./dap_source/addlay.f
             integer :: nmat
@@ -42,13 +44,13 @@ python module module_dap ! in
         subroutine bmolecules(wav,nlays,pres,depol,ri,mma,grav,bmsca,bmabs,coefsm) ! in :module_dap:./dap_source/bmolecules.f
             double precision intent(in) :: wav
             integer intent(in) :: nlays
-            double precision dimension(50),intent(in) :: pres
+            double precision dimension(100),intent(in) :: pres
             double precision intent(in) :: depol
             double precision intent(in) :: mma
             double precision intent(in) :: ri
             double precision intent(in) :: grav
-            double precision dimension(50),intent(out) :: bmsca
-            double precision dimension(50),intent(out) :: bmabs
+            double precision dimension(100),intent(out) :: bmsca
+            double precision dimension(100),intent(out) :: bmabs
             double precision dimension(4,4,4001),intent(out) :: coefsm
         end subroutine bmolecules
         subroutine brack(el,array,n,nd,i1,i2) ! in :module_dap:./dap_source/brack.f
@@ -62,9 +64,9 @@ python module module_dap ! in
         subroutine bstart(m,layer,coefs,ncoef,m0,xmumin,a,b,b0,ndoubl) ! in :module_dap:./dap_source/bstart.f
             integer :: m
             integer :: layer
-            double precision dimension(4,4,4001,50) :: coefs
-            integer dimension(50) :: ncoef
-            integer dimension(50) :: m0
+            double precision dimension(4,4,4001,100) :: coefs
+            integer dimension(100) :: ncoef
+            integer dimension(100) :: m0
             double precision :: xmumin
             double precision :: a
             double precision :: b
@@ -99,9 +101,9 @@ python module module_dap ! in
             double precision dimension(ndim),intent(out),depend(ndim) :: w
         end subroutine gauleg
         subroutine init(coefs,coefsm,coefsa) ! in :module_dap:./dap_source/init.f
-            double precision dimension(4,4,4001,50),intent(in,out) :: coefs
+            double precision dimension(4,4,4001,100),intent(in,out) :: coefs
             double precision dimension(4,4,4001),intent(in,out) :: coefsm
-            double precision dimension(4,4,4001,50),intent(in,out) :: coefsa
+            double precision dimension(4,4,4001,100),intent(in,out) :: coefsa
         end subroutine init
         subroutine layer0(surfmat,smf,nmu,nmat,ebbot,rmbot,tmbot,rmsbot) ! in :module_dap:./dap_source/layer0.f
             double precision dimension(804,804),intent(in) :: surfmat
@@ -115,16 +117,16 @@ python module module_dap ! in
         end subroutine layer0
         subroutine layerm(m,m0,m1,m2,l,xmu,smf,nmu,nmat,coefs,ncoefs,zmplus,zmmin,a,b,ebtop,rmtop,tmtop) ! in :module_dap:./dap_source/layerm.f
             integer intent(in) :: m
-            integer dimension(50),intent(in) :: m0
-            integer dimension(50),intent(in) :: m1
-            integer dimension(50),intent(in) :: m2
+            integer dimension(100),intent(in) :: m0
+            integer dimension(100),intent(in) :: m1
+            integer dimension(100),intent(in) :: m2
             integer intent(in) :: l
             double precision dimension(201),intent(in) :: xmu
             double precision dimension(201),intent(in) :: smf
             integer intent(in) :: nmu
             integer intent(in) :: nmat
-            double precision dimension(4,4,4001,50),intent(in) :: coefs
-            integer dimension(50),intent(in) :: ncoefs
+            double precision dimension(4,4,4001,100),intent(in) :: coefs
+            integer dimension(100),intent(in) :: ncoefs
             double precision dimension(804,804),intent(in,out) :: zmplus
             double precision dimension(804,804),intent(in,out) :: zmmin
             double precision intent(in,out) :: a
@@ -147,7 +149,7 @@ python module module_dap ! in
             integer intent(in) :: iunfou
             integer intent(in) :: nmat
             integer intent(in) :: nmu
-            integer dimension(50),intent(in) :: m0
+            integer dimension(100),intent(in) :: m0
             integer intent(in) :: nlays
             logical intent(out) :: nextm
         end subroutine newfou
@@ -222,8 +224,8 @@ python module module_dap ! in
         subroutine scalzm(m,layer,coefs,ncoefs,xmu,binfac,nmu,zmmin,zmplus) ! in :module_dap:./dap_source/scalzm.f
             integer intent(in) :: m
             integer intent(in) :: layer
-            double precision dimension(4,4,4001,50),intent(in) :: coefs
-            integer dimension(50),intent(in) :: ncoefs
+            double precision dimension(4,4,4001,100),intent(in) :: coefs
+            integer dimension(100),intent(in) :: ncoefs
             double precision dimension(201),intent(in) :: xmu
             double precision intent(in) :: binfac
             integer intent(in) :: nmu
@@ -231,17 +233,17 @@ python module module_dap ! in
             double precision dimension(804,804),intent(out) :: zmplus
         end subroutine scalzm
         subroutine setfou(coefs,ncoefs,nlays,a,b,xmu,nmug,m0,m1,m2,iadd) ! in :module_dap:./dap_source/setfou.f
-            double precision dimension(4,4,4001,50),intent(in) :: coefs
-            integer dimension(50),intent(in) :: ncoefs
+            double precision dimension(4,4,4001,100),intent(in) :: coefs
+            integer dimension(100),intent(in) :: ncoefs
             integer intent(in) :: nlays
-            double precision dimension(50),intent(in) :: a
-            double precision dimension(50),intent(in) :: b
+            double precision dimension(100),intent(in) :: a
+            double precision dimension(100),intent(in) :: b
             double precision dimension(201),intent(in) :: xmu
             integer intent(in) :: nmug
-            integer dimension(50),intent(out) :: m0
-            integer dimension(50),intent(out) :: m1
-            integer dimension(50),intent(out) :: m2
-            integer dimension(50,4001),intent(out) :: iadd
+            integer dimension(100),intent(out) :: m0
+            integer dimension(100),intent(out) :: m1
+            integer dimension(100),intent(out) :: m2
+            integer dimension(100,4001),intent(out) :: iadd
         end subroutine setfou
         subroutine setmu(nmat,nmug,iunfou,nmu,xmu,smf) ! in :module_dap:./dap_source/setmu.f
             integer intent(in) :: nmat
@@ -254,8 +256,8 @@ python module module_dap ! in
         subroutine setzm(m,layer,coefs,ncoefs,xmu,binfac,binfad,nmu,nmat,zmmin,zmplus) ! in :module_dap:./dap_source/setzm.f
             integer intent(in) :: m
             integer intent(in) :: layer
-            double precision dimension(4,4,4001,50),intent(in) :: coefs
-            integer dimension(50),intent(in) :: ncoefs
+            double precision dimension(4,4,4001,100),intent(in) :: coefs
+            integer dimension(100),intent(in) :: ncoefs
             double precision dimension(201),intent(in) :: xmu
             double precision intent(in) :: binfac
             double precision intent(in) :: binfad
