@@ -117,6 +117,57 @@ Then verify the package imports:
 python -c "import pymiedap.pymiedap as pmd; import pymiedap.exopy as exopy; print('pymiedap ok')"
 ```
 
+## Linux / HPC (multi-processor) installation
+
+On a Linux workstation or a multi-processor HPC cluster, the toolchain comes
+from environment modules (or the system package manager) rather than Homebrew,
+and the native extensions **must be compiled on the machine you will run on** —
+the prebuilt `.so` files in the repo are for other platforms. A full guide,
+including a SLURM job template and a troubleshooting section, lives in
+[`INSTALL_HPC.md`](INSTALL_HPC.md). The essentials:
+
+**Requirements:** Python ≥ 3.9 (**3.11 recommended**), `gfortran` ≥ 7, and
+**`numpy < 2.0`** — numpy 2.x changed the C-API and the compiled Fortran
+modules will fail to import under it.
+
+**Automated install** (creates a venv, installs deps, compiles all five Fortran
+modules, runs a smoke test):
+
+```bash
+# Load your cluster's toolchain first (names vary — check `module avail`):
+module load python/3.11        # or system python3.11
+module load gcc/12             # provides gfortran
+
+bash install_hpc.sh
+# custom interpreter / venv location:
+bash install_hpc.sh --python python3.11 --venv /scratch/$USER/pymiedap_venv
+# no module system (plain Linux box):
+bash install_hpc.sh --no-modules
+```
+
+**Manual install** (equivalent steps):
+
+```bash
+python3 -m venv venv && source venv/bin/activate
+pip install --upgrade pip setuptools wheel
+pip install -r requirements.txt                     # enforces numpy<2.0
+python -c "import numpy; print(numpy.__version__)"  # confirm 1.x
+python setup.py build_ext --inplace                 # or the explicit f2py
+                                                    # commands in INSTALL_HPC.md
+```
+
+If `gfortran` is missing: `sudo apt-get install gfortran` (Debian/Ubuntu) or
+`sudo yum install gcc-gfortran` (RHEL/CentOS), or `module load gcc`.
+
+**Running across many cores:** the doubling-adding solver itself is
+single-threaded, so on a multi-processor system you parallelise at the *task*
+level — run independent wavelengths, phase angles, or cloud realisations as
+separate processes/array-job tasks. The figure-reproduction scripts expose
+`--step dap | images | plot` sub-commands so the heavy radiative-transfer step
+can be farmed out to compute nodes; see the SLURM example in
+[`INSTALL_HPC.md`](INSTALL_HPC.md). Do not run heavy computations on a login
+node — submit them through your scheduler (SLURM/PBS/LSF).
+
 ## Running the Code
 
 ### Run the Test Suite
