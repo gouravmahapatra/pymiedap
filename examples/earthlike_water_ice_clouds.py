@@ -140,6 +140,32 @@ else:                  # "demo": fast, converged, slightly smaller droplets
     NMUG_MIE = 100
     M_TRUNC  = 60      # f ~ 0.05 for r_eff=3 um (negligible truncation)
 
+# --- Ice cloud model -------------------------------------------------------
+# "tmatrix" : oblate-spheroid T-matrix proxy (single 0.5 um file, ~1 um, fast).
+# "baum"    : SSEC/Baum severely-roughened habit mixture from a NetCDF cache
+#             built with examples/convert_baum_to_pymiedap.py.  Physically the
+#             correct ice model, but the D_eff~60 um crystals are SO forward-
+#             peaked (g~0.8) that a stable delta-M truncation needs nmug ~ 300,
+#             which EXCEEDS the compiled nmuMAX=201.  To run the Baum ice you
+#             must rebuild the Fortran with a larger nmuMAX (edit
+#             dap_source/max_incl and geos_source/max_incl, then recompile) and
+#             run offline -- it will NOT converge in the sandbox / default build.
+ICE_MODEL  = os.environ.get("EWIC_ICE", "tmatrix")   # "tmatrix" or "baum"
+ICE_DEFF_UM = 60.0                                   # Baum effective diameter
+M_ICE       = 700                                    # delta-M order for Baum ice
+BAUM_CACHE = os.path.join(
+    HERE, "baum_cache",
+    "GeneralHabitMixture_SeverelyRough_AllWavelengths_FullPhaseMatrix"
+    "_Deff{:.0f}.npz".format(ICE_DEFF_UM))
+
+if ICE_MODEL == "baum":
+    # The Baum GHM D_eff=60 um ice is extremely forward-peaked (g~0.8): a stable
+    # delta-M truncation needs M_ICE ~ 700 and hence nmug ~ 350-400, which
+    # EXCEEDS the default compiled nmuMAX=201. Run rebuild_highres_nmug.py first
+    # (nmuMAX>=512); on the default build this configuration will raise/NaN.
+    NMUG     = max(NMUG, 400)
+    NMUG_MIE = max(NMUG_MIE, 200)
+
 
 # =========================================================================
 # 2.  T-MATRIX SUPPORT  (now part of the PyMieDAP package)
@@ -219,7 +245,7 @@ def build_clear_model(wvl_list):
 # --------------------------------------------------------------------------
 def compute_cloudy(model, ice_coeff_file, ice_albedo, output_name,
                    nmug=NMUG, nmug_mie=NMUG_MIE, nsubr=50, nmat=4,
-                   m_trunc=M_TRUNC,
+                   m_trunc=M_TRUNC, m_ice=M_ICE,
                    path_input=os.path.join(REPO, "dap_database")):
     wvl = model.wvl_list
     nwvl = len(wvl)
@@ -228,17 +254,32 @@ def compute_cloudy(model, ice_coeff_file, ice_albedo, output_name,
         if hasattr(layer, 'mixed_aerosols'):
             del layer.mixed_aerosols
 
-        if lay_name == 'haze':                       # ICE: load coeffs
+        if lay_name == 'haze':                       # ICE cloud
             ice = layer.aerosols
-            # one .coeffs file per wavelength; here the same 0.5um file is
-            # reused for every wavelength (grey-ice approximation, see header).
-            ice.load_coefs([ice_coeff_file] * nwvl)
-            # mix_aerosols needs cross sections; only the RATIO (=albedo)
-            # matters once tau is user-set, so use unit extinction.
-            ice.sext  = np.ones(nwvl)
-            ice.ssca  = np.ones(nwvl) * ice_albedo
-            ice.ssalb = np.ones(nwvl) * ice_albedo
-            ice.f     = 1.0
+            if ICE_MODEL == 'baum':
+                # Severely-roughened habit-mixture ice from a Baum NetCDF cache
+                # (build it with examples/convert_baum_to_pymiedap.py). The raw
+                # expansion has ncoef~4000; delta-M truncate it and rescale the
+                # ice optical thickness.  NOTE: needs nmug >> nmuMAX for D_eff~60
+                # -- see the ICE_MODEL note in the config block.
+                from pymiedap.baum import fill_aerosol_from_cache
+                fill_aerosol_from_cache(ice, BAUM_CACHE, wavelengths_um=wvl)
+                ice.f = 1.0
+                tau_scale = delta_m_truncate(ice, m_ice)
+                layer.tau = np.atleast_1d(layer.tau).astype(float)
+                if layer.tau.size != nwvl:
+                    layer.tau = layer.tau[0] * np.ones(nwvl)
+                layer.tau = layer.tau * tau_scale
+            else:
+                # oblate-spheroid T-matrix proxy: one .coeffs file reused for
+                # every wavelength (grey-ice approximation, see header).
+                ice.load_coefs([ice_coeff_file] * nwvl)
+                # mix_aerosols needs cross sections; only the RATIO (=albedo)
+                # matters once tau is user-set, so use unit extinction.
+                ice.sext  = np.ones(nwvl)
+                ice.ssca  = np.ones(nwvl) * ice_albedo
+                ice.ssalb = np.ones(nwvl) * ice_albedo
+                ice.f     = 1.0
             layer.mix_aerosols()
         elif lay_name == 'cloud':                    # LIQUID: Mie + delta-M
             a = layer.aerosols

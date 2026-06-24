@@ -1,5 +1,10 @@
 .cache/
 
+# --- Large external scattering databases (inputs, keep out of git) ---
+*.nc
+*.nc.gz
+examples/baum_cache/
+
 # --- Python ---
 __pycache__/
 *.py[cod]

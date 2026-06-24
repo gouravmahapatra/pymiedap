@@ -3,6 +3,30 @@
 ## Unreleased
 
 ### New features
+- Added `pymiedap.baum`, integrating the SSEC / Baum-Yang-Heymsfield ice cloud
+  bulk scattering models (severely-roughened, randomly-oriented habit mixtures;
+  Baum et al. 2011):
+  - `read_baum_netcdf()` reads the full-phase-matrix `.nc`/`.nc.gz` files
+    (transparent gzip), applies the `F34 = -P43*P11` sign convention, and
+    subsets wavelengths.
+  - `expand_scattering_matrix()` / `phase_matrix_to_coeffs()` perform the full
+    six-element generalized-spherical-function expansion (non-spherical
+    `F22 != F11`, `F44 != F33`), validated to reproduce `module_mie.devel` to
+    machine precision on the spherical case and the files' own asymmetry
+    parameter to <0.5% across 0.2-2 um.
+  - `convert_baum_netcdf()` + `examples/convert_baum_to_pymiedap.py` build
+    `.npz` coefficient caches; `load_baum_coeffs()` / `fill_aerosol_from_cache()`
+    load them into an `Aerosols` object.
+  - `earthlike_water_ice_clouds.py` gained an `EWIC_ICE=tmatrix|baum` switch to
+    use Baum GHM ice. Note: D_eff~60 um crystals are so forward-peaked that a
+    stable delta-M run needs nmug beyond the compiled `nmuMAX=201`; rebuild with
+    a larger `nmuMAX` to run the Baum ice offline.
+- Added `rebuild_highres_nmug.py`: a helper that raises `nmuMAX` (default 512,
+  for nmug up to 500) consistently across `dap_source/max_incl`,
+  `geos_source/max_incl` and the matching `pymiedap.py` constants
+  (`_RFOU_DIM*`, default `nmuMAX=` arguments), then recompiles the native
+  modules. Supports `--nmug-max`, `--nfou-max`, `--patch-only`, `--restore`.
+  Intended for the multi-core Linux cluster build.
 - Added `pymiedap.tmatrix`, a module integrating the bundled T-matrix ice code
   (`tmatrix_ice/`) into the package:
   - `tmatrix_to_pymiedap_coeffs()` converts a T-matrix `.coeffs` file to the

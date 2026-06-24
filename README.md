@@ -282,6 +282,56 @@ To generate coefficients for other wavelengths/sizes/shapes, edit the
 `INPUT DATA` block of the Fortran source and rebuild as described in
 `tmatrix_ice/README.md`.
 
+### Baum / SSEC ice habit models
+
+For physically realistic ice crystals, the `pymiedap.baum` module ingests the
+SSEC (University of Wisconsin) / Baum bulk scattering models — severely
+roughened, randomly-oriented habit mixtures (general habit mixture, solid
+columns, aggregate of solid columns; Baum et al. 2011), supplied as
+full-phase-matrix NetCDF files (445 wavelengths 0.2–100 µm, effective diameters
+10–120 µm). Place the `*_FullPhaseMatrix.nc[.gz]` files in the repo and build
+coefficient caches once:
+
+```bash
+python examples/convert_baum_to_pymiedap.py --deff 60 --wlmin 0.2 --wlmax 2.0
+```
+
+This reads each file (gzip handled automatically), expands the six-element
+phase matrix into PyMieDAP coefficients (validated to reproduce the file's own
+asymmetry parameter to <0.5 %), and writes `.npz` caches into
+`examples/baum_cache/`. Load one into a layer with:
+
+```python
+import pymiedap.pymiedap as pmd
+from pymiedap.baum import fill_aerosol_from_cache
+from pymiedap.tmatrix import delta_m_truncate
+
+ice = pmd.Aerosols(typ='I')
+fill_aerosol_from_cache(ice, 'examples/baum_cache/GeneralHabitMixture_..._Deff60.npz',
+                        wavelengths_um=my_wvls)
+delta_m_truncate(ice, M=...)   # tame the forward diffraction peak
+```
+
+> **Resolution caveat — rebuild required.** Large ice crystals (D_eff ≈ 60 µm)
+> have an extreme forward diffraction peak (asymmetry g ≈ 0.8). A *stable*
+> delta-M truncation then needs `nmug ≈ 350–500`, which exceeds the default
+> compiled `nmuMAX = 201`. Raise the limit and recompile with the bundled
+> helper (run it where gfortran is available, e.g. the cluster):
+>
+> ```bash
+> python rebuild_highres_nmug.py            # nmuMAX=512 (nmug up to 500), then rebuilds
+> python rebuild_highres_nmug.py --restore  # revert to the nmuMAX=201 build
+> ```
+>
+> It patches both `max_incl` files and the matching Python constants together
+> (a half-patch would corrupt `read_dap_output`), and prints the per-process
+> memory (`rfou` ≈ 8.6 GB at nmuMAX=512, nfouMAX=1024 — size `--nfou-max` to
+> your largest delta-M order). Then run the Baum ice offline:
+>
+> ```bash
+> EWIC_MODE=offline EWIC_ICE=baum python examples/earthlike_water_ice_clouds.py
+> ```
+
 ### Earth-as-an-exoplanet example
 
 `examples/earthlike_water_ice_clouds.py` is a complete worked example that
@@ -295,6 +345,8 @@ and phase curves and overlays them on that paper's digitized Fig. 13.
 source .venv/bin/activate
 EWIC_MODE=demo    python examples/earthlike_water_ice_clouds.py   # fast, r_eff=3 um
 EWIC_MODE=offline python examples/earthlike_water_ice_clouds.py   # paper's r_eff=8.6 um
+# ice model: T-matrix proxy (default) or Baum GHM (needs a larger nmuMAX build):
+EWIC_ICE=baum     python examples/earthlike_water_ice_clouds.py
 ```
 
 `demo` mode runs in seconds with slightly smaller droplets; `offline` mode uses
