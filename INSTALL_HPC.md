@@ -64,6 +64,14 @@ conda create -n pymiedap python=3.11 -y
 conda activate pymiedap
 ```
 
+> **No `sudo` on the cluster?** That's expected — you don't need root for any
+> of this. `gfortran` should come from a module (`module avail gcc` →
+> `module load gcc/...`). If no module provides a Fortran compiler, install one
+> into your own environment without admin rights via conda
+> (`conda install -c conda-forge gfortran`) or [Spack](https://spack.io). The
+> `sudo apt-get`/`sudo yum` commands shown later apply **only to machines where
+> you are root** (e.g. your own workstation), never to a shared cluster.
+
 ### 2. Create and activate a virtual environment
 
 ```bash

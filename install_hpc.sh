@@ -86,9 +86,13 @@ if [[ $PY_MAJOR -lt 3 || ($PY_MAJOR -eq 3 && $PY_MINOR -lt 9) ]]; then
 fi
 
 if ! command -v gfortran &>/dev/null; then
-  echo "  ERROR: gfortran not found. Load a GCC module or install gfortran."
-  echo "  On RHEL/CentOS: sudo yum install gcc-gfortran"
-  echo "  On Debian/Ubuntu: sudo apt-get install gfortran"
+  echo "  ERROR: gfortran not found."
+  echo "  No sudo needed on a cluster — get it without admin rights via either:"
+  echo "    module avail gcc  &&  module load gcc/<version>"
+  echo "    conda install -c conda-forge gfortran"
+  echo "  (Only on a machine where you are root:"
+  echo "     Debian/Ubuntu: sudo apt-get install gfortran"
+  echo "     RHEL/CentOS:   sudo yum install gcc-gfortran)"
   exit 1
 fi
 echo "  gfortran: $(gfortran --version | head -1)"

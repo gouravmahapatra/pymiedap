@@ -156,8 +156,14 @@ python setup.py build_ext --inplace                 # or the explicit f2py
                                                     # commands in INSTALL_HPC.md
 ```
 
-If `gfortran` is missing: `sudo apt-get install gfortran` (Debian/Ubuntu) or
-`sudo yum install gcc-gfortran` (RHEL/CentOS), or `module load gcc`.
+**Getting `gfortran` without root.** On a shared cluster you normally don't
+have `sudo`, and the compiler is provided as an environment module — find it
+with `module avail gcc` and load it (`module load gcc/12`, name varies). If no
+module provides it, install a compiler into your own user space with conda
+(`conda install -c conda-forge gfortran`) or [Spack](https://spack.io) — no
+admin rights needed. Use the system package manager
+(`sudo apt-get install gfortran` / `sudo yum install gcc-gfortran`) **only on
+machines where you are root**, such as your own Linux workstation.
 
 **Running across many cores:** the doubling-adding solver itself is
 single-threaded, so on a multi-processor system you parallelise at the *task*
