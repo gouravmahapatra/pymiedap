@@ -22,6 +22,12 @@ from .baum import (
     load_baum_coeffs,
     fill_aerosol_from_cache,
 )
+from . import sscorr
+from .sscorr import (
+    scattering_geometry,
+    single_scattering_local,
+    tms_correct_local,
+)
 
 __all__ = [
     "__version__",
