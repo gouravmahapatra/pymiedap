@@ -155,6 +155,33 @@ def disk(cloudy, clear, alphas, npix, cloud_cover, nmug):
     return cloudy.I, cloudy.Q, cloudy.U   # shape (nwvl, nphase)
 
 
+FLOOR = 1e-4   # reflectance below this == non-converged (collapsed) DAP solve
+
+
+def compute_case(wvls, phases, tag, m_ice, args, clear, cache, name):
+    """Build+disk one case. nmug auto-raised so nmug >= M_ice/2 for ice cases."""
+    nmug = args.nmug if m_ice is None else max(args.nmug, (m_ice + 1) // 2 + 5)
+    m = build_and_compute(wvls, tag, cache, m_ice, args.m_liq, nmug,
+                          args.nmug_mie, args.asurf, name)
+    I, Q, U = disk(m, clear, phases, args.npix, args.cloud_cover, nmug)
+    I = np.array(I); Q = np.array(Q); U = np.array(U)
+    ok = np.isfinite(I).all() and bool((np.abs(I) >= FLOOR).all())
+    badwl = [float(wvls[k]) for k in range(len(wvls))
+             if np.any(np.abs(I[k]) < FLOOR)]
+    return dict(I=I, Q=Q, U=U, ok=ok, m_ice=m_ice, nmug=nmug, badwl=badwl)
+
+
+def _pol(c):
+    return -c["Q"] / c["I"]
+
+
+def _compare(x, y):
+    """Max reflectance diff [%] and max polarization diff [pp] between cases."""
+    dF = float(np.max(np.abs(x["I"] - y["I"]) / np.abs(y["I"])) * 100)
+    dP = float(np.max(np.abs(_pol(x) - _pol(y))) * 100)
+    return dF, dP
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--deff", type=float, default=60.0)
@@ -181,6 +208,14 @@ def main():
                          "BPDF only if you also want glint realism.")
     ap.add_argument("--cache", default=None,
                     help="Baum .npz cache (default: examples/baum_cache for --deff).")
+    ap.add_argument("--auto", action="store_true",
+                    help="Auto-bracket: raise M_ice on a ladder until the "
+                         "polarization converges (dP<tol) or --max-m is hit.")
+    ap.add_argument("--m-start", type=int, default=60, help="auto: first M_ice.")
+    ap.add_argument("--m-step", type=int, default=30, help="auto: M_ice increment.")
+    ap.add_argument("--max-m", type=int, default=150, help="auto: largest M_ice.")
+    ap.add_argument("--tol-df", type=float, default=1.0, help="F convergence [%].")
+    ap.add_argument("--tol-dp", type=float, default=0.5, help="P convergence [pp].")
     args = ap.parse_args()
 
     global LIQ_REFF
@@ -198,97 +233,101 @@ def main():
                   args.deff, wvls.min(), wvls.max()))
         return 1
 
-    print("Earth-like ice sensitivity | D_eff=%.0f um | nmug=%d  M_liq=%d  "
-          "M_ice: B=%d C=%d" % (args.deff, args.nmug, args.m_liq,
-                                args.m_ice_b, args.m_ice_c))
+    print("Earth-like ice sensitivity | D_eff=%.0f um | liq r_eff=%.1f um "
+          "tau_ice=%.2f | M_liq=%d nmug=%d" % (args.deff, LIQ_REFF, ICE_TAU,
+                                               args.m_liq, args.nmug))
     clear = build_clear(wvls, args.nmug, args.asurf, "ice_sens_clear")
-    # A reflectance this low at any wavelength means the doubling-adding did not
-    # converge (it returns ~0 / garbage for an over-peaked, near-conservative
-    # layer) -- NOT a physical result. 0.0 passes np.isfinite, so we test it.
-    FLOOR = 1e-4
-    cases = {}
-    specs = [("A", None), ("B", args.m_ice_b), ("C", args.m_ice_c)]
-    for tag, mice in specs:
-        m = build_and_compute(wvls, tag, cache, mice, args.m_liq, args.nmug,
-                              args.nmug_mie, args.asurf, "ice_sens_%s" % tag)
-        I, Q, U = disk(m, clear, phases, args.npix, args.cloud_cover, args.nmug)
-        I = np.array(I); Q = np.array(Q); U = np.array(U)
-        finite = np.isfinite(I).all() and np.isfinite(Q).all()
-        nbad = int((np.abs(I) < FLOOR).sum())          # collapsed/non-converged
-        valid = finite and nbad == 0
-        cases[tag] = dict(I=I, Q=Q, U=U, ok=valid, nbad=nbad, m_ice=mice,
-                          badwl=[float(wvls[k]) for k in range(len(wvls))
-                                 if np.any(np.abs(I[k]) < FLOOR)])
-        print("  case %s: valid=%s  (%d of %d wvl x phase points collapsed to ~0%s)"
-              % (tag, valid, nbad, I.size,
-                 "" if not cases[tag]["badwl"] else "; bad lambda=" +
-                 ",".join("%.2f" % w for w in cases[tag]["badwl"])))
 
-    A, B, C = cases["A"], cases["B"], cases["C"]
-
-    # Triage: distinguish a liquid/setup instability from an ice conclusion.
+    # Case A: liquid only (no ice). Must be valid or nothing else is meaningful.
+    A = compute_case(wvls, phases, "A", None, args, clear, cache, "ice_sens_A")
+    print("  Case A (liquid only): valid=%s%s" % (
+        A["ok"], "" if A["ok"] else "  bad lambda=" +
+        ",".join("%.2f" % w for w in A["badwl"])))
     if not A["ok"]:
-        print("\nINCONCLUSIVE -- the liquid-only Case A is itself unstable "
-              "(collapsed to ~0 at lambda=%s)." % ",".join("%.2f" % w for w in A["badwl"]))
-        print("That is a numerics/setup problem, not an ice result: the liquid "
-              "r_eff is too forward-peaked for M_liq=%d / nmug=%d at short "
-              "wavelengths." % (args.m_liq, args.nmug))
-        print("Fix and re-run: the liquid is IDENTICAL in A/B/C so its value "
-              "cancels in B-vs-C -- use a smaller liquid --liq-reff (e.g. 4-5) "
-              "or raise --m-liq/--nmug until Case A is valid at all wavelengths.")
+        print("\nINCONCLUSIVE -- liquid-only Case A collapsed (numerics, not an "
+              "ice result). The liquid is identical in all cases so it cancels "
+              "in the comparison: lower --liq-reff or raise --m-liq/--nmug until "
+              "Case A is valid at every wavelength, then re-run.")
         return 0
+
+    # -------------------------------------------------------------------------
+    if args.auto:
+        print("\nAUTO convergence ladder: M_ice = %d, %d, ... <= %d "
+              "(stop when dP<%.2f pp and dF<%.2f%%)" %
+              (args.m_start, args.m_start + args.m_step, args.max_m,
+               args.tol_dp, args.tol_df))
+        print("  M_ice nmug | ice-vs-noice: dF%  dP(pp) | step-to-step: dF%  dP(pp)")
+        prev = None; converged = None; last = None
+        M = args.m_start
+        while M <= args.max_m:
+            c = compute_case(wvls, phases, "I", M, args, clear, cache,
+                             "ice_sens_M%d" % M)
+            if not c["ok"]:
+                print("  %5d %4d | UNSTABLE (collapsed) -- skipping" % (M, c["nmug"]))
+                M += args.m_step; continue
+            dFA, dPA = _compare(c, A)            # how much ice changes the spectrum
+            if prev is None:
+                print("  %5d %4d | %5.1f %6.2f |   (baseline)" %
+                      (M, c["nmug"], dFA, dPA))
+            else:
+                dF, dP = _compare(c, prev)       # step-to-step convergence
+                print("  %5d %4d | %5.1f %6.2f | %5.2f %6.3f" %
+                      (M, c["nmug"], dFA, dPA, dF, dP))
+                if dF < args.tol_df and dP < args.tol_dp:
+                    converged = (prev["m_ice"], M); last = c; break
+            prev = c; last = c; M += args.m_step
+
+        print()
+        if converged:
+            print("CONVERGED: polarization stable between M_ice=%d and %d "
+                  "(dP<%.2f pp). Production ice setting: M_ice=%d, nmug=%d. "
+                  "delta-fit NOT needed." %
+                  (converged[0], converged[1], args.tol_dp, converged[1],
+                   last["nmug"]))
+        else:
+            print("NOT CONVERGED up to M_ice=%d: the polarization keeps drifting "
+                  "more than %.2f pp per step. Brute-force refinement is too slow "
+                  "=> develop delta-fit / positivity-preserving truncation." %
+                  (args.max_m, args.tol_dp))
+        return 0
+
+    # -------------------------------------------------------------------------
+    # Explicit two-order comparison (B vs C), with the dP(pp) verdict.
+    B = compute_case(wvls, phases, "B", args.m_ice_b, args, clear, cache, "ice_sens_B")
+    C = compute_case(wvls, phases, "C", args.m_ice_c, args, clear, cache, "ice_sens_C")
+    for tag, c in (("B", B), ("C", C)):
+        print("  Case %s (ice M=%d, nmug=%d): valid=%s%s" % (
+            tag, c["m_ice"], c["nmug"], c["ok"], "" if c["ok"] else
+            "  bad lambda=" + ",".join("%.2f" % w for w in c["badwl"])))
     if not (B["ok"] and C["ok"]):
         stable = [c["m_ice"] for c in (B, C) if c["ok"]]
-        unstable = [c["m_ice"] for c in (B, C) if not c["ok"]]
-        print("\nCase A is clean. ICE stability at D_eff=%.0f um, nmug=%d:" %
-              (args.deff, args.nmug))
-        print("   UNSTABLE (collapsed) at M_ice = %s" % unstable)
-        print("   STABLE             at M_ice = %s" % (stable or "none"))
-        if stable:
-            ms = min(stable)
-            print("\n=> A stable delta-M order DOES exist (M_ice=%d). delta-fit is "
-                  "NOT yet required." % ms)
-            print("   Next: compare TWO *stable* orders to check the ice is "
-                  "converged, e.g.:")
-            print("     python examples/ice_thin_sensitivity.py --deff %.0f "
-                  "--liq-reff %g --m-ice-b %d --m-ice-c %d --m-liq %d --nmug %d"
-                  % (args.deff, args.liq_reff, ms, ms + 30, args.m_liq,
-                     max(args.nmug, (ms + 30 + 1) // 2 + 1)))
-        else:
-            print("\n=> NO stable delta-M order at the tested M. Either raise "
-                  "--m-ice-* (and --nmug>=M/2), or develop delta-fit / "
-                  "positivity-preserving truncation.")
+        print("\nUnstable ice order(s) present. Stable: %s. Re-run with two "
+              "stable orders, or use --auto to find the converged M "
+              "automatically." % (stable or "none"))
         return 0
 
-    def P(c):  # signed degree of pol, and total
-        return -c["Q"] / c["I"], np.sqrt(c["Q"]**2 + c["U"]**2) / c["I"]
-    PA, _ = P(A); PB, _ = P(B); PC, _ = P(C)
-
+    PA, PB, PC = _pol(A), _pol(B), _pol(C)
     print("\n wl[um] alpha |   F_A     F_B     F_C   | dF(B-C) | P_A    P_B    P_C  | dP(B-C)pp | dF(A-B)")
-    maxdF_bc = maxdQ_bc = maxdP_bc = 0.0
+    maxdF = maxdP = 0.0
     for i, w in enumerate(wvls):
         for j, al in enumerate(phases):
-            FA, FB, FC = A["I"][i, j], B["I"][i, j], C["I"][i, j]
-            dF_bc = abs(FB - FC) / abs(FC) * 100
-            dQ_bc = abs(B["Q"][i, j] - C["Q"][i, j]) / max(abs(C["Q"][i, j]), 1e-9) * 100
-            dP_bc = abs(PB[i, j] - PC[i, j]) * 100   # percentage points
-            dF_ab = abs(FA - FB) / abs(FB) * 100
-            maxdF_bc = max(maxdF_bc, dF_bc); maxdQ_bc = max(maxdQ_bc, dQ_bc)
-            maxdP_bc = max(maxdP_bc, dP_bc)
+            dF = abs(B["I"][i, j] - C["I"][i, j]) / abs(C["I"][i, j]) * 100
+            dP = abs(PB[i, j] - PC[i, j]) * 100
+            dFab = abs(A["I"][i, j] - B["I"][i, j]) / abs(B["I"][i, j]) * 100
+            maxdF = max(maxdF, dF); maxdP = max(maxdP, dP)
             print(" %5.2f %5.0f | %.5f %.5f %.5f | %6.2f%% | %+.3f %+.3f %+.3f | %7.3f | %6.2f%%"
-                  % (w, al, FA, FB, FC, dF_bc, PA[i, j], PB[i, j], PC[i, j], dP_bc, dF_ab))
-
-    print("\nMax B-vs-C differences:  dF=%.2f%%  dQ=%.2f%%  dP=%.3f pp" %
-          (maxdF_bc, maxdQ_bc, maxdP_bc))
-    ok = maxdF_bc < 1.0 and maxdQ_bc < 3.0 and maxdP_bc < 0.5
-    print("\nDECISION:", (
-        "PASS -- cheap stable ice (M~%d) is good enough; the ice forward-peak "
-        "accuracy does NOT materially change the Earth-like spectrum." % args.m_ice_b
-        if ok else
-        "FAIL -- the ice forward-peak treatment DOES matter (B != C beyond "
-        "tolerance); proceed to develop delta-fit / positivity-preserving "
-        "truncation."))
-    print("(A-vs-B above shows how much the ice layer changes the spectrum at all.)")
+                  % (w, al, A["I"][i, j], B["I"][i, j], C["I"][i, j], dF,
+                     PA[i, j], PB[i, j], PC[i, j], dP, dFab))
+    print("\nB-vs-C convergence:  max dF=%.2f%% (tol %.1f%%)   max dP=%.3f pp "
+          "(tol %.2f pp)" % (maxdF, args.tol_df, maxdP, args.tol_dp))
+    if maxdF < args.tol_df and maxdP < args.tol_dp:
+        print("DECISION: CONVERGED -- M_ice=%d is good enough (reflectance AND "
+              "polarization stable). Use it for production." % args.m_ice_b)
+    else:
+        print("DECISION: NOT converged at M_ice=%d (polarization still drifting). "
+              "Push higher M (or run --auto); if it won't converge by ~M=150, "
+              "develop delta-fit." % args.m_ice_b)
+    print("(dF(A-B) shows how much the ice layer changes the spectrum at all.)")
     return 0
 
 
