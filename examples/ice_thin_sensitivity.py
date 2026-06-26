@@ -216,7 +216,7 @@ def main():
         finite = np.isfinite(I).all() and np.isfinite(Q).all()
         nbad = int((np.abs(I) < FLOOR).sum())          # collapsed/non-converged
         valid = finite and nbad == 0
-        cases[tag] = dict(I=I, Q=Q, U=U, ok=valid, nbad=nbad,
+        cases[tag] = dict(I=I, Q=Q, U=U, ok=valid, nbad=nbad, m_ice=mice,
                           badwl=[float(wvls[k]) for k in range(len(wvls))
                                  if np.any(np.abs(I[k]) < FLOOR)])
         print("  case %s: valid=%s  (%d of %d wvl x phase points collapsed to ~0%s)"
@@ -238,12 +238,26 @@ def main():
               "or raise --m-liq/--nmug until Case A is valid at all wavelengths.")
         return 0
     if not (B["ok"] and C["ok"]):
-        print("\nCase A is clean, but the D_eff=%.0f um ICE is UNSTABLE at "
-              "M_ice B=%d / C=%d (collapsed to ~0)." % (args.deff, args.m_ice_b,
-                                                        args.m_ice_c))
-        print("=> there is no cheap *stable* delta-M order for this ice. This is "
-              "the real, clean finding: proceed to delta-fit / positivity-"
-              "preserving truncation (or accept a larger, slower nmug).")
+        stable = [c["m_ice"] for c in (B, C) if c["ok"]]
+        unstable = [c["m_ice"] for c in (B, C) if not c["ok"]]
+        print("\nCase A is clean. ICE stability at D_eff=%.0f um, nmug=%d:" %
+              (args.deff, args.nmug))
+        print("   UNSTABLE (collapsed) at M_ice = %s" % unstable)
+        print("   STABLE             at M_ice = %s" % (stable or "none"))
+        if stable:
+            ms = min(stable)
+            print("\n=> A stable delta-M order DOES exist (M_ice=%d). delta-fit is "
+                  "NOT yet required." % ms)
+            print("   Next: compare TWO *stable* orders to check the ice is "
+                  "converged, e.g.:")
+            print("     python examples/ice_thin_sensitivity.py --deff %.0f "
+                  "--liq-reff %g --m-ice-b %d --m-ice-c %d --m-liq %d --nmug %d"
+                  % (args.deff, args.liq_reff, ms, ms + 30, args.m_liq,
+                     max(args.nmug, (ms + 30 + 1) // 2 + 1)))
+        else:
+            print("\n=> NO stable delta-M order at the tested M. Either raise "
+                  "--m-ice-* (and --nmug>=M/2), or develop delta-fit / "
+                  "positivity-preserving truncation.")
         return 0
 
     def P(c):  # signed degree of pol, and total
