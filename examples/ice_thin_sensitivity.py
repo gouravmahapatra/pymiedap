@@ -160,6 +160,11 @@ def main():
     ap.add_argument("--deff", type=float, default=60.0)
     ap.add_argument("--m-ice-b", type=int, default=24)
     ap.add_argument("--m-ice-c", type=int, default=60)
+    ap.add_argument("--liq-reff", type=float, default=4.0,
+                    help="Liquid cloud effective radius [um]. Held identical in "
+                         "A/B/C so it cancels in B-vs-C; keep it small enough to "
+                         "stay stable at the bluest wavelength (r_eff=9 um is "
+                         "unstable below ~0.7 um at affordable M_liq/nmug).")
     ap.add_argument("--m-liq", type=int, default=80)
     ap.add_argument("--nmug", type=int, default=50)
     ap.add_argument("--nmug-mie", type=int, default=120)
@@ -178,6 +183,8 @@ def main():
                     help="Baum .npz cache (default: examples/baum_cache for --deff).")
     args = ap.parse_args()
 
+    global LIQ_REFF
+    LIQ_REFF = args.liq_reff
     wvls = np.array([float(x) for x in args.wvls.split(",")])
     phases = np.array([float(x) for x in args.phases.split(",")])
     cache = args.cache or os.path.join(
@@ -195,23 +202,48 @@ def main():
           "M_ice: B=%d C=%d" % (args.deff, args.nmug, args.m_liq,
                                 args.m_ice_b, args.m_ice_c))
     clear = build_clear(wvls, args.nmug, args.asurf, "ice_sens_clear")
+    # A reflectance this low at any wavelength means the doubling-adding did not
+    # converge (it returns ~0 / garbage for an over-peaked, near-conservative
+    # layer) -- NOT a physical result. 0.0 passes np.isfinite, so we test it.
+    FLOOR = 1e-4
     cases = {}
     specs = [("A", None), ("B", args.m_ice_b), ("C", args.m_ice_c)]
     for tag, mice in specs:
         m = build_and_compute(wvls, tag, cache, mice, args.m_liq, args.nmug,
                               args.nmug_mie, args.asurf, "ice_sens_%s" % tag)
         I, Q, U = disk(m, clear, phases, args.npix, args.cloud_cover, args.nmug)
+        I = np.array(I); Q = np.array(Q); U = np.array(U)
         finite = np.isfinite(I).all() and np.isfinite(Q).all()
-        cases[tag] = dict(I=np.array(I), Q=np.array(Q), U=np.array(U), ok=finite)
-        print("  case %s computed; finite=%s%s" % (
-            tag, finite, "" if finite else "  <-- UNSTABLE (raise its M)"))
+        nbad = int((np.abs(I) < FLOOR).sum())          # collapsed/non-converged
+        valid = finite and nbad == 0
+        cases[tag] = dict(I=I, Q=Q, U=U, ok=valid, nbad=nbad,
+                          badwl=[float(wvls[k]) for k in range(len(wvls))
+                                 if np.any(np.abs(I[k]) < FLOOR)])
+        print("  case %s: valid=%s  (%d of %d wvl x phase points collapsed to ~0%s)"
+              % (tag, valid, nbad, I.size,
+                 "" if not cases[tag]["badwl"] else "; bad lambda=" +
+                 ",".join("%.2f" % w for w in cases[tag]["badwl"])))
 
     A, B, C = cases["A"], cases["B"], cases["C"]
+
+    # Triage: distinguish a liquid/setup instability from an ice conclusion.
+    if not A["ok"]:
+        print("\nINCONCLUSIVE -- the liquid-only Case A is itself unstable "
+              "(collapsed to ~0 at lambda=%s)." % ",".join("%.2f" % w for w in A["badwl"]))
+        print("That is a numerics/setup problem, not an ice result: the liquid "
+              "r_eff is too forward-peaked for M_liq=%d / nmug=%d at short "
+              "wavelengths." % (args.m_liq, args.nmug))
+        print("Fix and re-run: the liquid is IDENTICAL in A/B/C so its value "
+              "cancels in B-vs-C -- use a smaller liquid --liq-reff (e.g. 4-5) "
+              "or raise --m-liq/--nmug until Case A is valid at all wavelengths.")
+        return 0
     if not (B["ok"] and C["ok"]):
-        print("\nB and/or C are UNSTABLE at these M for D_eff=%.0f um ice." % args.deff)
-        print("=> there is no cheap *stable* delta-M order for this ice; either")
-        print("   raise --m-ice-* (and --nmug>=M/2) until finite, or develop the")
-        print("   delta-fit positivity-preserving truncation.")
+        print("\nCase A is clean, but the D_eff=%.0f um ICE is UNSTABLE at "
+              "M_ice B=%d / C=%d (collapsed to ~0)." % (args.deff, args.m_ice_b,
+                                                        args.m_ice_c))
+        print("=> there is no cheap *stable* delta-M order for this ice. This is "
+              "the real, clean finding: proceed to delta-fit / positivity-"
+              "preserving truncation (or accept a larger, slower nmug).")
         return 0
 
     def P(c):  # signed degree of pol, and total
