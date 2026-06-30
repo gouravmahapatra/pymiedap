@@ -28,6 +28,13 @@ from .sscorr import (
     single_scattering_local,
     tms_correct_local,
 )
+from . import deltafit
+from .deltafit import (
+    deltafit_scalar,
+    deltafit_matrix,
+    fill_aerosol_deltafit,
+    deltafit_from_baum,
+)
 
 __all__ = [
     "__version__",
